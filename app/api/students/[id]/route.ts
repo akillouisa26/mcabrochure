@@ -6,7 +6,10 @@ export const dynamic = 'force-dynamic';
 const prisma = new PrismaClient();
 
 export async function GET(req: Request, context: any) {
-  // Access req.url to explicitly flag route as dynamic in Next 15 AST
+  // Completely bypass ANY execution during Vercel Build phase
+  if (process.env.npm_lifecycle_event === 'build' || process.env.VERCEL_ENV === 'production' && !process.env.DATABASE_URL) {
+    return NextResponse.json({});
+  }
   const url = req.url;
   try {
     const { id } = await context.params;
