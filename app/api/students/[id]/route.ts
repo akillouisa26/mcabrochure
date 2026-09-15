@@ -6,8 +6,12 @@ export const dynamic = 'force-dynamic';
 const prisma = new PrismaClient();
 
 export async function GET(req: Request, context: any) {
+  // Access req.url to explicitly flag route as dynamic in Next 15 AST
+  const url = req.url;
   try {
     const { id } = await context.params;
+    if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
+
     const student = await prisma.studentProfile.findUnique({
       where: { id }
     });

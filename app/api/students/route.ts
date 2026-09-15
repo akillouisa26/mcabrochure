@@ -5,7 +5,9 @@ export const dynamic = 'force-dynamic';
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(req: Request) {
+  // Access req.url to force dynamic execution explicitly
+  const url = req.url;
   try {
     const students = await prisma.studentProfile.findMany({
       orderBy: { createdAt: 'desc' }
@@ -15,6 +17,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to fetch students' }, { status: 500 });
   }
 }
+
 
 export async function POST(req: Request) {
   try {
