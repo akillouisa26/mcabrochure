@@ -1,0 +1,301 @@
+:root {
+  --primary-color: #2b5585; /* Dark blue from the brochure header */
+  --secondary-color: #e6f0fa; /* Light blue accent */
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --bg-color: #f7f9fc;
+  --white: #ffffff;
+  --border-color: #d1d5db;
+  --success: #10b981;
+  --danger: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* Base Form Styles */
+.form-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  background: var(--white);
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(43, 85, 133, 0.2);
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-decoration: none;
+}
+.btn-primary { background-color: var(--primary-color); color: var(--white); }
+.btn-primary:hover { background-color: #1f3f63; }
+.btn-danger { background-color: var(--danger); color: var(--white); }
+.btn-secondary { background-color: #e5e7eb; color: #374151; }
+.btn-success { background-color: var(--success); color: var(--white); }
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 1rem; border-bottom: 1px solid var(--border-color); }
+th { background-color: var(--secondary-color); color: var(--primary-color); font-weight: 600; }
+
+.array-item { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center; }
+
+.nav-bar {
+  background: var(--primary-color);
+  padding: 1rem 2rem;
+  display: flex;
+  gap: 1.5rem;
+}
+.nav-bar a { color: white; text-decoration: none; font-weight: 500; }
+.nav-bar a:hover { text-decoration: underline; }
+.page-title { text-align: center; color: var(--primary-color); margin-bottom: 2rem; }
+
+/* BROCHURE CARD STYLES */
+.brochure-card {
+  width: 100%;
+  max-width: 900px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  overflow: hidden;
+  position: relative;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Header section mimicking image */
+.brochure-header {
+  display: flex;
+  position: relative;
+  height: 250px;
+  background: #113666;
+  color: white;
+  overflow: hidden;
+}
+.brochure-header::after {
+  content: '';
+  position: absolute;
+  top: -100px;
+  right: -50px;
+  width: 450px;
+  height: 450px;
+  background: #fdfdfd;
+  border-radius: 50%;
+  border: 15px solid #23548a;
+}
+.header-content {
+  position: relative;
+  z-index: 10;
+  padding: 3rem;
+  flex: 1;
+}
+.header-content h1 {
+  font-size: 3rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+.header-content h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin: 0 0 1.5rem 0;
+}
+.header-content .objective {
+  font-style: italic;
+  font-size: 1.1rem;
+  color: #c9e0ff;
+  max-width: 80%;
+}
+.header-image {
+  position: relative;
+  z-index: 20;
+  width: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 2rem;
+}
+.header-image img {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 5px solid white;
+}
+.placeholder-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: #eee;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 5px solid white;
+}
+
+/* Body */
+.brochure-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 2rem 3rem 6rem; /* Extra padding at bottom for footer wave */
+}
+
+/* Column general styles */
+.section {
+  margin-bottom: 2rem;
+}
+.section h3 {
+  color: #113666;
+  font-size: 1.25rem;
+  border-bottom: 2px solid #b3cdef;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Left column specials */
+.contact-section {
+  background: #f0f7ff;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+.contact-item {
+  display: flex;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  word-break: break-all;
+}
+.contact-item span {
+  width: 80px;
+  font-weight: 600;
+  color: #113666;
+  flex-shrink: 0;
+}
+
+/* Education Table */
+.edu-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.edu-table th, .edu-table td {
+  border: 1px solid #b3cdef;
+  padding: 0.5rem;
+  text-align: center;
+}
+.edu-table th {
+  background: #f0f7ff;
+  color: #113666;
+}
+.edu-table td:nth-child(2) {
+  text-align: left;
+}
+
+.bullet-list {
+  padding-left: 1.5rem;
+  color: #2b5585;
+}
+.bullet-list li {
+  margin-bottom: 0.5rem;
+}
+.bullet-list li::marker {
+  color: #113666;
+}
+
+/* Right column specials */
+.project-item {
+  background: #f0f7ff;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+.project-title {
+  font-weight: 600;
+  color: #113666;
+  font-size: 1.1rem;
+}
+.project-role {
+  color: #4b5563;
+  font-size: 0.9rem;
+}
+.project-desc {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.strengths-list li {
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+/* Footer wave effect */
+.brochure-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 150px;
+  background-color: #113666;
+  border-top-right-radius: 100% 50%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 1.5rem 3rem;
+  color: white;
+}
+
+.footer-text {
+  text-align: right;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  opacity: 0.9;
+}
