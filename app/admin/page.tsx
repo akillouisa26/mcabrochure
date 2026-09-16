@@ -3,6 +3,12 @@
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { 
+  parseStringList, 
+  parseEducationList, 
+  parseInternshipsList, 
+  parseProjectsList 
+} from '@/lib/parsers';
 
 function AdminDashboardContent() {
   const searchParams = useSearchParams();
@@ -194,18 +200,18 @@ function AdminDashboardContent() {
     };
 
     const rows = students.map(student => {
-      const edu = safeParse(student.educationalQualifications)
+      const edu = parseEducationList(student.educationalQualifications)
         .map((e: any) => `${e.qualification || ''} (${e.institution || ''}, ${e.year || ''}, CGPA: ${e.cgpa || ''})`)
         .join('; ');
-      const certs = safeParse(student.certifications).join('; ');
-      const tech = safeParse(student.technicalExpertise).join('; ');
-      const internships = safeParse(student.internships)
+      const certs = parseStringList(student.certifications).join('; ');
+      const tech = parseStringList(student.technicalExpertise).join('; ');
+      const internships = parseInternshipsList(student.internships)
         .map((i: any) => `${i.company || ''} - ${i.role || ''} (${i.duration || ''})`)
         .join('; ');
-      const projs = safeParse(student.projects)
+      const projs = parseProjectsList(student.projects)
         .map((p: any) => `${p.title || ''}${p.toolsUsed ? ` [Tools: ${p.toolsUsed}]` : ''}`)
         .join('; ');
-      const strengths = safeParse(student.strengths).join('; ');
+      const strengths = parseStringList(student.strengths).join('; ');
       const customFieldsText = student.customFieldsData && typeof student.customFieldsData === 'object'
         ? Object.entries(student.customFieldsData)
             .map(([k, v]) => {
@@ -376,12 +382,12 @@ function AdminDashboardContent() {
             </div>
           ) : (
             approvedStudents.map(student => {
-              const edu = safeParse(student.educationalQualifications);
-              const certs = safeParse(student.certifications);
-              const tech = safeParse(student.technicalExpertise);
-              const internships = safeParse(student.internships);
-              const projs = safeParse(student.projects);
-              const strengths = safeParse(student.strengths);
+              const edu = parseEducationList(student.educationalQualifications);
+              const certs = parseStringList(student.certifications);
+              const tech = parseStringList(student.technicalExpertise);
+              const internships = parseInternshipsList(student.internships);
+              const projs = parseProjectsList(student.projects);
+              const strengths = parseStringList(student.strengths);
 
               return (
                 <div key={student.id} style={{ width: '100%', position: 'relative' }}>
@@ -744,7 +750,7 @@ function AdminDashboardContent() {
             <hr style={{ margin: '1rem 0' }}/>
             <h4 style={{ margin: '0 0 0.5rem 0' }}>Educational Qualifications</h4>
             <ul>
-              {safeParse(viewStudentModal.educationalQualifications).map((e: any, idx: number) => (
+              {parseEducationList(viewStudentModal.educationalQualifications).map((e: any, idx: number) => (
                 <li key={idx}><strong>{e.qualification}</strong> - {e.institution} ({e.year}) | CGPA: {e.cgpa}</li>
               ))}
             </ul>
@@ -752,7 +758,7 @@ function AdminDashboardContent() {
             <hr style={{ margin: '1rem 0' }}/>
             <h4 style={{ margin: '0 0 0.5rem 0' }}>Certifications</h4>
             <ul>
-              {safeParse(viewStudentModal.certifications).map((c: string, idx: number) => (
+              {parseStringList(viewStudentModal.certifications).map((c: string, idx: number) => (
                 <li key={idx}>{c}</li>
               ))}
             </ul>
@@ -760,16 +766,16 @@ function AdminDashboardContent() {
             <hr style={{ margin: '1rem 0' }}/>
             <h4 style={{ margin: '0 0 0.5rem 0' }}>Technical Expertise</h4>
             <ul>
-              {safeParse(viewStudentModal.technicalExpertise).map((t: string, idx: number) => (
+              {parseStringList(viewStudentModal.technicalExpertise).map((t: string, idx: number) => (
                 <li key={idx}>{t}</li>
               ))}
             </ul>
 
-            {safeParse(viewStudentModal.internships).length > 0 && (
+            {parseInternshipsList(viewStudentModal.internships).length > 0 && (
               <>
                 <hr style={{ margin: '1rem 0' }}/>
                 <h4 style={{ margin: '0 0 0.5rem 0' }}>Internships</h4>
-                {safeParse(viewStudentModal.internships).map((i: any, idx: number) => (
+                {parseInternshipsList(viewStudentModal.internships).map((i: any, idx: number) => (
                   <div key={idx} style={{ marginBottom: '0.75rem', background: '#f9fafb', padding: '0.75rem', borderRadius: '4px' }}>
                     <strong>{i.company}</strong> {i.role && <span>({i.role})</span>}
                     {i.duration && <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: '#4b5563' }}>Duration: {i.duration}</p>}
@@ -778,11 +784,11 @@ function AdminDashboardContent() {
               </>
             )}
 
-            {safeParse(viewStudentModal.projects).length > 0 && (
+            {parseProjectsList(viewStudentModal.projects).length > 0 && (
               <>
                 <hr style={{ margin: '1rem 0' }}/>
                 <h4 style={{ margin: '0 0 0.5rem 0' }}>Projects</h4>
-                {safeParse(viewStudentModal.projects).map((p: any, idx: number) => (
+                {parseProjectsList(viewStudentModal.projects).map((p: any, idx: number) => (
                   <div key={idx} style={{ marginBottom: '0.75rem', background: '#f9fafb', padding: '0.75rem', borderRadius: '4px' }}>
                     <strong>{p.title}</strong> {p.toolsUsed && <span>(Tools: {p.toolsUsed})</span>}
                   </div>
@@ -793,7 +799,7 @@ function AdminDashboardContent() {
             <hr style={{ margin: '1rem 0' }}/>
             <h4 style={{ margin: '0 0 0.5rem 0' }}>Strengths</h4>
             <ul>
-              {safeParse(viewStudentModal.strengths).map((s: string, idx: number) => (
+              {parseStringList(viewStudentModal.strengths).map((s: string, idx: number) => (
                 <li key={idx}>{s}</li>
               ))}
             </ul>

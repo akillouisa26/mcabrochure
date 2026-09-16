@@ -10,6 +10,7 @@ import {
   serverTimestamp, 
   where 
 } from 'firebase/firestore';
+import { safeParseArray } from '@/lib/parsers';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,13 +50,6 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const data = await req.json();
-    
-    const parseArrayField = (val: any) => {
-      if (typeof val === 'string') {
-        try { return JSON.parse(val); } catch { return []; }
-      }
-      return Array.isArray(val) ? val : [];
-    };
 
     const docData = {
       name: data.name || '',
@@ -63,12 +57,12 @@ export async function POST(req: Request) {
       tagline: data.tagline || '',
       contactPhone: data.contactPhone || '',
       contactEmail: data.contactEmail || '',
-      educationalQualifications: parseArrayField(data.educationalQualifications),
-      certifications: parseArrayField(data.certifications),
-      technicalExpertise: parseArrayField(data.technicalExpertise),
-      internships: parseArrayField(data.internships),
-      projects: parseArrayField(data.projects),
-      strengths: parseArrayField(data.strengths),
+      educationalQualifications: safeParseArray(data.educationalQualifications),
+      certifications: safeParseArray(data.certifications),
+      technicalExpertise: safeParseArray(data.technicalExpertise),
+      internships: safeParseArray(data.internships),
+      projects: safeParseArray(data.projects),
+      strengths: safeParseArray(data.strengths),
       customFieldsData: data.customFieldsData || {},
       profileImageBase64: data.profileImageBase64 || null,
       status: 'PENDING',

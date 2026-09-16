@@ -1,6 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { 
+  parseStringList, 
+  parseEducationList, 
+  parseInternshipsList, 
+  parseProjectsList 
+} from '@/lib/parsers';
 
 export default function SingleBrochurePrintPage() {
   const params = useParams();
@@ -14,20 +20,12 @@ export default function SingleBrochurePrintPage() {
 
   if (!student) return <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>Loading Brochure...</div>;
 
-  const safeParse = (val: any) => {
-    if (Array.isArray(val)) return val;
-    if (typeof val === 'string') {
-      try { return JSON.parse(val); } catch { return []; }
-    }
-    return [];
-  };
-
-  const edu = safeParse(student.educationalQualifications);
-  const certs = safeParse(student.certifications);
-  const tech = safeParse(student.technicalExpertise);
-  const internships = safeParse(student.internships);
-  const projs = safeParse(student.projects);
-  const strengths = safeParse(student.strengths);
+  const edu = parseEducationList(student.educationalQualifications);
+  const certs = parseStringList(student.certifications);
+  const tech = parseStringList(student.technicalExpertise);
+  const internships = parseInternshipsList(student.internships);
+  const projs = parseProjectsList(student.projects);
+  const strengths = parseStringList(student.strengths);
 
   return (
     <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#e5e7eb', minHeight: '100vh' }} className="print-container">
