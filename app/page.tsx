@@ -236,7 +236,14 @@ export default function Home() {
       }
     }
 
+    // Validate Profile Picture if enabled
+    if (formConfig.showProfilePicture !== false && !formData.profileImageBase64) {
+      setErrorMsg('Please upload your Profile Picture before submitting.');
+      return;
+    }
+
     // Validate Custom Fields if present
+    const customFieldsPayload: Record<string, any> = {};
     if (formConfig.customFields && formConfig.customFields.length > 0) {
       for (const field of formConfig.customFields) {
         const val = formData.customFieldsData?.[field.id];
@@ -244,16 +251,22 @@ export default function Home() {
           setErrorMsg(`Please fill in the custom field "${field.label}".`);
           return;
         }
+        customFieldsPayload[field.label] = val;
       }
     }
 
     setLoading(true);
 
     try {
+      const payload = {
+        ...formData,
+        customFieldsData: customFieldsPayload,
+      };
+
       const res = await fetch('/api/students', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
       const resData = await res.json();
 
@@ -309,8 +322,8 @@ export default function Home() {
 
         {formConfig.showProfilePicture && (
           <div className="form-group">
-            <label>Profile Picture</label>
-            <input type="file" accept="image/*" className="form-control" onChange={handleFileChange} />
+            <label>Profile Picture *</label>
+            <input type="file" accept="image/*" required className="form-control" onChange={handleFileChange} />
           </div>
         )}
 

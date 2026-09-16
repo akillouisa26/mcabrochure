@@ -183,6 +183,7 @@ function AdminDashboardContent() {
       'Internships',
       'Projects',
       'Strengths',
+      'Custom Fields',
       'Submitted At'
     ];
 
@@ -202,9 +203,17 @@ function AdminDashboardContent() {
         .map((i: any) => `${i.company || ''} - ${i.role || ''} (${i.duration || ''})`)
         .join('; ');
       const projs = safeParse(student.projects)
-        .map((p: any) => `${p.title || ''} [Tools: ${p.toolsUsed || ''}]: ${p.description || ''}`)
+        .map((p: any) => `${p.title || ''}${p.toolsUsed ? ` [Tools: ${p.toolsUsed}]` : ''}`)
         .join('; ');
       const strengths = safeParse(student.strengths).join('; ');
+      const customFieldsText = student.customFieldsData && typeof student.customFieldsData === 'object'
+        ? Object.entries(student.customFieldsData)
+            .map(([k, v]) => {
+              const label = formConfig.customFields?.find(f => f.id === k)?.label || k.replace(/^field_/, 'Field ');
+              return `${label}: ${typeof v === 'object' ? JSON.stringify(v) : String(v)}`;
+            })
+            .join('; ')
+        : '';
 
       return [
         escapeCsv(student.registerNumber || 'N/A'),
@@ -219,6 +228,7 @@ function AdminDashboardContent() {
         escapeCsv(internships),
         escapeCsv(projs),
         escapeCsv(strengths),
+        escapeCsv(customFieldsText),
         escapeCsv(student.createdAt ? new Date(student.createdAt).toLocaleString() : '')
       ].join(',');
     });
@@ -495,9 +505,10 @@ function AdminDashboardContent() {
                             <ul className="bullet-list">
                               {Object.entries(student.customFieldsData).map(([key, val]: [string, any]) => {
                                 if (!val) return null;
+                                const label = formConfig.customFields?.find(f => f.id === key)?.label || key.replace(/^field_/, 'Field ');
                                 return (
                                   <li key={key}>
-                                    <strong>{key.replace(/^field_/, 'Field ')}:</strong> {typeof val === 'object' ? JSON.stringify(val) : String(val)}
+                                    <strong>{label}:</strong> {typeof val === 'object' ? JSON.stringify(val) : String(val)}
                                   </li>
                                 );
                               })}
@@ -794,9 +805,10 @@ function AdminDashboardContent() {
                 <ul>
                   {Object.entries(viewStudentModal.customFieldsData).map(([key, val]: [string, any]) => {
                     if (!val) return null;
+                    const label = formConfig.customFields?.find(f => f.id === key)?.label || key.replace(/^field_/, 'Field ');
                     return (
                       <li key={key}>
-                        <strong>{key.replace(/^field_/, 'Field ')}:</strong> {typeof val === 'object' ? JSON.stringify(val) : String(val)}
+                        <strong>{label}:</strong> {typeof val === 'object' ? JSON.stringify(val) : String(val)}
                       </li>
                     );
                   })}
