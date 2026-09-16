@@ -733,9 +733,9 @@ function AdminDashboardContent() {
 
             <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
               {viewStudentModal.profileImageBase64 ? (
-                <img src={viewStudentModal.profileImageBase64} alt={viewStudentModal.name} style={{ width: '90px', height: '110px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #ddd' }} />
+                <img src={viewStudentModal.profileImageBase64} alt={viewStudentModal.name} style={{ width: '120px', height: '150px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #ddd', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }} />
               ) : (
-                <div style={{ width: '90px', height: '110px', background: '#e5e7eb', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280' }}>No Photo</div>
+                <div style={{ width: '120px', height: '150px', background: '#e5e7eb', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280' }}>No Photo</div>
               )}
               <div>
                 <h3 style={{ margin: '0 0 0.25rem 0', color: '#1f2937' }}>{viewStudentModal.name}</h3>
