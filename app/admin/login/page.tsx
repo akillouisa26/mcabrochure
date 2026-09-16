@@ -22,12 +22,18 @@ export default function AdminLogin() {
         body: JSON.stringify({ email: email.trim(), password }),
       });
 
-      if (res.ok) {
+      let resData: any = null;
+      try {
+        resData = await res.json();
+      } catch (jsonErr) {
+        console.warn('Non-JSON auth response:', jsonErr);
+      }
+
+      if (res.ok && resData?.success !== false) {
         router.push('/admin');
         router.refresh();
       } else {
-        const data = await res.json();
-        setError(data.error || 'Invalid email or password');
+        setError(resData?.error || 'Invalid password or login failed');
       }
     } catch (err: any) {
       setError(err.message || 'Login failed. Please try again.');
