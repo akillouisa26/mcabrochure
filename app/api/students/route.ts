@@ -1,51 +1,96 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { cookies } from 'next/headers';
+import { db } from '@/lib/firebase';
+import { 
+  collection, 
+  getDocs, 
+  addDoc, 
+  query, 
+  orderBy, 
+  serverTimestamp, 
+  where 
+} from 'firebase/firestore';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request) {
-  // Completely bypass ANY execution during Vercel Build phase
-  if (process.env.npm_lifecycle_event === 'build' || process.env.VERCEL_ENV === 'production' && !process.env.DATABASE_URL) {
-    return NextResponse.json([]);
-  }
-  const url = req.url;
+export async function GET() {
   try {
-    const students = await prisma.studentProfile.findMany({
-      orderBy: { createdAt: 'desc' }
+    const cookieStore = await cookies();
+    const isAdmin = Boolean(cookieStore.get('admin_session')?.value);
+
+    const collectionRef = collection(db, 'studentProfiles');
+    let q;
+    
+    if (isAdmin) {
+      q = query(collectionRef, orderBy('createdAt', 'desc'));
+    } else {
+      q = query(collectionRef, where('status', '==', 'APPROVED'));
+    }
+
+    const snapshot = await getDocs(q);
+
+    const students = snapshot.docs.map((docSnap) => {
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        ...data,
+        createdAt: data.createdAt?.toDate?.() ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+        updatedAt: data.updatedAt?.toDate?.() ? data.updatedAt.toDate().toISOString() : new Date().toISOString(),
+      };
     });
+
     return NextResponse.json(students);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch students' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Firestore GET error:', error?.message || error);
+    return NextResponse.json({ error: error?.message || 'Failed to fetch students' }, { status: 500 });
   }
 }
-
 
 export async function POST(req: Request) {
   try {
     const data = await req.json();
-    const student = await prisma.studentProfile.create({
-      data: {
-        name: data.name,
-        tagline: data.tagline,
-        objective: data.objective,
-        contactPhone: data.contactPhone,
-        contactEmail: data.contactEmail,
-        contactLocation: data.contactLocation,
-        contactLinkedIn: data.contactLinkedIn,
-        contactGitHub: data.contactGitHub,
-        contactPortfolio: data.contactPortfolio,
-        educationalQualifications: JSON.stringify(data.educationalQualifications || []),
-        certifications: JSON.stringify(data.certifications || []),
-        technicalExpertise: JSON.stringify(data.technicalExpertise || []),
-        projects: JSON.stringify(data.projects || []),
-        strengths: JSON.stringify(data.strengths || []),
-        profileImageBase64: data.profileImageBase64 || null,
-        status: 'PENDING'
+    
+    const parseArrayField = (val: any) => {
+      if (typeof val === 'string') {
+        try { return JSON.parse(val); } catch { return []; }
       }
+      return Array.isArray(val) ? val : [];
+    };
+
+    const docData = {
+      name: data.name || '',
+      registerNumber: data.registerNumber || '',
+      tagline: data.tagline || '',
+      contactPhone: data.contactPhone || '',
+      contactEmail: data.contactEmail || '',
+      educationalQualifications: parseArrayField(data.educationalQualifications),
+      certifications: parseArrayField(data.certifications),
+      technicalExpertise: parseArrayField(data.technicalExpertise),
+      internships: parseArrayField(data.internships),
+      projects: parseArrayField(data.projects),
+      strengths: parseArrayField(data.strengths),
+      customFieldsData: data.customFieldsData || {},
+      profileImageBase64: data.profileImageBase64 || null,
+      status: 'PENDING',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+
+    const docRef = await addDoc(collection(db, 'studentProfiles'), docData);
+    
+    return NextResponse.json({
+      id: docRef.id,
+      ...docData,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     });
-    return NextResponse.json(student);
   } catch (error: any) {
-    console.error(error);
-    return NextResponse.json({ error: error.message || 'Failed to create student' }, { status: 500 });
+    console.error('Firestore POST error:', error?.message || error);
+    if (error?.message?.includes('PERMISSION_DENIED') || error?.code === 'permission-denied') {
+      return NextResponse.json({ 
+        error: 'Firebase Firestore Permission Denied. Please enable Read/Write permissions in your Firebase Console -> Firestore Database -> Rules tab.' 
+      }, { status: 403 });
+    }
+    return NextResponse.json({ error: error.message || 'Failed to create student profile' }, { status: 500 });
   }
 }

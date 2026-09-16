@@ -11,13 +11,21 @@ export default function AdminEditPage() {
     fetch(`/api/students/${params.id}`)
       .then(r => r.json())
       .then(data => {
+        const safeParse = (val: any) => {
+          if (Array.isArray(val)) return val;
+          if (typeof val === 'string') {
+            try { return JSON.parse(val); } catch { return []; }
+          }
+          return [];
+        };
+
         setFormData({
           ...data,
-          educationalQualifications: JSON.parse(data.educationalQualifications || '[]'),
-          certifications: JSON.parse(data.certifications || '[]'),
-          technicalExpertise: JSON.parse(data.technicalExpertise || '[]'),
-          projects: JSON.parse(data.projects || '[]'),
-          strengths: JSON.parse(data.strengths || '[]'),
+          educationalQualifications: safeParse(data.educationalQualifications),
+          certifications: safeParse(data.certifications),
+          technicalExpertise: safeParse(data.technicalExpertise),
+          projects: safeParse(data.projects),
+          strengths: safeParse(data.strengths),
         });
       });
   }, [params.id]);

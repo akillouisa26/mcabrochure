@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public form submissions and reading for studentProfiles
+    match /studentProfiles/{studentId} {
+      allow read, write: if true;
+    }
+    // Allow system config reading and writing for formSettings
+    match /systemConfig/{configId} {
+      allow read, write: if true;
+    }
+  }
+}

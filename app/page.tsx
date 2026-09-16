@@ -1,33 +1,71 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+const initialFormState = {
+  name: '',
+  registerNumber: '',
+  tagline: '',
+  contactPhone: '',
+  contactEmail: '',
+  educationalQualifications: [{ qualification: '', institution: '', year: '', cgpa: '' }],
+  certifications: [''],
+  technicalExpertise: [''],
+  internships: [{ company: '', role: '', duration: '' }],
+  projects: [{ title: '', toolsUsed: '' }],
+  strengths: [''],
+  profileImageBase64: '',
+  customFieldsData: {} as Record<string, any>,
+};
 
 export default function Home() {
-  const router = useRouter();
-  const [formData, setFormData] = useState({
-    name: '',
-    tagline: '',
-    objective: '',
-    contactPhone: '',
-    contactEmail: '',
-    contactLocation: '',
-    contactLinkedIn: '',
-    contactGitHub: '',
-    contactPortfolio: '',
-    educationalQualifications: [{ qualification: '', institution: '', year: '', cgpa: '' }],
-    certifications: [''],
-    technicalExpertise: [''],
-    projects: [{ title: '', role: '', description: '' }],
-    strengths: [''],
-    profileImageBase64: ''
+  const [formData, setFormData] = useState(initialFormState);
+  const [formConfig, setFormConfig] = useState<any>({
+    showTagline: true,
+    showProfilePicture: true,
+    showCertifications: true,
+    showTechnicalExpertise: true,
+    showInternships: true,
+    showProjects: true,
+    showStrengths: true,
+    customFields: [],
   });
-
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    fetch('/api/config')
+      .then(r => r.json())
+      .then(data => {
+        if (data && typeof data === 'object') {
+          setFormConfig((prev: any) => ({
+            ...prev,
+            ...data,
+            customFields: Array.isArray(data.customFields) ? data.customFields : []
+          }));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setFormData(prev => ({ ...prev, contactPhone: val }));
+  };
+
+  const handleCustomFieldChange = (fieldId: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      customFieldsData: {
+        ...prev.customFieldsData,
+        [fieldId]: value,
+      },
+    }));
   };
 
   const handleArrayChange = (field: string, index: number, value: any, subfield?: string) => {
@@ -54,8 +92,36 @@ export default function Home() {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, profileImageBase64: reader.result as string });
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 400;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+            setFormData(prev => ({ ...prev, profileImageBase64: compressedBase64 }));
+          }
+        };
+        img.src = event.target?.result as string;
       };
       reader.readAsDataURL(file);
     }
@@ -63,135 +129,321 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSuccess('');
+    setErrorMsg('');
+
+    // Form Field Validations
+    if (!formData.name.trim()) {
+      setErrorMsg('Please enter your Full Name.');
+      return;
+    }
+    if (!formData.registerNumber.trim()) {
+      setErrorMsg('Please enter your Register Number.');
+      return;
+    }
+    if (formConfig.showTagline && !formData.tagline.trim()) {
+      setErrorMsg('Please enter your Tagline.');
+      return;
+    }
+    if (!/^\d{10}$/.test(formData.contactPhone)) {
+      setErrorMsg('Phone number must be exactly 10 digits.');
+      return;
+    }
+    if (!formData.contactEmail.trim()) {
+      setErrorMsg('Please enter a valid Email address.');
+      return;
+    }
+
+    // Validate Education Items
+    if (!formData.educationalQualifications || formData.educationalQualifications.length === 0) {
+      setErrorMsg('Please add at least one Educational Qualification.');
+      return;
+    }
+    for (const edu of formData.educationalQualifications) {
+      if (!edu.qualification.trim() || !edu.institution.trim() || !edu.year.trim() || !edu.cgpa.trim()) {
+        setErrorMsg('Please complete all Educational Qualification details (Qualification, Institution, Year, CGPA).');
+        return;
+      }
+    }
+
+    // Validate Certifications if enabled
+    if (formConfig.showCertifications) {
+      if (!formData.certifications || formData.certifications.length === 0) {
+        setErrorMsg('Please add at least one Certification.');
+        return;
+      }
+      for (const cert of formData.certifications) {
+        if (!cert.trim()) {
+          setErrorMsg('Please fill in all Certification fields.');
+          return;
+        }
+      }
+    }
+
+    // Validate Technical Expertise if enabled
+    if (formConfig.showTechnicalExpertise) {
+      if (!formData.technicalExpertise || formData.technicalExpertise.length === 0) {
+        setErrorMsg('Please add at least one Technical Expertise item.');
+        return;
+      }
+      for (const tech of formData.technicalExpertise) {
+        if (!tech.trim()) {
+          setErrorMsg('Please fill in all Technical Expertise fields.');
+          return;
+        }
+      }
+    }
+
+    // Validate Internships if enabled
+    if (formConfig.showInternships !== false) {
+      if (!formData.internships || formData.internships.length === 0) {
+        setErrorMsg('Please add at least one Internship entry.');
+        return;
+      }
+      for (const intern of formData.internships) {
+        if (!intern.company.trim() || !intern.role.trim() || !intern.duration.trim()) {
+          setErrorMsg('Please complete all Internship details (Company Name, Role, Duration).');
+          return;
+        }
+      }
+    }
+
+    // Validate Projects if enabled
+    if (formConfig.showProjects) {
+      if (!formData.projects || formData.projects.length === 0) {
+        setErrorMsg('Please add at least one Project entry.');
+        return;
+      }
+      for (const proj of formData.projects) {
+        if (!proj.title.trim() || !proj.toolsUsed.trim()) {
+          setErrorMsg('Please complete all Project details (Project Name, Tools Used).');
+          return;
+        }
+      }
+    }
+
+    // Validate Strengths if enabled
+    if (formConfig.showStrengths) {
+      if (!formData.strengths || formData.strengths.length === 0) {
+        setErrorMsg('Please add at least one Strength entry.');
+        return;
+      }
+      for (const str of formData.strengths) {
+        if (!str.trim()) {
+          setErrorMsg('Please fill in all Strength fields.');
+          return;
+        }
+      }
+    }
+
+    // Validate Custom Fields if present
+    if (formConfig.customFields && formConfig.customFields.length > 0) {
+      for (const field of formConfig.customFields) {
+        const val = formData.customFieldsData?.[field.id];
+        if (!val || (typeof val === 'string' && !val.trim())) {
+          setErrorMsg(`Please fill in the custom field "${field.label}".`);
+          return;
+        }
+      }
+    }
+
     setLoading(true);
+
     try {
       const res = await fetch('/api/students', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      if (res.ok) {
+      const resData = await res.json();
+
+      if (res.ok && resData.id) {
         setSuccess('Brochure details submitted successfully!');
+        setFormData(initialFormState);
         window.scrollTo(0, 0);
-        setTimeout(() => setSuccess(''), 5000);
+        setTimeout(() => setSuccess(''), 6000);
       } else {
-        alert('Failed to submit');
+        setErrorMsg(resData.error || 'Failed to submit form details.');
       }
-    } catch(err) {
-      alert('Error submitting');
+    } catch(err: any) {
+      setErrorMsg(err?.message || 'Error submitting details. Please check connection.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
     <div className="form-container">
       <h1 className="page-title">Submit Placement Brochure Data</h1>
-      {success && <div style={{ padding: '1rem', background: '#d1fae5', color: '#065f46', marginBottom: '1rem', borderRadius: '4px' }}>{success}</div>}
+      
+      {success && (
+        <div style={{ padding: '1rem', background: '#d1fae5', color: '#065f46', marginBottom: '1.5rem', borderRadius: '4px', border: '1px solid #a7f3d0', fontWeight: 600 }}>
+          {success}
+        </div>
+      )}
+
+      {errorMsg && (
+        <div style={{ padding: '1rem', background: '#fee2e2', color: '#991b1b', marginBottom: '1.5rem', borderRadius: '4px', border: '1px solid #fca5a5' }}>
+          {errorMsg}
+        </div>
+      )}
       
       <form onSubmit={handleSubmit}>
         <h3>Personal Details</h3>
         <div className="form-group">
-          <label>Full Name</label>
-          <input className="form-control" required name="name" value={formData.name} onChange={handleChange} />
+          <label>Full Name *</label>
+          <input className="form-control" required name="name" value={formData.name} onChange={handleChange} placeholder="e.g. Vimal Jerald" />
         </div>
+
         <div className="form-group">
-          <label>Tagline (e.g. Aspiring Full Stack Developer)</label>
-          <input className="form-control" required name="tagline" value={formData.tagline} onChange={handleChange} />
+          <label>Register Number *</label>
+          <input className="form-control" required name="registerNumber" value={formData.registerNumber} onChange={handleChange} placeholder="e.g. 25MCA101" />
         </div>
-        <div className="form-group">
-          <label>Objective / Quote</label>
-          <textarea className="form-control" required name="objective" value={formData.objective} onChange={handleChange} rows={3} />
-        </div>
-        <div className="form-group">
-          <label>Profile Picture</label>
-          <input type="file" accept="image/*" className="form-control" onChange={handleFileChange} />
-        </div>
+
+        {formConfig.showTagline && (
+          <div className="form-group">
+            <label>Tagline * (e.g. Aspiring Full Stack Developer)</label>
+            <input className="form-control" required name="tagline" value={formData.tagline} onChange={handleChange} placeholder="e.g. Software Engineer & Web Developer" />
+          </div>
+        )}
+
+        {formConfig.showProfilePicture && (
+          <div className="form-group">
+            <label>Profile Picture</label>
+            <input type="file" accept="image/*" className="form-control" onChange={handleFileChange} />
+          </div>
+        )}
 
         <hr style={{ margin: '2rem 0' }}/>
         <h3>Contact Info</h3>
         <div className="form-group">
-          <label>Phone</label>
-          <input className="form-control" name="contactPhone" value={formData.contactPhone} onChange={handleChange} />
+          <label>Phone * (10 Digits)</label>
+          <input className="form-control" type="tel" required maxLength={10} name="contactPhone" value={formData.contactPhone} onChange={handlePhoneChange} placeholder="9876543210" />
         </div>
         <div className="form-group">
-          <label>Email</label>
-          <input className="form-control" type="email" name="contactEmail" value={formData.contactEmail} onChange={handleChange} />
-        </div>
-        <div className="form-group">
-          <label>Location</label>
-          <input className="form-control" name="contactLocation" value={formData.contactLocation} onChange={handleChange} />
-        </div>
-        <div className="form-group">
-          <label>LinkedIn URL</label>
-          <input className="form-control" name="contactLinkedIn" value={formData.contactLinkedIn} onChange={handleChange} />
-        </div>
-        <div className="form-group">
-          <label>GitHub URL</label>
-          <input className="form-control" name="contactGitHub" value={formData.contactGitHub} onChange={handleChange} />
-        </div>
-        <div className="form-group">
-          <label>Portfolio URL</label>
-          <input className="form-control" name="contactPortfolio" value={formData.contactPortfolio} onChange={handleChange} />
+          <label>Email *</label>
+          <input className="form-control" type="email" required name="contactEmail" value={formData.contactEmail} onChange={handleChange} placeholder="vimal@gmail.com" />
         </div>
 
         <hr style={{ margin: '2rem 0' }}/>
         <h3>Educational Qualifications</h3>
         {formData.educationalQualifications.map((edu, idx) => (
           <div key={idx} className="array-item">
-            <input className="form-control" placeholder="Qualification (e.g. MCA)" value={edu.qualification} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'qualification')} />
-            <input className="form-control" placeholder="Institution" value={edu.institution} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'institution')} />
-            <input className="form-control" placeholder="Year (e.g. 2025-2027)" value={edu.year} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'year')} />
-            <input className="form-control" placeholder="CGPA" value={edu.cgpa} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'cgpa')} />
+            <input className="form-control" required placeholder="Qualification (e.g. MCA)" value={edu.qualification} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'qualification')} />
+            <input className="form-control" required placeholder="Institution" value={edu.institution} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'institution')} />
+            <input className="form-control" required placeholder="Year (e.g. 2025-2027)" value={edu.year} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'year')} />
+            <input className="form-control" required placeholder="CGPA" value={edu.cgpa} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'cgpa')} />
             <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('educationalQualifications', idx)}>X</button>
           </div>
         ))}
         <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('educationalQualifications', { qualification: '', institution: '', year: '', cgpa: ''})}>+ Add Education</button>
 
-        <hr style={{ margin: '2rem 0' }}/>
-        <h3>Certifications</h3>
-        {formData.certifications.map((cert, idx) => (
-          <div key={idx} className="array-item">
-            <input className="form-control" placeholder="Certification Name" value={cert} onChange={e => handleArrayChange('certifications', idx, e.target.value)} />
-            <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('certifications', idx)}>X</button>
-          </div>
-        ))}
-        <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('certifications', '')}>+ Add Certification</button>
+        {formConfig.showCertifications && (
+          <>
+            <hr style={{ margin: '2rem 0' }}/>
+            <h3>Certifications</h3>
+            {formData.certifications.map((cert, idx) => (
+              <div key={idx} className="array-item">
+                <input className="form-control" required placeholder="Certification Name" value={cert} onChange={e => handleArrayChange('certifications', idx, e.target.value)} />
+                <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('certifications', idx)}>X</button>
+              </div>
+            ))}
+            <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('certifications', '')}>+ Add Certification</button>
+          </>
+        )}
 
-        <hr style={{ margin: '2rem 0' }}/>
-        <h3>Technical Expertise</h3>
-        {formData.technicalExpertise.map((tech, idx) => (
-          <div key={idx} className="array-item">
-            <input className="form-control" placeholder="Skill/Expertise" value={tech} onChange={e => handleArrayChange('technicalExpertise', idx, e.target.value)} />
-            <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('technicalExpertise', idx)}>X</button>
-          </div>
-        ))}
-        <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('technicalExpertise', '')}>+ Add Expertise</button>
+        {formConfig.showTechnicalExpertise && (
+          <>
+            <hr style={{ margin: '2rem 0' }}/>
+            <h3>Technical Expertise</h3>
+            {formData.technicalExpertise.map((tech, idx) => (
+              <div key={idx} className="array-item">
+                <input className="form-control" required placeholder="Skill/Expertise" value={tech} onChange={e => handleArrayChange('technicalExpertise', idx, e.target.value)} />
+                <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('technicalExpertise', idx)}>X</button>
+              </div>
+            ))}
+            <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('technicalExpertise', '')}>+ Add Expertise</button>
+          </>
+        )}
 
-        <hr style={{ margin: '2rem 0' }}/>
-        <h3>Internships & Projects</h3>
-        {formData.projects.map((proj, idx) => (
-          <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #ddd', padding: '1rem' }}>
-            <input className="form-control" placeholder="Project Title" value={proj.title} onChange={e => handleArrayChange('projects', idx, e.target.value, 'title')} style={{marginBottom:'0.5rem'}} />
-            <input className="form-control" placeholder="Role/Duration" value={proj.role} onChange={e => handleArrayChange('projects', idx, e.target.value, 'role')} style={{marginBottom:'0.5rem'}} />
-            <textarea className="form-control" placeholder="Description" value={proj.description} onChange={e => handleArrayChange('projects', idx, e.target.value, 'description')} style={{marginBottom:'0.5rem'}} />
-            <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('projects', idx)}>Remove Project</button>
-          </div>
-        ))}
-        <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('projects', { title: '', role: '', description: ''})}>+ Add Project</button>
+        {formConfig.showInternships !== false && (
+          <>
+            <hr style={{ margin: '2rem 0' }}/>
+            <h3>Internships</h3>
+            {formData.internships?.map((intern, idx) => (
+              <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #ddd', padding: '1rem', borderRadius: '4px' }}>
+                <input className="form-control" required placeholder="Company Name" value={intern.company} onChange={e => handleArrayChange('internships', idx, e.target.value, 'company')} style={{marginBottom:'0.5rem'}} />
+                <input className="form-control" required placeholder="Role (e.g. Web Developer Intern)" value={intern.role} onChange={e => handleArrayChange('internships', idx, e.target.value, 'role')} style={{marginBottom:'0.5rem'}} />
+                <input className="form-control" required placeholder="Duration (e.g. 3 Months / June - Aug 2024)" value={intern.duration} onChange={e => handleArrayChange('internships', idx, e.target.value, 'duration')} style={{marginBottom:'0.5rem'}} />
+                <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('internships', idx)}>Remove Internship</button>
+              </div>
+            ))}
+            <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('internships', { company: '', role: '', duration: ''})}>+ Add Internship</button>
+          </>
+        )}
 
-        <hr style={{ margin: '2rem 0' }}/>
-        <h3>Strengths</h3>
-        {formData.strengths.map((strength, idx) => (
-          <div key={idx} className="array-item">
-            <input className="form-control" placeholder="Strength details" value={strength} onChange={e => handleArrayChange('strengths', idx, e.target.value)} />
-            <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('strengths', idx)}>X</button>
-          </div>
-        ))}
-        <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('strengths', '')}>+ Add Strength</button>
+        {formConfig.showProjects && (
+          <>
+            <hr style={{ margin: '2rem 0' }}/>
+            <h3>Projects</h3>
+            {formData.projects?.map((proj, idx) => (
+              <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #ddd', padding: '1rem', borderRadius: '4px' }}>
+                <input className="form-control" required placeholder="Project Name" value={proj.title} onChange={e => handleArrayChange('projects', idx, e.target.value, 'title')} style={{marginBottom:'0.5rem'}} />
+                <input className="form-control" required placeholder="Tools Used (e.g. React, Node.js, Firebase)" value={proj.toolsUsed} onChange={e => handleArrayChange('projects', idx, e.target.value, 'toolsUsed')} style={{marginBottom:'0.5rem'}} />
+                <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('projects', idx)}>Remove Project</button>
+              </div>
+            ))}
+            <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('projects', { title: '', toolsUsed: ''})}>+ Add Project</button>
+          </>
+        )}
+
+        {formConfig.showStrengths && (
+          <>
+            <hr style={{ margin: '2rem 0' }}/>
+            <h3>Strengths</h3>
+            {formData.strengths.map((strength, idx) => (
+              <div key={idx} className="array-item">
+                <input className="form-control" placeholder="Strength details" value={strength} onChange={e => handleArrayChange('strengths', idx, e.target.value)} />
+                <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('strengths', idx)}>X</button>
+              </div>
+            ))}
+            <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('strengths', '')}>+ Add Strength</button>
+          </>
+        )}
+
+        {/* Dynamic Custom Fields */}
+        {formConfig.customFields && formConfig.customFields.length > 0 && (
+          <>
+            <hr style={{ margin: '2rem 0' }}/>
+            <h3>Additional Information</h3>
+            {formConfig.customFields.map((field: any) => (
+              <div key={field.id} className="form-group">
+                <label>{field.label}</label>
+                {field.type === 'textarea' ? (
+                  <textarea
+                    className="form-control"
+                    rows={3}
+                    placeholder={`Enter ${field.label}`}
+                    value={formData.customFieldsData?.[field.id] || ''}
+                    onChange={e => handleCustomFieldChange(field.id, e.target.value)}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder={`Enter ${field.label}`}
+                    value={formData.customFieldsData?.[field.id] || ''}
+                    onChange={e => handleCustomFieldChange(field.id, e.target.value)}
+                  />
+                )}
+              </div>
+            ))}
+          </>
+        )}
 
         <div style={{ marginTop: '2rem' }}>
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', fontSize: '1.2rem' }} disabled={loading}>
-            {loading ? 'Submitting...' : 'Submit Details'}
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', fontSize: '1.2rem', background: '#113666' }} disabled={loading}>
+            {loading ? 'Submitting Details...' : 'Submit Details'}
           </button>
         </div>
       </form>

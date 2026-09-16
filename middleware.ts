@@ -4,8 +4,8 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
-    const isAdmin = request.cookies.get('admin_session')?.value;
-    if (isAdmin !== 'true') {
+    const adminSession = request.cookies.get('admin_session')?.value;
+    if (!adminSession) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
   }

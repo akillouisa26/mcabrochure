@@ -1,24 +1,30 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/firebase';
+import { doc, getDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request, context: any) {
-  // Completely bypass ANY execution during Vercel Build phase
-  if (process.env.npm_lifecycle_event === 'build' || process.env.VERCEL_ENV === 'production' && !process.env.DATABASE_URL) {
-    return NextResponse.json({});
-  }
-  const url = req.url;
   try {
     const { id } = await context.params;
     if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
 
-    const student = await prisma.studentProfile.findUnique({
-      where: { id }
+    const docRef = doc(db, 'studentProfiles', id);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+
+    const data = docSnap.data() || {};
+    return NextResponse.json({
+      id: docSnap.id,
+      ...data,
+      createdAt: data.createdAt?.toDate?.() ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+      updatedAt: data.updatedAt?.toDate?.() ? data.updatedAt.toDate().toISOString() : new Date().toISOString(),
     });
-    if (!student) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    return NextResponse.json(student);
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Error fetching student:', error);
     return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
   }
 }
@@ -26,32 +32,42 @@ export async function GET(req: Request, context: any) {
 export async function PUT(req: Request, context: any) {
   try {
     const { id } = await context.params;
-    const data = await req.json();
-    const updateData: any = { ...data };
-    
-    // Stringify array fields if they are sent as objects/arrays
-    if (data.educationalQualifications && typeof data.educationalQualifications !== 'string') {
-      updateData.educationalQualifications = JSON.stringify(data.educationalQualifications);
-    }
-    if (data.certifications && typeof data.certifications !== 'string') {
-      updateData.certifications = JSON.stringify(data.certifications);
-    }
-    if (data.technicalExpertise && typeof data.technicalExpertise !== 'string') {
-      updateData.technicalExpertise = JSON.stringify(data.technicalExpertise);
-    }
-    if (data.projects && typeof data.projects !== 'string') {
-      updateData.projects = JSON.stringify(data.projects);
-    }
-    if (data.strengths && typeof data.strengths !== 'string') {
-      updateData.strengths = JSON.stringify(data.strengths);
-    }
+    if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
 
-    const student = await prisma.studentProfile.update({
-      where: { id },
-      data: updateData
+    const data = await req.json();
+
+    const parseArrayField = (val: any) => {
+      if (typeof val === 'string') {
+        try { return JSON.parse(val); } catch { return val; }
+      }
+      return val;
+    };
+
+    const updateData: any = { ...data };
+    delete updateData.id;
+
+    if ('educationalQualifications' in data) updateData.educationalQualifications = parseArrayField(data.educationalQualifications);
+    if ('certifications' in data) updateData.certifications = parseArrayField(data.certifications);
+    if ('technicalExpertise' in data) updateData.technicalExpertise = parseArrayField(data.technicalExpertise);
+    if ('projects' in data) updateData.projects = parseArrayField(data.projects);
+    if ('strengths' in data) updateData.strengths = parseArrayField(data.strengths);
+
+    updateData.updatedAt = serverTimestamp();
+
+    const docRef = doc(db, 'studentProfiles', id);
+    await updateDoc(docRef, updateData);
+
+    const updatedSnap = await getDoc(docRef);
+    const updatedData = updatedSnap.data() || {};
+
+    return NextResponse.json({
+      id: updatedSnap.id,
+      ...updatedData,
+      createdAt: updatedData.createdAt?.toDate?.() ? updatedData.createdAt.toDate().toISOString() : new Date().toISOString(),
+      updatedAt: updatedData.updatedAt?.toDate?.() ? updatedData.updatedAt.toDate().toISOString() : new Date().toISOString(),
     });
-    return NextResponse.json(student);
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Error updating student:', error);
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
   }
 }
@@ -59,11 +75,13 @@ export async function PUT(req: Request, context: any) {
 export async function DELETE(req: Request, context: any) {
   try {
     const { id } = await context.params;
-    await prisma.studentProfile.delete({
-      where: { id }
-    });
+    if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
+
+    const docRef = doc(db, 'studentProfiles', id);
+    await deleteDoc(docRef);
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Error deleting student:', error);
     return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
   }
 }
