@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -16,10 +18,20 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
+      let idToken = '';
+      if (auth && auth.app) {
+        try {
+          const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
+          idToken = await userCredential.user.getIdToken();
+        } catch (fbErr: any) {
+          console.warn('Firebase Client Auth note:', fbErr?.message || fbErr);
+        }
+      }
+
       const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password }),
+        body: JSON.stringify({ email: email.trim(), password, idToken }),
       });
 
       let resData: any = null;
@@ -33,10 +45,10 @@ export default function AdminLogin() {
         router.push('/admin');
         router.refresh();
       } else {
-        setError(resData?.error || 'Invalid password or login failed');
+        setError(resData?.error || 'Invalid email or password');
       }
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please try again.');
+      setError(err.message || 'Login failed. Please check credentials.');
     } finally {
       setLoading(false);
     }
