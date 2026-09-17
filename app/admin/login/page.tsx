@@ -33,8 +33,8 @@ export default function AdminLogin() {
             msg = 'Please enter a valid email address.';
           } else if (code === 'auth/too-many-requests') {
             msg = 'Access temporarily disabled due to too many failed attempts. Try again later.';
-          } else if (code === 'auth/invalid-api-key' || code === 'auth/api-key-not-valid') {
-            msg = 'Firebase API Key is missing. Please add NEXT_PUBLIC_FIREBASE_API_KEY in Vercel Environment Variables.';
+          } else if (code.includes('api-key') || code === 'auth/invalid-api-key') {
+            msg = 'Firebase API Key is missing or invalid. Please add your real NEXT_PUBLIC_FIREBASE_API_KEY in Vercel Environment Variables.';
           } else if (fbErr?.message) {
             msg = fbErr.message.replace(/^Firebase:\s*/, '');
           }
