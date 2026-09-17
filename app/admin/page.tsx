@@ -875,6 +875,11 @@ function AdminDashboardContent() {
             </div>
           ) : (
             approvedStudents.map(student => {
+              const linkedInVal = student.linkedIn || student.customFieldsData?.linkedIn || student.customFieldsData?.LinkedIn || student.customFieldsData?.['linkedin'];
+              const githubVal = student.github || student.customFieldsData?.github || student.customFieldsData?.GitHub || student.customFieldsData?.['github'];
+              const portfolioVal = student.portfolio || student.customFieldsData?.portfolio || student.customFieldsData?.Portfolio || student.customFieldsData?.['portfolio'];
+              const visionObj = student.objective || student.visionStatement || student.customFieldsData?.objective || student.customFieldsData?.visionStatement || student.customFieldsData?.['Vision Statement (2 Lines)'] || student.customFieldsData?.['Vision Statement (2 lines)'] || student.customFieldsData?.['Vision Statement'];
+
               const edu = parseEducationList(student.educationalQualifications);
               const certs = parseStringList(student.certifications);
               const tech = parseStringList(student.technicalExpertise);
@@ -895,9 +900,9 @@ function AdminDashboardContent() {
                       <div className="header-content">
                         <h1>{student.name}</h1>
                         {student.tagline && <h2>{renderWithLinks(student.tagline)}</h2>}
-                        {(student.objective || student.visionStatement || student.customFieldsData?.objective || student.customFieldsData?.visionStatement) && (
+                        {visionObj && (
                           <div className="objective">
-                            &ldquo;{renderWithLinks(student.objective || student.visionStatement || student.customFieldsData?.objective || student.customFieldsData?.visionStatement)}&rdquo;
+                            &ldquo;{renderWithLinks(visionObj)}&rdquo;
                           </div>
                         )}
                       </div>
@@ -918,9 +923,9 @@ function AdminDashboardContent() {
                           <h3>Contact</h3>
                           {student.contactPhone && <div className="contact-item"><span>Phone</span>: {renderWithLinks(student.contactPhone)}</div>}
                           {student.contactEmail && <div className="contact-item"><span>Email</span>: {renderWithLinks(student.contactEmail)}</div>}
-                          {student.linkedIn && <div className="contact-item"><span>LinkedIn</span>: {renderWithLinks(student.linkedIn)}</div>}
-                          {student.github && <div className="contact-item"><span>GitHub</span>: {renderWithLinks(student.github)}</div>}
-                          {student.portfolio && <div className="contact-item"><span>Portfolio</span>: {renderWithLinks(student.portfolio)}</div>}
+                          {linkedInVal && <div className="contact-item"><span>LinkedIn</span>: {renderWithLinks(linkedInVal)}</div>}
+                          {githubVal && <div className="contact-item"><span>GitHub</span>: {renderWithLinks(githubVal)}</div>}
+                          {portfolioVal && <div className="contact-item"><span>Portfolio</span>: {renderWithLinks(portfolioVal)}</div>}
                           {getCustomFieldsForSection('contact', student).map((cf, idx) => (
                             <div key={idx} className="contact-item">
                               <span>{cf.label}</span>: {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}

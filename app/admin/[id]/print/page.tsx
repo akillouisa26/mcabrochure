@@ -38,8 +38,15 @@ export default function SingleBrochurePrintPage() {
     if (!studentObj || !studentObj.customFieldsData) return [];
     const results: Array<{ label: string; value: any }> = [];
 
+    const handledKeys = [
+      'linkedin', 'github', 'portfolio', 'objective', 
+      'visionstatement', 'vision statement (2 lines)', 'vision statement (2lines)', 'vision statement'
+    ];
+
     Object.entries(studentObj.customFieldsData).forEach(([key, val]) => {
       if (val === undefined || val === null || val === '') return;
+      const lowerKey = key.toLowerCase();
+      if (handledKeys.includes(lowerKey)) return;
 
       if (typeof val === 'object' && val !== null && 'value' in val) {
         const sec = (val as any).section || 'additional';
@@ -49,11 +56,11 @@ export default function SingleBrochurePrintPage() {
         return;
       }
 
-      const cfgField = (formConfig.customFields || []).find((f: any) => f.id === key || f.label === key);
+      const cfgField = (formConfig.customFields || []).find((f: any) => f.id === key || (f.label && f.label.toLowerCase() === lowerKey));
       const assignedSec = cfgField ? (cfgField.section || 'additional') : 'additional';
 
       if (assignedSec === sectionId) {
-        const label = cfgField ? cfgField.label : key.replace(/^field_/, 'Field ');
+        const label = cfgField ? cfgField.label : key.replace(/^field_/, '');
         results.push({ label, value: val });
       }
     });
@@ -61,7 +68,10 @@ export default function SingleBrochurePrintPage() {
     return results;
   };
 
-  const visionObj = student.objective || student.visionStatement || student.customFieldsData?.objective || student.customFieldsData?.visionStatement;
+  const linkedInVal = student.linkedIn || student.customFieldsData?.linkedIn || student.customFieldsData?.LinkedIn || student.customFieldsData?.['linkedin'];
+  const githubVal = student.github || student.customFieldsData?.github || student.customFieldsData?.GitHub || student.customFieldsData?.['github'];
+  const portfolioVal = student.portfolio || student.customFieldsData?.portfolio || student.customFieldsData?.Portfolio || student.customFieldsData?.['portfolio'];
+  const visionObj = student.objective || student.visionStatement || student.customFieldsData?.objective || student.customFieldsData?.visionStatement || student.customFieldsData?.['Vision Statement (2 Lines)'] || student.customFieldsData?.['Vision Statement (2 lines)'] || student.customFieldsData?.['Vision Statement'];
 
   return (
     <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#e5e7eb', minHeight: '100vh' }} className="print-container">
@@ -104,9 +114,9 @@ export default function SingleBrochurePrintPage() {
               <h3>Contact</h3>
               {student.contactPhone && <div className="contact-item"><span>Phone</span>: {renderWithLinks(student.contactPhone)}</div>}
               {student.contactEmail && <div className="contact-item"><span>Email</span>: {renderWithLinks(student.contactEmail)}</div>}
-              {student.linkedIn && <div className="contact-item"><span>LinkedIn</span>: {renderWithLinks(student.linkedIn)}</div>}
-              {student.github && <div className="contact-item"><span>GitHub</span>: {renderWithLinks(student.github)}</div>}
-              {student.portfolio && <div className="contact-item"><span>Portfolio</span>: {renderWithLinks(student.portfolio)}</div>}
+              {linkedInVal && <div className="contact-item"><span>LinkedIn</span>: {renderWithLinks(linkedInVal)}</div>}
+              {githubVal && <div className="contact-item"><span>GitHub</span>: {renderWithLinks(githubVal)}</div>}
+              {portfolioVal && <div className="contact-item"><span>Portfolio</span>: {renderWithLinks(portfolioVal)}</div>}
               {getCustomFieldsForSection('contact', student).map((cf, idx) => (
                 <div key={idx} className="contact-item">
                   <span>{cf.label}</span>: {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
