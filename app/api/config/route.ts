@@ -5,13 +5,32 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 export const dynamic = 'force-dynamic';
 
 const defaultConfig = {
+  showName: true,
+  showRegisterNumber: true,
   showTagline: true,
   showProfilePicture: true,
+  showPhone: true,
+  showEmail: true,
+  showEducation: true,
   showCertifications: true,
   showTechnicalExpertise: true,
   showInternships: true,
   showProjects: true,
   showStrengths: true,
+  fieldLabels: {
+    name: 'Full Name',
+    registerNumber: 'Register Number',
+    tagline: 'Tagline',
+    profilePicture: 'Profile Picture',
+    phone: 'Phone',
+    email: 'Email',
+    education: 'Educational Qualifications',
+    certifications: 'Certifications',
+    technical: 'Technical Expertise',
+    internships: 'Internships',
+    projects: 'Projects',
+    strengths: 'Strengths',
+  },
   sectionOrder: ['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths', 'additional'],
   sectionTitles: {
     personal: 'Personal Details',

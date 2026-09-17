@@ -34,25 +34,52 @@ function AdminDashboardContent() {
     additional: 'Additional Information',
   };
 
+  const DEFAULT_FIELD_LABELS: Record<string, string> = {
+    name: 'Full Name',
+    registerNumber: 'Register Number',
+    tagline: 'Tagline',
+    profilePicture: 'Profile Picture',
+    phone: 'Phone',
+    email: 'Email',
+    education: 'Educational Qualifications',
+    certifications: 'Certifications',
+    technical: 'Technical Expertise',
+    internships: 'Internships',
+    projects: 'Projects',
+    strengths: 'Strengths',
+  };
+
   const [formConfig, setFormConfig] = useState<{
+    showName: boolean;
+    showRegisterNumber: boolean;
     showTagline: boolean;
     showProfilePicture: boolean;
+    showPhone: boolean;
+    showEmail: boolean;
+    showEducation: boolean;
     showCertifications: boolean;
     showTechnicalExpertise: boolean;
     showInternships: boolean;
     showProjects: boolean;
     showStrengths: boolean;
+    fieldLabels: Record<string, string>;
     sectionOrder: string[];
     sectionTitles: Record<string, string>;
-    customFields: Array<{ id: string; label: string; type: string; section: string; required?: boolean; order?: number }>;
+    customFields: Array<{ id: string; label: string; type: string; section: string; required?: boolean; enabled?: boolean; order?: number }>;
   }>({
+    showName: true,
+    showRegisterNumber: true,
     showTagline: true,
     showProfilePicture: true,
+    showPhone: true,
+    showEmail: true,
+    showEducation: true,
     showCertifications: true,
     showTechnicalExpertise: true,
     showInternships: true,
     showProjects: true,
     showStrengths: true,
+    fieldLabels: DEFAULT_FIELD_LABELS,
     sectionOrder: DEFAULT_SECTIONS,
     sectionTitles: DEFAULT_SECTION_TITLES,
     customFields: [],
@@ -98,10 +125,14 @@ function AdminDashboardContent() {
           sectionTitles: data.sectionTitles && typeof data.sectionTitles === 'object' 
             ? { ...DEFAULT_SECTION_TITLES, ...data.sectionTitles } 
             : DEFAULT_SECTION_TITLES,
+          fieldLabels: data.fieldLabels && typeof data.fieldLabels === 'object'
+            ? { ...DEFAULT_FIELD_LABELS, ...data.fieldLabels }
+            : DEFAULT_FIELD_LABELS,
           customFields: Array.isArray(data.customFields) 
             ? data.customFields.map((f: any) => ({
                 ...f,
                 section: f.section || 'additional',
+                enabled: f.enabled !== false,
               }))
             : []
         }));
@@ -146,7 +177,17 @@ function AdminDashboardContent() {
     }));
   };
 
-  const updateCustomField = (fieldId: string, updates: Partial<{ label: string; type: string; section: string; required: boolean }>) => {
+  const updateFieldLabel = (fieldKey: string, newLabel: string) => {
+    setFormConfig(prev => ({
+      ...prev,
+      fieldLabels: {
+        ...(prev.fieldLabels || DEFAULT_FIELD_LABELS),
+        [fieldKey]: newLabel,
+      },
+    }));
+  };
+
+  const updateCustomField = (fieldId: string, updates: Partial<{ label: string; type: string; section: string; required: boolean; enabled: boolean }>) => {
     setFormConfig(prev => ({
       ...prev,
       customFields: (prev.customFields || []).map(f => 
@@ -656,9 +697,6 @@ function AdminDashboardContent() {
         <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
           <div style={{ marginBottom: '1.5rem' }}>
             <h2 style={{ fontSize: '1.4rem', margin: 0, color: '#111827' }}>Student Form Configurator</h2>
-            <p style={{ margin: '0.3rem 0 0 0', color: '#6b7280', fontSize: '0.9rem' }}>
-              Edit section headings, rename field labels, drag or move fields between sections, and configure your student submission form.
-            </p>
           </div>
 
           {configSuccess && (
@@ -776,31 +814,6 @@ function AdminDashboardContent() {
                         className="form-control"
                         style={{ fontWeight: 700, fontSize: '1.05rem', color: '#0f172a', padding: '0.35rem 0.6rem', width: 'auto', flex: 1, minWidth: '180px' }}
                       />
-                      {sectionId === 'certifications' && (
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>
-                          <input type="checkbox" checked={formConfig.showCertifications} onChange={e => setFormConfig({ ...formConfig, showCertifications: e.target.checked })} /> Enabled
-                        </label>
-                      )}
-                      {sectionId === 'technical' && (
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>
-                          <input type="checkbox" checked={formConfig.showTechnicalExpertise} onChange={e => setFormConfig({ ...formConfig, showTechnicalExpertise: e.target.checked })} /> Enabled
-                        </label>
-                      )}
-                      {sectionId === 'internships' && (
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>
-                          <input type="checkbox" checked={formConfig.showInternships !== false} onChange={e => setFormConfig({ ...formConfig, showInternships: e.target.checked })} /> Enabled
-                        </label>
-                      )}
-                      {sectionId === 'projects' && (
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>
-                          <input type="checkbox" checked={formConfig.showProjects} onChange={e => setFormConfig({ ...formConfig, showProjects: e.target.checked })} /> Enabled
-                        </label>
-                      )}
-                      {sectionId === 'strengths' && (
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>
-                          <input type="checkbox" checked={formConfig.showStrengths} onChange={e => setFormConfig({ ...formConfig, showStrengths: e.target.checked })} /> Enabled
-                        </label>
-                      )}
                     </div>
 
                     <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
@@ -808,166 +821,345 @@ function AdminDashboardContent() {
                         type="button" 
                         onClick={() => moveSectionOrder(sectionId, 'up')}
                         disabled={sectionIndex === 0}
-                        style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '4px 10px', fontSize: '0.8rem', cursor: sectionIndex === 0 ? 'not-allowed' : 'pointer', opacity: sectionIndex === 0 ? 0.4 : 1 }}
+                        style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '4px 10px', fontSize: '0.85rem', cursor: sectionIndex === 0 ? 'not-allowed' : 'pointer', opacity: sectionIndex === 0 ? 0.4 : 1 }}
                       >
-                        Move Section Up
+                        ▲
                       </button>
                       <button 
                         type="button" 
                         onClick={() => moveSectionOrder(sectionId, 'down')}
                         disabled={sectionIndex === formConfig.sectionOrder.length - 1}
-                        style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '4px 10px', fontSize: '0.8rem', cursor: sectionIndex === formConfig.sectionOrder.length - 1 ? 'not-allowed' : 'pointer', opacity: sectionIndex === formConfig.sectionOrder.length - 1 ? 0.4 : 1 }}
+                        style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '4px 10px', fontSize: '0.85rem', cursor: sectionIndex === formConfig.sectionOrder.length - 1 ? 'not-allowed' : 'pointer', opacity: sectionIndex === formConfig.sectionOrder.length - 1 ? 0.4 : 1 }}
                       >
-                        Move Section Down
+                        ▼
                       </button>
                     </div>
                   </div>
 
-                  {/* Section Content & Fields */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                    {/* Standard built-in fields preview */}
+                  {/* Section Fields */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {/* Built-in Fields in this Section */}
                     {sectionId === 'personal' && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>Full Name (Standard)</span>
-                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>Register Number (Standard)</span>
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
-                          <input type="checkbox" checked={formConfig.showTagline} onChange={e => setFormConfig({ ...formConfig, showTagline: e.target.checked })} /> Tagline Field
-                        </label>
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
-                          <input type="checkbox" checked={formConfig.showProfilePicture} onChange={e => setFormConfig({ ...formConfig, showProfilePicture: e.target.checked })} /> Profile Picture Upload
-                        </label>
-                      </div>
-                    )}
-
-                    {sectionId === 'contact' && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>Phone (Standard)</span>
-                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>Email (Standard)</span>
-                      </div>
-                    )}
-
-                    {sectionId === 'education' && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>Educational Qualifications List (Standard)</span>
-                      </div>
-                    )}
-
-                    {/* Moveable Custom Fields in this Section */}
-                    {sectionCustomFields.length > 0 ? (
-                      sectionCustomFields.map((field, fieldIdx) => (
-                        <div
-                          key={field.id}
-                          draggable={true}
-                          onDragStart={(e) => {
-                            setDraggedFieldId(field.id);
-                            e.dataTransfer.setData('text/plain', field.id);
-                          }}
-                          onDragEnd={() => {
-                            setDraggedFieldId(null);
-                            setDragOverSection(null);
-                          }}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: '0.75rem 1rem',
-                            background: draggedFieldId === field.id ? '#fef3c7' : '#ffffff',
-                            borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                            cursor: 'grab',
-                            flexWrap: 'wrap',
-                            gap: '0.75rem',
-                          }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '2 1 280px' }}>
-                            <span 
-                              style={{ cursor: 'grab', fontSize: '0.8rem', background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', color: '#64748b', fontWeight: 600, userSelect: 'none' }}
-                              title="Press and drag to move field"
-                            >
-                              Drag
-                            </span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {[
+                          { key: 'name', defaultLabel: 'Full Name', stateKey: 'showName' },
+                          { key: 'registerNumber', defaultLabel: 'Register Number', stateKey: 'showRegisterNumber' },
+                          { key: 'tagline', defaultLabel: 'Tagline', stateKey: 'showTagline' },
+                          { key: 'profilePicture', defaultLabel: 'Profile Picture', stateKey: 'showProfilePicture' },
+                        ].map((item) => (
+                          <div key={item.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.9rem', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 240px' }}>
                               <input 
                                 type="text"
-                                value={field.label}
-                                onChange={e => updateCustomField(field.id, { label: e.target.value })}
-                                placeholder="Field Label"
+                                value={formConfig.fieldLabels?.[item.key] || DEFAULT_FIELD_LABELS[item.key] || item.defaultLabel}
+                                onChange={e => updateFieldLabel(item.key, e.target.value)}
                                 className="form-control"
                                 style={{ fontWeight: 600, padding: '0.3rem 0.5rem', fontSize: '0.9rem' }}
                               />
                             </div>
-                          </div>
-
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                            {/* Type selector */}
-                            <select
-                              value={field.type}
-                              onChange={e => updateCustomField(field.id, { type: e.target.value as any })}
-                              style={{ padding: '0.3rem 0.5rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#fff' }}
-                            >
-                              <option value="text">Single Line Text</option>
-                              <option value="textarea">Paragraph Text</option>
-                              <option value="list">Bullet List</option>
-                            </select>
-
-                            {/* Move to another section dropdown */}
-                            <select
-                              value={field.section || sectionId}
-                              onChange={(e) => moveFieldToSection(field.id, e.target.value)}
-                              style={{ padding: '0.3rem 0.5rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#fff' }}
-                            >
-                              {formConfig.sectionOrder.map(secKey => (
-                                <option key={secKey} value={secKey}>
-                                  Move to: {formConfig.sectionTitles?.[secKey] || DEFAULT_SECTION_TITLES[secKey] || secKey}
-                                </option>
-                              ))}
-                            </select>
-
-                            {/* Required toggle */}
-                            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: '#334155', cursor: 'pointer' }}>
+                            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer' }}>
                               <input 
-                                type="checkbox"
-                                checked={field.required || false}
-                                onChange={e => updateCustomField(field.id, { required: e.target.checked })}
+                                type="checkbox" 
+                                checked={(formConfig as any)[item.stateKey] !== false} 
+                                onChange={e => setFormConfig({ ...formConfig, [item.stateKey]: e.target.checked })} 
+                                style={{ width: '16px', height: '16px' }}
                               />
-                              Required
+                              Enabled
                             </label>
-
-                            {/* Move Up / Down Buttons */}
-                            <button
-                              type="button"
-                              onClick={() => moveCustomFieldInList(field.id, 'up')}
-                              disabled={fieldIdx === 0}
-                              style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '3px 8px', fontSize: '0.8rem', cursor: fieldIdx === 0 ? 'not-allowed' : 'pointer', opacity: fieldIdx === 0 ? 0.4 : 1 }}
-                            >
-                              Move Up
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => moveCustomFieldInList(field.id, 'down')}
-                              disabled={fieldIdx === sectionCustomFields.length - 1}
-                              style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '3px 8px', fontSize: '0.8rem', cursor: fieldIdx === sectionCustomFields.length - 1 ? 'not-allowed' : 'pointer', opacity: fieldIdx === sectionCustomFields.length - 1 ? 0.4 : 1 }}
-                            >
-                              Move Down
-                            </button>
-
-                            <button 
-                              type="button" 
-                              onClick={() => removeCustomField(field.id)}
-                              className="btn btn-danger"
-                              style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
-                            >
-                              Remove
-                            </button>
                           </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div style={{ padding: '0.6rem 1rem', background: '#f8fafc', borderRadius: '6px', border: '1px dashed #cbd5e1', color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center' }}>
-                        Drag & Drop any custom field here or use "Add Field" above to place fields in {currentSectionTitle}.
+                        ))}
                       </div>
                     )}
+
+                    {sectionId === 'contact' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {[
+                          { key: 'phone', defaultLabel: 'Phone', stateKey: 'showPhone' },
+                          { key: 'email', defaultLabel: 'Email', stateKey: 'showEmail' },
+                        ].map((item) => (
+                          <div key={item.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.9rem', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 240px' }}>
+                              <input 
+                                type="text"
+                                value={formConfig.fieldLabels?.[item.key] || DEFAULT_FIELD_LABELS[item.key] || item.defaultLabel}
+                                onChange={e => updateFieldLabel(item.key, e.target.value)}
+                                className="form-control"
+                                style={{ fontWeight: 600, padding: '0.3rem 0.5rem', fontSize: '0.9rem' }}
+                              />
+                            </div>
+                            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer' }}>
+                              <input 
+                                type="checkbox" 
+                                checked={(formConfig as any)[item.stateKey] !== false} 
+                                onChange={e => setFormConfig({ ...formConfig, [item.stateKey]: e.target.checked })} 
+                                style={{ width: '16px', height: '16px' }}
+                              />
+                              Enabled
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {sectionId === 'education' && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.9rem', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 240px' }}>
+                          <input 
+                            type="text"
+                            value={formConfig.fieldLabels?.education || DEFAULT_FIELD_LABELS.education}
+                            onChange={e => updateFieldLabel('education', e.target.value)}
+                            className="form-control"
+                            style={{ fontWeight: 600, padding: '0.3rem 0.5rem', fontSize: '0.9rem' }}
+                          />
+                        </div>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={formConfig.showEducation !== false} 
+                            onChange={e => setFormConfig({ ...formConfig, showEducation: e.target.checked })} 
+                            style={{ width: '16px', height: '16px' }}
+                          />
+                          Enabled
+                        </label>
+                      </div>
+                    )}
+
+                    {sectionId === 'certifications' && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.9rem', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 240px' }}>
+                          <input 
+                            type="text"
+                            value={formConfig.fieldLabels?.certifications || DEFAULT_FIELD_LABELS.certifications}
+                            onChange={e => updateFieldLabel('certifications', e.target.value)}
+                            className="form-control"
+                            style={{ fontWeight: 600, padding: '0.3rem 0.5rem', fontSize: '0.9rem' }}
+                          />
+                        </div>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={formConfig.showCertifications !== false} 
+                            onChange={e => setFormConfig({ ...formConfig, showCertifications: e.target.checked })} 
+                            style={{ width: '16px', height: '16px' }}
+                          />
+                          Enabled
+                        </label>
+                      </div>
+                    )}
+
+                    {sectionId === 'technical' && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.9rem', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 240px' }}>
+                          <input 
+                            type="text"
+                            value={formConfig.fieldLabels?.technical || DEFAULT_FIELD_LABELS.technical}
+                            onChange={e => updateFieldLabel('technical', e.target.value)}
+                            className="form-control"
+                            style={{ fontWeight: 600, padding: '0.3rem 0.5rem', fontSize: '0.9rem' }}
+                          />
+                        </div>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={formConfig.showTechnicalExpertise !== false} 
+                            onChange={e => setFormConfig({ ...formConfig, showTechnicalExpertise: e.target.checked })} 
+                            style={{ width: '16px', height: '16px' }}
+                          />
+                          Enabled
+                        </label>
+                      </div>
+                    )}
+
+                    {sectionId === 'internships' && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.9rem', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 240px' }}>
+                          <input 
+                            type="text"
+                            value={formConfig.fieldLabels?.internships || DEFAULT_FIELD_LABELS.internships}
+                            onChange={e => updateFieldLabel('internships', e.target.value)}
+                            className="form-control"
+                            style={{ fontWeight: 600, padding: '0.3rem 0.5rem', fontSize: '0.9rem' }}
+                          />
+                        </div>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={formConfig.showInternships !== false} 
+                            onChange={e => setFormConfig({ ...formConfig, showInternships: e.target.checked })} 
+                            style={{ width: '16px', height: '16px' }}
+                          />
+                          Enabled
+                        </label>
+                      </div>
+                    )}
+
+                    {sectionId === 'projects' && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.9rem', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 240px' }}>
+                          <input 
+                            type="text"
+                            value={formConfig.fieldLabels?.projects || DEFAULT_FIELD_LABELS.projects}
+                            onChange={e => updateFieldLabel('projects', e.target.value)}
+                            className="form-control"
+                            style={{ fontWeight: 600, padding: '0.3rem 0.5rem', fontSize: '0.9rem' }}
+                          />
+                        </div>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={formConfig.showProjects !== false} 
+                            onChange={e => setFormConfig({ ...formConfig, showProjects: e.target.checked })} 
+                            style={{ width: '16px', height: '16px' }}
+                          />
+                          Enabled
+                        </label>
+                      </div>
+                    )}
+
+                    {sectionId === 'strengths' && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.9rem', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 240px' }}>
+                          <input 
+                            type="text"
+                            value={formConfig.fieldLabels?.strengths || DEFAULT_FIELD_LABELS.strengths}
+                            onChange={e => updateFieldLabel('strengths', e.target.value)}
+                            className="form-control"
+                            style={{ fontWeight: 600, padding: '0.3rem 0.5rem', fontSize: '0.9rem' }}
+                          />
+                        </div>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={formConfig.showStrengths !== false} 
+                            onChange={e => setFormConfig({ ...formConfig, showStrengths: e.target.checked })} 
+                            style={{ width: '16px', height: '16px' }}
+                          />
+                          Enabled
+                        </label>
+                      </div>
+                    )}
+
+                    {/* Moveable Custom Fields in this Section */}
+                    {sectionCustomFields.map((field, fieldIdx) => (
+                      <div
+                        key={field.id}
+                        draggable={true}
+                        onDragStart={(e) => {
+                          setDraggedFieldId(field.id);
+                          e.dataTransfer.setData('text/plain', field.id);
+                        }}
+                        onDragEnd={() => {
+                          setDraggedFieldId(null);
+                          setDragOverSection(null);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '0.75rem 1rem',
+                          background: draggedFieldId === field.id ? '#fef3c7' : '#ffffff',
+                          borderRadius: '6px',
+                          border: '1px solid #cbd5e1',
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                          cursor: 'grab',
+                          flexWrap: 'wrap',
+                          gap: '0.75rem',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '2 1 280px' }}>
+                          <span 
+                            style={{ cursor: 'grab', fontSize: '1.1rem', color: '#94a3b8', userSelect: 'none' }}
+                            title="Press and drag to move field"
+                          >
+                            ⠿
+                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                            <input 
+                              type="text"
+                              value={field.label}
+                              onChange={e => updateCustomField(field.id, { label: e.target.value })}
+                              placeholder="Field Label"
+                              className="form-control"
+                              style={{ fontWeight: 600, padding: '0.3rem 0.5rem', fontSize: '0.9rem' }}
+                            />
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          {/* Enable Toggle */}
+                          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.85rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer' }}>
+                            <input 
+                              type="checkbox"
+                              checked={field.enabled !== false}
+                              onChange={e => updateCustomField(field.id, { enabled: e.target.checked })}
+                              style={{ width: '16px', height: '16px' }}
+                            />
+                            Enabled
+                          </label>
+
+                          {/* Type selector */}
+                          <select
+                            value={field.type}
+                            onChange={e => updateCustomField(field.id, { type: e.target.value as any })}
+                            style={{ padding: '0.3rem 0.5rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#fff' }}
+                          >
+                            <option value="text">Single Line Text</option>
+                            <option value="textarea">Paragraph Text</option>
+                            <option value="list">Bullet List</option>
+                          </select>
+
+                          {/* Move to another section dropdown */}
+                          <select
+                            value={field.section || sectionId}
+                            onChange={(e) => moveFieldToSection(field.id, e.target.value)}
+                            style={{ padding: '0.3rem 0.5rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#fff' }}
+                          >
+                            {formConfig.sectionOrder.map(secKey => (
+                              <option key={secKey} value={secKey}>
+                                Move to: {formConfig.sectionTitles?.[secKey] || DEFAULT_SECTION_TITLES[secKey] || secKey}
+                              </option>
+                            ))}
+                          </select>
+
+                          {/* Required toggle */}
+                          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: '#334155', cursor: 'pointer' }}>
+                            <input 
+                              type="checkbox"
+                              checked={field.required || false}
+                              onChange={e => updateCustomField(field.id, { required: e.target.checked })}
+                            />
+                            Required
+                          </label>
+
+                          {/* Move Up / Down Buttons */}
+                          <button
+                            type="button"
+                            onClick={() => moveCustomFieldInList(field.id, 'up')}
+                            disabled={fieldIdx === 0}
+                            style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '3px 8px', fontSize: '0.85rem', cursor: fieldIdx === 0 ? 'not-allowed' : 'pointer', opacity: fieldIdx === 0 ? 0.4 : 1 }}
+                          >
+                            ▲
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveCustomFieldInList(field.id, 'down')}
+                            disabled={fieldIdx === sectionCustomFields.length - 1}
+                            style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '3px 8px', fontSize: '0.85rem', cursor: fieldIdx === sectionCustomFields.length - 1 ? 'not-allowed' : 'pointer', opacity: fieldIdx === sectionCustomFields.length - 1 ? 0.4 : 1 }}
+                          >
+                            ▼
+                          </button>
+
+                          <button 
+                            type="button" 
+                            onClick={() => removeCustomField(field.id)}
+                            className="btn btn-danger"
+                            style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               );

@@ -137,44 +137,46 @@ export default function Home() {
     setSuccess('');
     setErrorMsg('');
 
-    // Form Field Validations
-    if (!formData.name.trim()) {
-      setErrorMsg('Please enter your Full Name.');
+    // Form Field Validations (Only validate if field is enabled)
+    if (formConfig.showName !== false && !formData.name.trim()) {
+      setErrorMsg(`Please enter your ${formConfig.fieldLabels?.name || 'Full Name'}.`);
       return;
     }
-    if (!formData.registerNumber.trim()) {
-      setErrorMsg('Please enter your Register Number.');
+    if (formConfig.showRegisterNumber !== false && !formData.registerNumber.trim()) {
+      setErrorMsg(`Please enter your ${formConfig.fieldLabels?.registerNumber || 'Register Number'}.`);
       return;
     }
-    if (formConfig.showTagline && !formData.tagline.trim()) {
-      setErrorMsg('Please enter your Tagline.');
+    if (formConfig.showTagline !== false && !formData.tagline.trim()) {
+      setErrorMsg(`Please enter your ${formConfig.fieldLabels?.tagline || 'Tagline'}.`);
       return;
     }
-    if (!/^\d{10}$/.test(formData.contactPhone)) {
-      setErrorMsg('Phone number must be exactly 10 digits.');
+    if (formConfig.showPhone !== false && !/^\d{10}$/.test(formData.contactPhone)) {
+      setErrorMsg(`Please enter a valid 10-digit ${formConfig.fieldLabels?.phone || 'Phone number'}.`);
       return;
     }
-    if (!formData.contactEmail.trim()) {
-      setErrorMsg('Please enter a valid Email address.');
+    if (formConfig.showEmail !== false && !formData.contactEmail.trim()) {
+      setErrorMsg(`Please enter a valid ${formConfig.fieldLabels?.email || 'Email address'}.`);
       return;
     }
 
-    // Validate Education Items
-    if (!formData.educationalQualifications || formData.educationalQualifications.length === 0) {
-      setErrorMsg('Please add at least one Educational Qualification.');
-      return;
-    }
-    for (const edu of formData.educationalQualifications) {
-      if (!edu.qualification.trim() || !edu.institution.trim() || !edu.year.trim() || !edu.cgpa.trim()) {
-        setErrorMsg('Please complete all Educational Qualification details (Qualification, Institution, Year, CGPA).');
+    // Validate Education Items if enabled
+    if (formConfig.showEducation !== false) {
+      if (!formData.educationalQualifications || formData.educationalQualifications.length === 0) {
+        setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.education || 'Educational Qualification'} entry.`);
         return;
+      }
+      for (const edu of formData.educationalQualifications) {
+        if (!edu.qualification.trim() || !edu.institution.trim() || !edu.year.trim() || !edu.cgpa.trim()) {
+          setErrorMsg('Please complete all Educational Qualification details (Qualification, Institution, Year, CGPA).');
+          return;
+        }
       }
     }
 
     // Validate Certifications if enabled
-    if (formConfig.showCertifications) {
+    if (formConfig.showCertifications !== false) {
       if (!formData.certifications || formData.certifications.length === 0) {
-        setErrorMsg('Please add at least one Certification.');
+        setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.certifications || 'Certification'}.`);
         return;
       }
       for (const cert of formData.certifications) {
@@ -186,9 +188,9 @@ export default function Home() {
     }
 
     // Validate Technical Expertise if enabled
-    if (formConfig.showTechnicalExpertise) {
+    if (formConfig.showTechnicalExpertise !== false) {
       if (!formData.technicalExpertise || formData.technicalExpertise.length === 0) {
-        setErrorMsg('Please add at least one Technical Expertise item.');
+        setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.technical || 'Technical Expertise'} item.`);
         return;
       }
       for (const tech of formData.technicalExpertise) {
@@ -202,7 +204,7 @@ export default function Home() {
     // Validate Internships if enabled
     if (formConfig.showInternships !== false) {
       if (!formData.internships || formData.internships.length === 0) {
-        setErrorMsg('Please add at least one Internship entry.');
+        setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.internships || 'Internship'} entry.`);
         return;
       }
       for (const intern of formData.internships) {
@@ -214,9 +216,9 @@ export default function Home() {
     }
 
     // Validate Projects if enabled
-    if (formConfig.showProjects) {
+    if (formConfig.showProjects !== false) {
       if (!formData.projects || formData.projects.length === 0) {
-        setErrorMsg('Please add at least one Project entry.');
+        setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.projects || 'Project'} entry.`);
         return;
       }
       for (const proj of formData.projects) {
@@ -228,9 +230,9 @@ export default function Home() {
     }
 
     // Validate Strengths if enabled
-    if (formConfig.showStrengths) {
+    if (formConfig.showStrengths !== false) {
       if (!formData.strengths || formData.strengths.length === 0) {
-        setErrorMsg('Please add at least one Strength entry.');
+        setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.strengths || 'Strength'} entry.`);
         return;
       }
       for (const str of formData.strengths) {
@@ -243,20 +245,23 @@ export default function Home() {
 
     // Validate Profile Picture if enabled
     if (formConfig.showProfilePicture !== false && !formData.profileImageBase64) {
-      setErrorMsg('Please upload your Profile Picture before submitting.');
+      setErrorMsg(`Please upload your ${formConfig.fieldLabels?.profilePicture || 'Profile Picture'} before submitting.`);
       return;
     }
 
-    // Validate Custom Fields if present
+    // Validate Custom Fields if present and enabled
     const customFieldsPayload: Record<string, any> = {};
     if (formConfig.customFields && formConfig.customFields.length > 0) {
       for (const field of formConfig.customFields) {
+        if (field.enabled === false) continue;
         const val = formData.customFieldsData?.[field.id];
-        if (!val || (typeof val === 'string' && !val.trim())) {
-          setErrorMsg(`Please fill in the custom field "${field.label}".`);
+        if (field.required && (!val || (typeof val === 'string' && !val.trim()))) {
+          setErrorMsg(`Please fill in the required field "${field.label}".`);
           return;
         }
-        customFieldsPayload[field.label] = val;
+        if (val !== undefined && val !== null && val !== '') {
+          customFieldsPayload[field.label] = val;
+        }
       }
     }
 
@@ -295,7 +300,7 @@ export default function Home() {
     : ['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths', 'additional'];
 
   const renderCustomFieldsForSection = (secId: string) => {
-    const fields = (formConfig.customFields || []).filter((f: any) => (f.section || 'additional') === secId);
+    const fields = (formConfig.customFields || []).filter((f: any) => (f.section || 'additional') === secId && f.enabled !== false);
     if (fields.length === 0) return null;
 
     return fields.map((field: any) => (
@@ -324,6 +329,10 @@ export default function Home() {
         )}
       </div>
     ));
+  };
+
+  const getLabel = (key: string, fallback: string) => {
+    return formConfig.fieldLabels?.[key] || fallback;
   };
 
   return (
@@ -363,26 +372,30 @@ export default function Home() {
               {secId === 'personal' && (
                 <div>
                   <h3>{sectionTitle}</h3>
-                  <div className="form-group">
-                    <label>Full Name *</label>
-                    <input className="form-control" required name="name" value={formData.name} onChange={handleChange} placeholder="e.g. Vimal Jerald" />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Register Number *</label>
-                    <input className="form-control" required name="registerNumber" value={formData.registerNumber} onChange={handleRegisterNumberChange} placeholder="e.g. 25PCA101" />
-                  </div>
-
-                  {formConfig.showTagline && (
+                  {formConfig.showName !== false && (
                     <div className="form-group">
-                      <label>Tagline * (e.g. Aspiring Full Stack Developer)</label>
+                      <label>{getLabel('name', 'Full Name')} *</label>
+                      <input className="form-control" required name="name" value={formData.name} onChange={handleChange} placeholder="e.g. Vimal Jerald" />
+                    </div>
+                  )}
+
+                  {formConfig.showRegisterNumber !== false && (
+                    <div className="form-group">
+                      <label>{getLabel('registerNumber', 'Register Number')} *</label>
+                      <input className="form-control" required name="registerNumber" value={formData.registerNumber} onChange={handleRegisterNumberChange} placeholder="e.g. 25PCA101" />
+                    </div>
+                  )}
+
+                  {formConfig.showTagline !== false && (
+                    <div className="form-group">
+                      <label>{getLabel('tagline', 'Tagline')} * (e.g. Aspiring Full Stack Developer)</label>
                       <input className="form-control" required name="tagline" value={formData.tagline} onChange={handleChange} placeholder="e.g. Software Engineer & Web Developer" />
                     </div>
                   )}
 
                   {formConfig.showProfilePicture !== false && (
                     <div className="form-group">
-                      <label>Profile Picture *</label>
+                      <label>{getLabel('profilePicture', 'Profile Picture')} *</label>
                       <input type="file" accept="image/*" required className="form-control" onChange={handleFileChange} />
                     </div>
                   )}
@@ -393,14 +406,18 @@ export default function Home() {
               {secId === 'contact' && (
                 <div>
                   <h3>{sectionTitle}</h3>
-                  <div className="form-group">
-                    <label>Phone * (10 Digits)</label>
-                    <input className="form-control" type="tel" required maxLength={10} name="contactPhone" value={formData.contactPhone} onChange={handlePhoneChange} placeholder="9876543210" />
-                  </div>
-                  <div className="form-group">
-                    <label>Email *</label>
-                    <input className="form-control" type="email" required name="contactEmail" value={formData.contactEmail} onChange={handleChange} placeholder="vimal@gmail.com" />
-                  </div>
+                  {formConfig.showPhone !== false && (
+                    <div className="form-group">
+                      <label>{getLabel('phone', 'Phone')} * (10 Digits)</label>
+                      <input className="form-control" type="tel" required maxLength={10} name="contactPhone" value={formData.contactPhone} onChange={handlePhoneChange} placeholder="9876543210" />
+                    </div>
+                  )}
+                  {formConfig.showEmail !== false && (
+                    <div className="form-group">
+                      <label>{getLabel('email', 'Email')} *</label>
+                      <input className="form-control" type="email" required name="contactEmail" value={formData.contactEmail} onChange={handleChange} placeholder="vimal@gmail.com" />
+                    </div>
+                  )}
                   {renderCustomFieldsForSection('contact')}
                 </div>
               )}
@@ -408,23 +425,27 @@ export default function Home() {
               {secId === 'education' && (
                 <div>
                   <h3>{sectionTitle}</h3>
-                  {formData.educationalQualifications.map((edu, idx) => (
-                    <div key={idx} className="array-item">
-                      <input className="form-control" required placeholder="Qualification (e.g. MCA)" value={edu.qualification} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'qualification')} />
-                      <input className="form-control" required placeholder="Institution" value={edu.institution} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'institution')} />
-                      <input className="form-control" required placeholder="Year (e.g. 2025-2027)" value={edu.year} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'year')} />
-                      <input className="form-control" required placeholder="CGPA" value={edu.cgpa} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'cgpa')} />
-                      <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('educationalQualifications', idx)}>X</button>
-                    </div>
-                  ))}
-                  <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('educationalQualifications', { qualification: '', institution: '', year: '', cgpa: ''})}>+ Add Education</button>
+                  {formConfig.showEducation !== false && (
+                    <>
+                      {formData.educationalQualifications.map((edu, idx) => (
+                        <div key={idx} className="array-item">
+                          <input className="form-control" required placeholder="Qualification (e.g. MCA)" value={edu.qualification} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'qualification')} />
+                          <input className="form-control" required placeholder="Institution" value={edu.institution} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'institution')} />
+                          <input className="form-control" required placeholder="Year (e.g. 2025-2027)" value={edu.year} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'year')} />
+                          <input className="form-control" required placeholder="CGPA" value={edu.cgpa} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'cgpa')} />
+                          <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('educationalQualifications', idx)}>X</button>
+                        </div>
+                      ))}
+                      <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('educationalQualifications', { qualification: '', institution: '', year: '', cgpa: ''})}>+ Add Education</button>
+                    </>
+                  )}
                   {renderCustomFieldsForSection('education')}
                 </div>
               )}
 
-              {secId === 'certifications' && (formConfig.showCertifications || renderCustomFieldsForSection('certifications')) && (
+              {secId === 'certifications' && (formConfig.showCertifications !== false || renderCustomFieldsForSection('certifications')) && (
                 <div>
-                  {formConfig.showCertifications && (
+                  {formConfig.showCertifications !== false && (
                     <>
                       <h3>{sectionTitle}</h3>
                       {formData.certifications.map((cert, idx) => (
@@ -440,9 +461,9 @@ export default function Home() {
                 </div>
               )}
 
-              {secId === 'technical' && (formConfig.showTechnicalExpertise || renderCustomFieldsForSection('technical')) && (
+              {secId === 'technical' && (formConfig.showTechnicalExpertise !== false || renderCustomFieldsForSection('technical')) && (
                 <div>
-                  {formConfig.showTechnicalExpertise && (
+                  {formConfig.showTechnicalExpertise !== false && (
                     <>
                       <h3>{sectionTitle}</h3>
                       {formData.technicalExpertise.map((tech, idx) => (
@@ -478,9 +499,9 @@ export default function Home() {
                 </div>
               )}
 
-              {secId === 'projects' && (formConfig.showProjects || renderCustomFieldsForSection('projects')) && (
+              {secId === 'projects' && (formConfig.showProjects !== false || renderCustomFieldsForSection('projects')) && (
                 <div>
-                  {formConfig.showProjects && (
+                  {formConfig.showProjects !== false && (
                     <>
                       <h3>{sectionTitle}</h3>
                       {formData.projects?.map((proj, idx) => (
@@ -497,9 +518,9 @@ export default function Home() {
                 </div>
               )}
 
-              {secId === 'strengths' && (formConfig.showStrengths || renderCustomFieldsForSection('strengths')) && (
+              {secId === 'strengths' && (formConfig.showStrengths !== false || renderCustomFieldsForSection('strengths')) && (
                 <div>
-                  {formConfig.showStrengths && (
+                  {formConfig.showStrengths !== false && (
                     <>
                       <h3>{sectionTitle}</h3>
                       {formData.strengths.map((strength, idx) => (
