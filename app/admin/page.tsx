@@ -1465,10 +1465,24 @@ function AdminDashboardContent() {
               <div>
                 <h3 style={{ margin: '0 0 0.25rem 0', color: '#1f2937' }}>{viewStudentModal.name}</h3>
                 {viewStudentModal.registerNumber && <p style={{ margin: '0 0 0.25rem 0', color: '#1f2937', fontWeight: 600 }}>Reg. No: {viewStudentModal.registerNumber}</p>}
-                {viewStudentModal.tagline && <p style={{ margin: '0 0 0.5rem 0', color: '#6b7280', fontStyle: 'italic' }}>"{viewStudentModal.tagline}"</p>}
+                {viewStudentModal.tagline && <p style={{ margin: '0 0 0.25rem 0', color: '#6b7280', fontStyle: 'italic' }}>"{viewStudentModal.tagline}"</p>}
+                {(viewStudentModal.objective || viewStudentModal.visionStatement || viewStudentModal.customFieldsData?.objective || viewStudentModal.customFieldsData?.['Vision Statement (2 Lines)']) && (
+                  <p style={{ margin: '0 0 0.5rem 0', color: '#4b5563', fontStyle: 'italic', fontSize: '0.9rem' }}>
+                    <strong>Vision Statement:</strong> "{viewStudentModal.objective || viewStudentModal.visionStatement || viewStudentModal.customFieldsData?.objective || viewStudentModal.customFieldsData?.['Vision Statement (2 Lines)']}"
+                  </p>
+                )}
                 <p style={{ margin: '0 0 0.5rem 0', color: '#4b5563' }}><strong>Status:</strong> <span style={{ color: viewStudentModal.status === 'APPROVED' ? '#059669' : '#d97706', fontWeight: 600 }}>{viewStudentModal.status}</span></p>
                 <p style={{ margin: '0 0 0.25rem 0', color: '#4b5563' }}><strong>Phone:</strong> {viewStudentModal.contactPhone || 'N/A'}</p>
                 <p style={{ margin: '0 0 0.25rem 0', color: '#4b5563' }}><strong>Email:</strong> {viewStudentModal.contactEmail || 'N/A'}</p>
+                {(viewStudentModal.linkedIn || viewStudentModal.customFieldsData?.linkedIn || viewStudentModal.customFieldsData?.LinkedIn) && (
+                  <p style={{ margin: '0 0 0.25rem 0', color: '#4b5563' }}><strong>LinkedIn:</strong> {viewStudentModal.linkedIn || viewStudentModal.customFieldsData?.linkedIn || viewStudentModal.customFieldsData?.LinkedIn}</p>
+                )}
+                {(viewStudentModal.github || viewStudentModal.customFieldsData?.github || viewStudentModal.customFieldsData?.GitHub) && (
+                  <p style={{ margin: '0 0 0.25rem 0', color: '#4b5563' }}><strong>GitHub:</strong> {viewStudentModal.github || viewStudentModal.customFieldsData?.github || viewStudentModal.customFieldsData?.GitHub}</p>
+                )}
+                {(viewStudentModal.portfolio || viewStudentModal.customFieldsData?.portfolio || viewStudentModal.customFieldsData?.Portfolio) && (
+                  <p style={{ margin: '0 0 0.25rem 0', color: '#4b5563' }}><strong>Portfolio:</strong> {viewStudentModal.portfolio || viewStudentModal.customFieldsData?.portfolio || viewStudentModal.customFieldsData?.Portfolio}</p>
+                )}
               </div>
             </div>
 
