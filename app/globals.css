@@ -116,14 +116,14 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 }
 
 .brochure-card a {
-  color: #1d4ed8;
+  color: #000000;
   text-decoration: underline;
   word-break: break-all;
   cursor: pointer;
 }
 
 .brochure-card a:hover {
-  color: #1e40af;
+  color: #000000;
 }
 
 /* Header section */
@@ -371,7 +371,7 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   }
 
   .brochure-card a {
-    color: #113666 !important;
+    color: #000000 !important;
     text-decoration: underline !important;
   }
 }

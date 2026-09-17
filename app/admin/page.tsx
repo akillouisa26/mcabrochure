@@ -94,6 +94,7 @@ function AdminDashboardContent() {
     name: 'Full Name',
     registerNumber: 'Register Number',
     tagline: 'Tagline',
+    objective: 'Vision Statement / Objective',
     profilePicture: 'Profile Picture',
     phone: 'Phone',
     email: 'Email',
@@ -109,6 +110,7 @@ function AdminDashboardContent() {
     showName: boolean;
     showRegisterNumber: boolean;
     showTagline: boolean;
+    showObjective: boolean;
     showProfilePicture: boolean;
     showPhone: boolean;
     showEmail: boolean;
@@ -130,6 +132,7 @@ function AdminDashboardContent() {
     showName: true,
     showRegisterNumber: true,
     showTagline: true,
+    showObjective: true,
     showProfilePicture: true,
     showPhone: true,
     showEmail: true,
@@ -144,6 +147,7 @@ function AdminDashboardContent() {
       name: 'personal',
       registerNumber: 'personal',
       tagline: 'personal',
+      objective: 'personal',
       profilePicture: 'personal',
       phone: 'contact',
       email: 'contact',
@@ -879,6 +883,11 @@ function AdminDashboardContent() {
                       <div className="header-content">
                         <h1>{student.name}</h1>
                         {student.tagline && <h2>{renderWithLinks(student.tagline)}</h2>}
+                        {(student.objective || student.visionStatement || student.customFieldsData?.objective || student.customFieldsData?.visionStatement) && (
+                          <div className="objective">
+                            &ldquo;{renderWithLinks(student.objective || student.visionStatement || student.customFieldsData?.objective || student.customFieldsData?.visionStatement)}&rdquo;
+                          </div>
+                        )}
                       </div>
                       <div className="header-image">
                         {student.profileImageBase64 ? (
@@ -965,39 +974,71 @@ function AdminDashboardContent() {
                         {(internships.length > 0 || getCustomFieldsForSection('internships', student).length > 0) && (
                           <div className="section">
                             <h3>Internships</h3>
-                            <ul className="bullet-list">
-                              {internships.map((i: any, idx: number) => (
-                                <li key={idx}>
-                                  {renderWithLinks(i.company)}
-                                  {i.role && <> | {renderWithLinks(i.role)}</>}
-                                  {i.duration && <> | Duration: {renderWithLinks(i.duration)}</>}
-                                </li>
-                              ))}
-                              {getCustomFieldsForSection('internships', student).map((cf, idx) => (
-                                <li key={'cf_' + idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
-                              ))}
-                            </ul>
+                            {internships.map((i: any, idx: number) => {
+                              const role = i.role || '';
+                              const company = i.company || '';
+                              const duration = i.duration || '';
+
+                              return (
+                                <div key={idx} style={{ marginBottom: '0.65rem' }}>
+                                  {role ? (
+                                    <>
+                                      <div style={{ fontWeight: 700, color: '#000000', fontSize: '0.95rem', lineHeight: '1.35' }}>
+                                        {renderWithLinks(role)}
+                                      </div>
+                                      <div style={{ color: '#000000', fontSize: '0.875rem', lineHeight: '1.35' }}>
+                                        {renderWithLinks(company)}
+                                        {duration && <> | {renderWithLinks(duration)}</>}
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div style={{ fontWeight: 700, color: '#000000', fontSize: '0.95rem', lineHeight: '1.35' }}>
+                                        {renderWithLinks(company)}
+                                      </div>
+                                      {duration && (
+                                        <div style={{ color: '#000000', fontSize: '0.875rem', lineHeight: '1.35' }}>
+                                          Duration: {renderWithLinks(duration)}
+                                        </div>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              );
+                            })}
+                            {getCustomFieldsForSection('internships', student).map((cf, idx) => (
+                              <div key={'cf_' + idx} style={{ marginBottom: '0.5rem', color: '#000000', fontSize: '0.875rem' }}>
+                                <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
+                              </div>
+                            ))}
                           </div>
                         )}
 
                         {(projs.length > 0 || getCustomFieldsForSection('projects', student).length > 0) && (
                           <div className="section">
                             <h3>Projects</h3>
-                            <ul className="bullet-list">
-                              {projs.map((p: any, idx: number) => {
-                                const title = typeof p === 'string' ? p : (p.title || p.name || '');
-                                const hasTools = typeof p === 'object' && p.toolsUsed;
-                                return (
-                                  <li key={idx}>
+                            {projs.map((p: any, idx: number) => {
+                              const title = typeof p === 'string' ? p : (p.title || p.name || '');
+                              const tools = typeof p === 'object' && p.toolsUsed ? p.toolsUsed : '';
+
+                              return (
+                                <div key={idx} style={{ marginBottom: '0.65rem' }}>
+                                  <div style={{ fontWeight: 700, color: '#000000', fontSize: '0.95rem', lineHeight: '1.35' }}>
                                     {renderWithLinks(title)}
-                                    {hasTools ? <> | Tools Used: {renderWithLinks(p.toolsUsed)}</> : null}
-                                  </li>
-                                );
-                              })}
-                              {getCustomFieldsForSection('projects', student).map((cf, idx) => (
-                                <li key={'cf_' + idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
-                              ))}
-                            </ul>
+                                  </div>
+                                  {tools && (
+                                    <div style={{ color: '#000000', fontSize: '0.875rem', lineHeight: '1.35' }}>
+                                      Tools Used: {renderWithLinks(tools)}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                            {getCustomFieldsForSection('projects', student).map((cf, idx) => (
+                              <div key={'cf_' + idx} style={{ marginBottom: '0.5rem', color: '#000000', fontSize: '0.875rem' }}>
+                                <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
+                              </div>
+                            ))}
                           </div>
                         )}
 
@@ -1564,6 +1605,16 @@ function AdminDashboardContent() {
                       value={editStudentModal.tagline || ''} 
                       onChange={e => setEditStudentModal({ ...editStudentModal, tagline: e.target.value })} 
                       className="form-control" 
+                    />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Vision Statement / Objective</label>
+                    <textarea 
+                      rows={2}
+                      value={editStudentModal.objective || ''} 
+                      onChange={e => setEditStudentModal({ ...editStudentModal, objective: e.target.value })} 
+                      className="form-control" 
+                      placeholder="To secure a challenging position..."
                     />
                   </div>
                   <div>

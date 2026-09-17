@@ -134,7 +134,7 @@ export function renderWithLinks(input: any): React.ReactNode {
           target: '_blank',
           rel: 'noopener noreferrer',
           style: {
-            color: '#1d4ed8',
+            color: '#000000',
             textDecoration: 'underline',
             wordBreak: 'break-all',
             cursor: 'pointer',

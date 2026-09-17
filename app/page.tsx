@@ -6,6 +6,7 @@ const initialFormState = {
   name: '',
   registerNumber: '',
   tagline: '',
+  objective: '',
   contactPhone: '',
   contactEmail: '',
   educationalQualifications: [
@@ -25,6 +26,7 @@ export default function Home() {
   const [formData, setFormData] = useState(initialFormState);
   const [formConfig, setFormConfig] = useState<any>({
     showTagline: true,
+    showObjective: true,
     showProfilePicture: true,
     showCertifications: true,
     showTechnicalExpertise: true,
@@ -181,6 +183,10 @@ export default function Home() {
     }
     if (formConfig.showTagline !== false && isFieldReq('tagline', false) && !formData.tagline.trim()) {
       setErrorMsg(`Please enter your ${formConfig.fieldLabels?.tagline || 'Tagline'}.`);
+      return;
+    }
+    if (formConfig.showObjective !== false && isFieldReq('objective', false) && !formData.objective.trim()) {
+      setErrorMsg(`Please enter your ${formConfig.fieldLabels?.objective || 'Vision Statement / Objective'}.`);
       return;
     }
     if (formConfig.showPhone !== false && isFieldReq('phone', true)) {
@@ -410,6 +416,7 @@ export default function Home() {
             (getSection('name', 'personal') === secId && formConfig.showName !== false) ||
             (getSection('registerNumber', 'personal') === secId && formConfig.showRegisterNumber !== false) ||
             (getSection('tagline', 'personal') === secId && formConfig.showTagline !== false) ||
+            (getSection('objective', 'personal') === secId && formConfig.showObjective !== false) ||
             (getSection('profilePicture', 'personal') === secId && formConfig.showProfilePicture !== false) ||
             (getSection('phone', 'contact') === secId && formConfig.showPhone !== false) ||
             (getSection('email', 'contact') === secId && formConfig.showEmail !== false) ||
@@ -447,6 +454,13 @@ export default function Home() {
                 <div className="form-group">
                   <label>{getLabel('tagline', 'Tagline')}</label>
                   <input className="form-control" required={isReq('tagline', false)} name="tagline" value={formData.tagline} onChange={handleChange} placeholder="Software Engineer & Web Developer" />
+                </div>
+              )}
+
+              {getSection('objective', 'personal') === secId && formConfig.showObjective !== false && (
+                <div className="form-group">
+                  <label>{getLabel('objective', 'Vision Statement / Objective')}</label>
+                  <textarea className="form-control" rows={2} required={isReq('objective', false)} name="objective" value={formData.objective} onChange={handleChange} placeholder="To secure a challenging position in a reputable organization..." />
                 </div>
               )}
 
