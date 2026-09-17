@@ -7,7 +7,8 @@ import {
   parseStringList, 
   parseEducationList, 
   parseInternshipsList, 
-  parseProjectsList 
+  parseProjectsList,
+  renderWithLinks
 } from '@/lib/parsers';
 
 function AdminDashboardContent() {
@@ -867,7 +868,7 @@ function AdminDashboardContent() {
                     <div className="brochure-header">
                       <div className="header-content">
                         <h1>{student.name}</h1>
-                        {student.tagline && <h2>{student.tagline}</h2>}
+                        {student.tagline && <h2>{renderWithLinks(student.tagline)}</h2>}
                       </div>
                       <div className="header-image">
                         {student.profileImageBase64 ? (
@@ -884,11 +885,11 @@ function AdminDashboardContent() {
                       <div className="left-col">
                         <div className="section contact-section">
                           <h3>Contact</h3>
-                          <div className="contact-item"><span>Phone</span>: {student.contactPhone}</div>
-                          <div className="contact-item"><span>Email</span>: {student.contactEmail}</div>
+                          <div className="contact-item"><span>Phone</span>: {renderWithLinks(student.contactPhone)}</div>
+                          <div className="contact-item"><span>Email</span>: {renderWithLinks(student.contactEmail)}</div>
                           {getCustomFieldsForSection('contact', student).map((cf, idx) => (
                             <div key={idx} className="contact-item">
-                              <span>{cf.label}</span>: {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
+                              <span>{cf.label}</span>: {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
                             </div>
                           ))}
                         </div>
@@ -907,10 +908,10 @@ function AdminDashboardContent() {
                             <tbody>
                               {edu.map((e: any, idx: number) => (
                                 <tr key={idx}>
-                                  <td>{e.qualification}</td>
-                                  <td>{e.institution}</td>
-                                  <td>{e.year}</td>
-                                  <td>{e.cgpa}</td>
+                                  <td>{renderWithLinks(e.qualification)}</td>
+                                  <td>{renderWithLinks(e.institution)}</td>
+                                  <td>{renderWithLinks(e.year)}</td>
+                                  <td>{renderWithLinks(e.cgpa)}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -918,7 +919,7 @@ function AdminDashboardContent() {
                           {getCustomFieldsForSection('education', student).length > 0 && (
                             <ul className="bullet-list" style={{ marginTop: '0.5rem' }}>
                               {getCustomFieldsForSection('education', student).map((cf, idx) => (
-                                <li key={idx}><strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}</li>
+                                <li key={idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
                               ))}
                             </ul>
                           )}
@@ -928,9 +929,9 @@ function AdminDashboardContent() {
                           <div className="section">
                             <h3>Certifications</h3>
                             <ul className="bullet-list">
-                              {certs.map((c: string, idx: number) => <li key={idx}>{c}</li>)}
+                              {certs.map((c: string, idx: number) => <li key={idx}>{renderWithLinks(c)}</li>)}
                               {getCustomFieldsForSection('certifications', student).map((cf, idx) => (
-                                <li key={'cf_' + idx}><strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}</li>
+                                <li key={'cf_' + idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
                               ))}
                             </ul>
                           </div>
@@ -940,9 +941,9 @@ function AdminDashboardContent() {
                           <div className="section">
                             <h3>Technical Expertise</h3>
                             <ul className="bullet-list">
-                              {tech.map((t: string, idx: number) => <li key={idx}>{t}</li>)}
+                              {tech.map((t: string, idx: number) => <li key={idx}>{renderWithLinks(t)}</li>)}
                               {getCustomFieldsForSection('technical', student).map((cf, idx) => (
-                                <li key={'cf_' + idx}><strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}</li>
+                                <li key={'cf_' + idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
                               ))}
                             </ul>
                           </div>
@@ -957,15 +958,15 @@ function AdminDashboardContent() {
                             {internships.map((i: any, idx: number) => (
                               <div key={idx} className="project-item">
                                 <div className="project-header">
-                                  <span className="project-title">{i.company}</span>
-                                  {i.role && <span className="project-role"> | {i.role}</span>}
+                                  <span className="project-title">{renderWithLinks(i.company)}</span>
+                                  {i.role && <span className="project-role"> | {renderWithLinks(i.role)}</span>}
                                 </div>
-                                {i.duration && <p className="project-desc" style={{ fontStyle: 'italic', margin: '0.25rem 0 0 0' }}>Duration: {i.duration}</p>}
+                                {i.duration && <p className="project-desc" style={{ fontStyle: 'italic', margin: '0.25rem 0 0 0' }}>Duration: {renderWithLinks(i.duration)}</p>}
                               </div>
                             ))}
                             {getCustomFieldsForSection('internships', student).map((cf, idx) => (
                               <div key={'cf_' + idx} className="project-item">
-                                <strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
+                                <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
                               </div>
                             ))}
                           </div>
@@ -977,15 +978,16 @@ function AdminDashboardContent() {
                             <ul className="bullet-list">
                               {projs.map((p: any, idx: number) => {
                                 const title = typeof p === 'string' ? p : (p.title || p.name || '');
-                                const tools = typeof p === 'object' && p.toolsUsed ? ` | Tools Used: ${p.toolsUsed}` : '';
+                                const hasTools = typeof p === 'object' && p.toolsUsed;
                                 return (
                                   <li key={idx}>
-                                    {title}{tools}
+                                    {renderWithLinks(title)}
+                                    {hasTools ? <> | Tools Used: {renderWithLinks(p.toolsUsed)}</> : null}
                                   </li>
                                 );
                               })}
                               {getCustomFieldsForSection('projects', student).map((cf, idx) => (
-                                <li key={'cf_' + idx}><strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}</li>
+                                <li key={'cf_' + idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
                               ))}
                             </ul>
                           </div>
@@ -995,9 +997,9 @@ function AdminDashboardContent() {
                           <div className="section">
                             <h3>Strengths</h3>
                             <ul className="bullet-list strengths-list">
-                              {strengths.map((s: string, idx: number) => <li key={idx}>{s}</li>)}
+                              {strengths.map((s: string, idx: number) => <li key={idx}>{renderWithLinks(s)}</li>)}
                               {getCustomFieldsForSection('strengths', student).map((cf, idx) => (
-                                <li key={'cf_' + idx}><strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}</li>
+                                <li key={'cf_' + idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
                               ))}
                             </ul>
                           </div>
@@ -1016,7 +1018,7 @@ function AdminDashboardContent() {
                                 <ul className="bullet-list">
                                   {secFields.map((cf, idx) => (
                                     <li key={idx}>
-                                      <strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
+                                      <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
                                     </li>
                                   ))}
                                 </ul>

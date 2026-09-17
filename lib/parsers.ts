@@ -1,3 +1,5 @@
+import React from 'react';
+
 export const safeParseArray = (val: any): any[] => {
   if (!val) return [];
   if (Array.isArray(val)) return val;
@@ -78,3 +80,81 @@ export const parseProjectsList = (val: any): Array<{ title: string; toolsUsed: s
     };
   }).filter(p => p.title);
 };
+
+/**
+ * Parses input text and converts any web URLs or email addresses into interactive touchable/clickable hyperlinks (<a> tags).
+ */
+export function renderWithLinks(input: any): React.ReactNode {
+  if (input === null || input === undefined) return null;
+  const text = typeof input === 'string' ? input : String(input);
+  if (!text) return text;
+
+  // Regex to match email addresses (Group 1) OR web URLs (Group 2)
+  const combinedRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})|(https?:\/\/[^\s,]+|www\.[^\s,]+|(?:[a-zA-Z0-9-]+\.)+(?:com|org|net|io|dev|edu|gov|in|me|co|app|tech|info|ai|xyz)(?:\/[^\s,]*)?)/gi;
+
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  const regex = new RegExp(combinedRegex.source, 'gi');
+
+  while ((match = regex.exec(text)) !== null) {
+    const matchedStr = match[0];
+    const isEmail = !!match[1];
+    const matchIndex = match.index;
+
+    if (matchIndex > lastIndex) {
+      parts.push(text.substring(lastIndex, matchIndex));
+    }
+
+    let cleanStr = matchedStr;
+    let trailingPunct = '';
+    while (cleanStr.length > 0 && /[.,;:)]$/.test(cleanStr)) {
+      trailingPunct = cleanStr.slice(-1) + trailingPunct;
+      cleanStr = cleanStr.slice(0, -1);
+    }
+
+    let href = cleanStr;
+    if (isEmail) {
+      if (!href.startsWith('mailto:')) {
+        href = 'mailto:' + href;
+      }
+    } else {
+      if (!/^https?:\/\//i.test(href)) {
+        href = 'https://' + href;
+      }
+    }
+
+    parts.push(
+      React.createElement(
+        'a',
+        {
+          key: `link_${matchIndex}_${cleanStr}`,
+          href,
+          target: '_blank',
+          rel: 'noopener noreferrer',
+          style: {
+            color: '#1d4ed8',
+            textDecoration: 'underline',
+            wordBreak: 'break-all',
+            cursor: 'pointer',
+          },
+          onClick: (e: any) => e.stopPropagation(),
+        },
+        cleanStr
+      )
+    );
+
+    if (trailingPunct) {
+      parts.push(trailingPunct);
+    }
+
+    lastIndex = matchIndex + matchedStr.length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : text;
+}
