@@ -172,6 +172,11 @@ export default function SingleBrochurePrintPage() {
             <strong>Student Profile</strong><br/>
             St. Joseph's College<br/>
             MCA Batch 2025-2027
+            {student.registerNumber && (
+              <div style={{ fontSize: '0.75rem', opacity: 0.85, marginTop: '3px', fontWeight: 500 }}>
+                Reg No: {student.registerNumber}
+              </div>
+            )}
           </div>
         </div>
       </div>
