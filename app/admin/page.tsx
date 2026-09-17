@@ -273,6 +273,33 @@ function AdminDashboardContent() {
     return allFields;
   };
 
+  const getCustomFieldsForSection = (sectionId: string, studentObj: any) => {
+    if (!studentObj || !studentObj.customFieldsData) return [];
+    const results: Array<{ label: string; value: any }> = [];
+
+    Object.entries(studentObj.customFieldsData).forEach(([key, val]) => {
+      if (val === undefined || val === null || val === '') return;
+
+      if (typeof val === 'object' && val !== null && 'value' in val) {
+        const sec = (val as any).section || 'additional';
+        if (sec === sectionId || (sectionId === 'additional' && (!sec || sec === 'additional'))) {
+          results.push({ label: (val as any).label || key, value: (val as any).value });
+        }
+        return;
+      }
+
+      const cfgField = (formConfig.customFields || []).find((f: any) => f.id === key || f.label === key);
+      const assignedSec = cfgField ? (cfgField.section || 'additional') : 'additional';
+
+      if (assignedSec === sectionId) {
+        const label = cfgField ? cfgField.label : key.replace(/^field_/, 'Field ');
+        results.push({ label, value: val });
+      }
+    });
+
+    return results;
+  };
+
   const updateAnyFieldLabel = (fieldId: string, isCustom: boolean, label: string) => {
     if (isCustom) {
       updateCustomField(fieldId, { label });
@@ -857,6 +884,11 @@ function AdminDashboardContent() {
                           <h3>Contact</h3>
                           <div className="contact-item"><span>Phone</span>: {student.contactPhone}</div>
                           <div className="contact-item"><span>Email</span>: {student.contactEmail}</div>
+                          {getCustomFieldsForSection('contact', student).map((cf, idx) => (
+                            <div key={idx} className="contact-item">
+                              <span>{cf.label}</span>: {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
+                            </div>
+                          ))}
                         </div>
 
                         <div className="section">
@@ -881,22 +913,35 @@ function AdminDashboardContent() {
                               ))}
                             </tbody>
                           </table>
+                          {getCustomFieldsForSection('education', student).length > 0 && (
+                            <ul className="bullet-list" style={{ marginTop: '0.5rem' }}>
+                              {getCustomFieldsForSection('education', student).map((cf, idx) => (
+                                <li key={idx}><strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}</li>
+                              ))}
+                            </ul>
+                          )}
                         </div>
 
-                        {certs.length > 0 && (
+                        {(certs.length > 0 || getCustomFieldsForSection('certifications', student).length > 0) && (
                           <div className="section">
                             <h3>Certifications</h3>
                             <ul className="bullet-list">
                               {certs.map((c: string, idx: number) => <li key={idx}>{c}</li>)}
+                              {getCustomFieldsForSection('certifications', student).map((cf, idx) => (
+                                <li key={'cf_' + idx}><strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}</li>
+                              ))}
                             </ul>
                           </div>
                         )}
 
-                        {tech.length > 0 && (
+                        {(tech.length > 0 || getCustomFieldsForSection('technical', student).length > 0) && (
                           <div className="section">
                             <h3>Technical Expertise</h3>
                             <ul className="bullet-list">
                               {tech.map((t: string, idx: number) => <li key={idx}>{t}</li>)}
+                              {getCustomFieldsForSection('technical', student).map((cf, idx) => (
+                                <li key={'cf_' + idx}><strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}</li>
+                              ))}
                             </ul>
                           </div>
                         )}
@@ -904,7 +949,7 @@ function AdminDashboardContent() {
 
                       {/* Right Column */}
                       <div className="right-col">
-                        {internships.length > 0 && (
+                        {(internships.length > 0 || getCustomFieldsForSection('internships', student).length > 0) && (
                           <div className="section">
                             <h3>Internships</h3>
                             {internships.map((i: any, idx: number) => (
@@ -913,13 +958,18 @@ function AdminDashboardContent() {
                                   <span className="project-title">{i.company}</span>
                                   {i.role && <span className="project-role"> | {i.role}</span>}
                                 </div>
-                                {i.duration && <p className="project-desc" style={{ fontStyle: 'italic', margin: '0.25rem 0 0 0' }}>Duration: {i.duration}</p>}
+                                {i.duration && <p className="project-desc" style={{ fontStyle: 'italic', margin: '0.25rem 0 0 0' }}>Tools Used: {i.duration}</p>}
+                              </div>
+                            ))}
+                            {getCustomFieldsForSection('internships', student).map((cf, idx) => (
+                              <div key={'cf_' + idx} className="project-item">
+                                <strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
                               </div>
                             ))}
                           </div>
                         )}
 
-                        {projs.length > 0 && (
+                        {(projs.length > 0 || getCustomFieldsForSection('projects', student).length > 0) && (
                           <div className="section">
                             <h3>Projects</h3>
                             <ul className="bullet-list">
@@ -932,35 +982,45 @@ function AdminDashboardContent() {
                                   </li>
                                 );
                               })}
+                              {getCustomFieldsForSection('projects', student).map((cf, idx) => (
+                                <li key={'cf_' + idx}><strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}</li>
+                              ))}
                             </ul>
                           </div>
                         )}
 
-                        {strengths.length > 0 && (
+                        {(strengths.length > 0 || getCustomFieldsForSection('strengths', student).length > 0) && (
                           <div className="section">
                             <h3>Strengths</h3>
                             <ul className="bullet-list strengths-list">
                               {strengths.map((s: string, idx: number) => <li key={idx}>{s}</li>)}
+                              {getCustomFieldsForSection('strengths', student).map((cf, idx) => (
+                                <li key={'cf_' + idx}><strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}</li>
+                              ))}
                             </ul>
                           </div>
                         )}
 
-                        {student.customFieldsData && Object.keys(student.customFieldsData).length > 0 && (
-                          <div className="section">
-                            <h3>Additional Information</h3>
-                            <ul className="bullet-list">
-                              {Object.entries(student.customFieldsData).map(([key, val]: [string, any]) => {
-                                if (!val) return null;
-                                const label = formConfig.customFields?.find(f => f.id === key)?.label || key.replace(/^field_/, 'Field ');
-                                return (
-                                  <li key={key}>
-                                    <strong>{label}:</strong> {typeof val === 'object' ? JSON.stringify(val) : String(val)}
-                                  </li>
-                                );
-                              })}
-                            </ul>
-                          </div>
-                        )}
+                        {/* Additional / Custom Section rendering */}
+                        {(formConfig.sectionOrder || ['additional'])
+                          .filter(secId => !['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths'].includes(secId))
+                          .map(secId => {
+                            const secFields = getCustomFieldsForSection(secId, student);
+                            if (secFields.length === 0) return null;
+                            const secTitle = formConfig.sectionTitles?.[secId] || DEFAULT_SECTION_TITLES[secId] || secId;
+                            return (
+                              <div key={secId} className="section">
+                                <h3>{secTitle}</h3>
+                                <ul className="bullet-list">
+                                  {secFields.map((cf, idx) => (
+                                    <li key={idx}>
+                                      <strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            );
+                          })}
                       </div>
                     </div>
 
@@ -974,7 +1034,7 @@ function AdminDashboardContent() {
                           <>
                             <br/>
                             <span style={{ fontSize: '0.75rem', opacity: 0.85, fontWeight: 500 }}>
-                              Reg No: {student.registerNumber}
+                              {student.registerNumber}
                             </span>
                           </>
                         )}
@@ -1610,6 +1670,48 @@ function AdminDashboardContent() {
                       const updated = [...editStudentModal.technicalExpertise];
                       updated.splice(idx, 1);
                       setEditStudentModal({ ...editStudentModal, technicalExpertise: updated });
+                    }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Internships */}
+              <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <h3 style={{ margin: 0, fontSize: '1rem', color: '#1e293b' }}>Internships</h3>
+                  <button 
+                    type="button" 
+                    onClick={() => setEditStudentModal({
+                      ...editStudentModal,
+                      internships: [...(editStudentModal.internships || []), { company: '', role: '', duration: '' }]
+                    })}
+                    className="btn btn-secondary" 
+                    style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem', background: '#3b82f6', color: '#fff' }}
+                  >
+                    + Add Internship
+                  </button>
+                </div>
+                {(editStudentModal.internships || []).map((i: any, idx: number) => (
+                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1.2fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+                    <input type="text" placeholder="Company Name" value={i.company || ''} onChange={e => {
+                      const updated = [...editStudentModal.internships];
+                      updated[idx].company = e.target.value;
+                      setEditStudentModal({ ...editStudentModal, internships: updated });
+                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    <input type="text" placeholder="Role (e.g. Web Dev Intern)" value={i.role || ''} onChange={e => {
+                      const updated = [...editStudentModal.internships];
+                      updated[idx].role = e.target.value;
+                      setEditStudentModal({ ...editStudentModal, internships: updated });
+                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    <input type="text" placeholder="Tools Used" value={i.duration || ''} onChange={e => {
+                      const updated = [...editStudentModal.internships];
+                      updated[idx].duration = e.target.value;
+                      setEditStudentModal({ ...editStudentModal, internships: updated });
+                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    <button type="button" onClick={() => {
+                      const updated = [...editStudentModal.internships];
+                      updated.splice(idx, 1);
+                      setEditStudentModal({ ...editStudentModal, internships: updated });
                     }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
                   </div>
                 ))}

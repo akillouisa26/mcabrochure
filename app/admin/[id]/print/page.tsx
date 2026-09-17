@@ -11,11 +11,17 @@ import {
 export default function SingleBrochurePrintPage() {
   const params = useParams();
   const [student, setStudent] = useState<any>(null);
+  const [formConfig, setFormConfig] = useState<any>({});
 
   useEffect(() => {
     fetch(`/api/students/${params.id}`)
       .then(r => r.json())
       .then(data => setStudent(data));
+      
+    fetch('/api/config')
+      .then(r => r.json())
+      .then(cfg => { if (cfg && typeof cfg === 'object') setFormConfig(cfg); })
+      .catch(() => {});
   }, [params.id]);
 
   if (!student) return <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>Loading Brochure...</div>;
@@ -26,6 +32,33 @@ export default function SingleBrochurePrintPage() {
   const internships = parseInternshipsList(student.internships);
   const projs = parseProjectsList(student.projects);
   const strengths = parseStringList(student.strengths);
+
+  const getCustomFieldsForSection = (sectionId: string, studentObj: any) => {
+    if (!studentObj || !studentObj.customFieldsData) return [];
+    const results: Array<{ label: string; value: any }> = [];
+
+    Object.entries(studentObj.customFieldsData).forEach(([key, val]) => {
+      if (val === undefined || val === null || val === '') return;
+
+      if (typeof val === 'object' && val !== null && 'value' in val) {
+        const sec = (val as any).section || 'additional';
+        if (sec === sectionId || (sectionId === 'additional' && (!sec || sec === 'additional'))) {
+          results.push({ label: (val as any).label || key, value: (val as any).value });
+        }
+        return;
+      }
+
+      const cfgField = (formConfig.customFields || []).find((f: any) => f.id === key || f.label === key);
+      const assignedSec = cfgField ? (cfgField.section || 'additional') : 'additional';
+
+      if (assignedSec === sectionId) {
+        const label = cfgField ? cfgField.label : key.replace(/^field_/, 'Field ');
+        results.push({ label, value: val });
+      }
+    });
+
+    return results;
+  };
 
   return (
     <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#e5e7eb', minHeight: '100vh' }} className="print-container">
@@ -63,6 +96,11 @@ export default function SingleBrochurePrintPage() {
               <h3>Contact</h3>
               <div className="contact-item"><span>Phone</span>: {student.contactPhone}</div>
               <div className="contact-item"><span>Email</span>: {student.contactEmail}</div>
+              {getCustomFieldsForSection('contact', student).map((cf, idx) => (
+                <div key={idx} className="contact-item">
+                  <span>{cf.label}</span>: {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
+                </div>
+              ))}
             </div>
 
             <div className="section">
@@ -87,22 +125,35 @@ export default function SingleBrochurePrintPage() {
                   ))}
                 </tbody>
               </table>
+              {getCustomFieldsForSection('education', student).length > 0 && (
+                <ul className="bullet-list" style={{ marginTop: '0.5rem' }}>
+                  {getCustomFieldsForSection('education', student).map((cf, idx) => (
+                    <li key={idx}><strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}</li>
+                  ))}
+                </ul>
+              )}
             </div>
 
-            {certs.length > 0 && (
+            {(certs.length > 0 || getCustomFieldsForSection('certifications', student).length > 0) && (
               <div className="section">
                 <h3>Certifications</h3>
                 <ul className="bullet-list">
                   {certs.map((c: string, idx: number) => <li key={idx}>{c}</li>)}
+                  {getCustomFieldsForSection('certifications', student).map((cf, idx) => (
+                    <li key={'cf_' + idx}><strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}</li>
+                  ))}
                 </ul>
               </div>
             )}
 
-            {tech.length > 0 && (
+            {(tech.length > 0 || getCustomFieldsForSection('technical', student).length > 0) && (
               <div className="section">
                 <h3>Technical Expertise</h3>
                 <ul className="bullet-list">
                   {tech.map((t: string, idx: number) => <li key={idx}>{t}</li>)}
+                  {getCustomFieldsForSection('technical', student).map((cf, idx) => (
+                    <li key={'cf_' + idx}><strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}</li>
+                  ))}
                 </ul>
               </div>
             )}
@@ -110,7 +161,7 @@ export default function SingleBrochurePrintPage() {
 
           {/* Right Column */}
           <div className="right-col">
-            {internships.length > 0 && (
+            {(internships.length > 0 || getCustomFieldsForSection('internships', student).length > 0) && (
               <div className="section">
                 <h3>Internships</h3>
                 {internships.map((i: any, idx: number) => (
@@ -119,13 +170,18 @@ export default function SingleBrochurePrintPage() {
                       <span className="project-title">{i.company}</span>
                       {i.role && <span className="project-role"> | {i.role}</span>}
                     </div>
-                    {i.duration && <p className="project-desc" style={{ fontStyle: 'italic', margin: '0.25rem 0 0 0' }}>Duration: {i.duration}</p>}
+                    {i.duration && <p className="project-desc" style={{ fontStyle: 'italic', margin: '0.25rem 0 0 0' }}>Tools Used: {i.duration}</p>}
+                  </div>
+                ))}
+                {getCustomFieldsForSection('internships', student).map((cf, idx) => (
+                  <div key={'cf_' + idx} className="project-item">
+                    <strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
                   </div>
                 ))}
               </div>
             )}
 
-            {projs.length > 0 && (
+            {(projs.length > 0 || getCustomFieldsForSection('projects', student).length > 0) && (
               <div className="section">
                 <h3>Projects</h3>
                 <ul className="bullet-list">
@@ -138,34 +194,45 @@ export default function SingleBrochurePrintPage() {
                       </li>
                     );
                   })}
+                  {getCustomFieldsForSection('projects', student).map((cf, idx) => (
+                    <li key={'cf_' + idx}><strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}</li>
+                  ))}
                 </ul>
               </div>
             )}
 
-            {strengths.length > 0 && (
+            {(strengths.length > 0 || getCustomFieldsForSection('strengths', student).length > 0) && (
               <div className="section">
                 <h3>Strengths</h3>
                 <ul className="bullet-list strengths-list">
                   {strengths.map((s: string, idx: number) => <li key={idx}>{s}</li>)}
+                  {getCustomFieldsForSection('strengths', student).map((cf, idx) => (
+                    <li key={'cf_' + idx}><strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}</li>
+                  ))}
                 </ul>
               </div>
             )}
 
-            {student.customFieldsData && Object.keys(student.customFieldsData).length > 0 && (
-              <div className="section">
-                <h3>Additional Information</h3>
-                <ul className="bullet-list">
-                  {Object.entries(student.customFieldsData).map(([key, val]: [string, any]) => {
-                    if (!val) return null;
-                    return (
-                      <li key={key}>
-                        <strong>{key.replace(/^field_/, 'Field ')}:</strong> {typeof val === 'object' ? JSON.stringify(val) : String(val)}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            )}
+            {/* Additional / Custom Section rendering */}
+            {(formConfig.sectionOrder || ['additional'])
+              .filter((secId: string) => !['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths'].includes(secId))
+              .map((secId: string) => {
+                const secFields = getCustomFieldsForSection(secId, student);
+                if (secFields.length === 0) return null;
+                const secTitle = formConfig.sectionTitles?.[secId] || secId;
+                return (
+                  <div key={secId} className="section">
+                    <h3>{secTitle}</h3>
+                    <ul className="bullet-list">
+                      {secFields.map((cf, idx) => (
+                        <li key={idx}>
+                          <strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
           </div>
         </div>
 
@@ -179,7 +246,7 @@ export default function SingleBrochurePrintPage() {
               <>
                 <br/>
                 <span style={{ fontSize: '0.75rem', opacity: 0.85, fontWeight: 500 }}>
-                  Reg No: {student.registerNumber}
+                  {student.registerNumber}
                 </span>
               </>
             )}
