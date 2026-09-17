@@ -203,16 +203,18 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 
 /* Body */
 .brochure-body {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  columns: 2;
+  column-gap: 1.5rem;
+  display: block;
   padding: 1.25rem 2.5rem 65px;
   flex: 1;
 }
 
 /* Column general styles */
 .section {
-  margin-bottom: 0.9rem;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 0.85rem;
 }
 .section h3 {
   color: #113666;
@@ -233,6 +235,7 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   margin-bottom: 0.3rem;
   font-size: 0.875rem;
   word-break: break-all;
+  color: #113666;
 }
 .contact-item span {
   min-width: 75px;
@@ -246,11 +249,13 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   width: 100%;
   border-collapse: collapse;
   font-size: 0.825rem;
+  color: #113666;
 }
 .edu-table th, .edu-table td {
   border: 1px solid #b3cdef;
   padding: 0.3rem 0.45rem;
   text-align: center;
+  color: #113666;
 }
 .edu-table th {
   background: #f0f7ff;
@@ -265,11 +270,12 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 
 .bullet-list {
   padding-left: 1.25rem;
-  color: #2b5585;
+  color: #113666;
 }
 .bullet-list li {
   margin-bottom: 0.25rem;
   font-size: 0.875rem;
+  color: #113666;
 }
 .bullet-list li::marker {
   color: #113666;
@@ -290,18 +296,19 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   font-size: 0.95rem;
 }
 .project-role {
-  color: #4b5563;
+  color: #113666;
   font-size: 0.85rem;
 }
 .project-desc {
   margin-top: 0.25rem;
   font-size: 0.85rem;
-  color: #374151;
+  color: #113666;
 }
 
 .strengths-list li {
   margin-bottom: 0.35rem;
   font-size: 0.875rem;
+  color: #113666;
 }
 
 /* Footer banner effect - cleanly anchored at bottom of A4 card */
