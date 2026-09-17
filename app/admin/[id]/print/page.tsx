@@ -170,7 +170,7 @@ export default function SingleBrochurePrintPage() {
                       <span className="project-title">{i.company}</span>
                       {i.role && <span className="project-role"> | {i.role}</span>}
                     </div>
-                    {i.duration && <p className="project-desc" style={{ fontStyle: 'italic', margin: '0.25rem 0 0 0' }}>Tools Used: {i.duration}</p>}
+                    {i.duration && <p className="project-desc" style={{ fontStyle: 'italic', margin: '0.25rem 0 0 0' }}>Duration: {i.duration}</p>}
                   </div>
                 ))}
                 {getCustomFieldsForSection('internships', student).map((cf, idx) => (
@@ -187,7 +187,7 @@ export default function SingleBrochurePrintPage() {
                 <ul className="bullet-list">
                   {projs.map((p: any, idx: number) => {
                     const title = typeof p === 'string' ? p : (p.title || p.name || '');
-                    const tools = typeof p === 'object' && p.toolsUsed ? ` | Tools: ${p.toolsUsed}` : '';
+                    const tools = typeof p === 'object' && p.toolsUsed ? ` | Tools Used: ${p.toolsUsed}` : '';
                     return (
                       <li key={idx}>
                         {title}{tools}

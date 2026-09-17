@@ -100,9 +100,10 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 
 /* BROCHURE CARD STYLES */
 .brochure-card {
-  width: 800px;
-  height: 1131px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 850px;
+  height: auto;
+  min-height: auto;
   background: #fff;
   border-radius: 6px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
@@ -112,7 +113,6 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   flex-direction: column;
   overflow: hidden;
   box-sizing: border-box;
-  flex-shrink: 0;
 }
 
 /* Header section */
@@ -347,7 +347,8 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 
   .brochure-card {
     width: 210mm !important;
-    height: 297mm !important;
+    min-height: 297mm !important;
+    height: auto !important;
     max-width: none !important;
     box-shadow: none !important;
     border-radius: 0 !important;

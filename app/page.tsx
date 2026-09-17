@@ -53,13 +53,30 @@ export default function Home() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const toTitleCase = (str: string) => {
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map(w => w ? w.charAt(0).toUpperCase() + w.slice(1) : '')
+      .join(' ');
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const lettersOnly = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+    setFormData(prev => ({ ...prev, name: lettersOnly }));
+  };
+
+  const handleNameBlur = () => {
+    setFormData(prev => ({ ...prev, name: toTitleCase(prev.name.trim()) }));
+  };
+
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/\D/g, '').slice(0, 10);
     setFormData(prev => ({ ...prev, contactPhone: val }));
   };
 
   const handleRegisterNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.toUpperCase();
+    const val = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
     setFormData(prev => ({ ...prev, registerNumber: val }));
   };
 
@@ -75,10 +92,14 @@ export default function Home() {
 
   const handleArrayChange = (field: string, index: number, value: any, subfield?: string) => {
     const updated = [...(formData as any)[field]];
+    let cleanVal = value;
+    if (subfield === 'cgpa') {
+      cleanVal = value.replace(/[^0-9.]/g, '');
+    }
     if (subfield) {
-      updated[index][subfield] = value;
+      updated[index][subfield] = cleanVal;
     } else {
-      updated[index] = value;
+      updated[index] = cleanVal;
     }
     setFormData({ ...formData, [field]: updated });
   };
@@ -270,6 +291,7 @@ export default function Home() {
     try {
       const payload = {
         ...formData,
+        name: toTitleCase(formData.name.trim()),
         customFieldsData: customFieldsPayload,
       };
 
@@ -394,7 +416,7 @@ export default function Home() {
               {getSection('name', 'personal') === secId && formConfig.showName !== false && (
                 <div className="form-group">
                   <label>{getLabel('name', 'Full Name')}</label>
-                  <input className="form-control" required={isReq('name', true)} name="name" value={formData.name} onChange={handleChange} placeholder="Vimal Jerald" />
+                  <input className="form-control" required={isReq('name', true)} name="name" value={formData.name} onChange={handleNameChange} onBlur={handleNameBlur} placeholder="Vimal Jerald" />
                 </div>
               )}
 
