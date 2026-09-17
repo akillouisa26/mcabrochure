@@ -3,7 +3,7 @@ import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyDemoKeyForMCABrochure12345678',
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'mca-brochure.firebaseapp.com',
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'mca-brochure',
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'mca-brochure.firebasestorage.app',
@@ -22,8 +22,8 @@ try {
 } catch (e: any) {
   console.warn('Firebase client SDK fallback mode:', e?.message || e);
   app = getApps()[0] || ({} as FirebaseApp);
-  auth = {} as Auth;
-  db = {} as Firestore;
+  try { auth = getAuth(app); } catch { auth = {} as Auth; }
+  try { db = getFirestore(app); } catch { db = {} as Firestore; }
 }
 
 export { auth, db };
