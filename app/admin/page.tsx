@@ -1207,26 +1207,6 @@ function AdminDashboardContent() {
                               Required
                             </label>
 
-                            {/* In-Section Up / Down Arrow Buttons */}
-                            <button
-                              type="button"
-                              onClick={() => moveFieldPositionInSection(field.id, sectionId, 'up')}
-                              disabled={fieldIdx === 0}
-                              style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '3px 9px', fontSize: '0.85rem', cursor: fieldIdx === 0 ? 'not-allowed' : 'pointer', opacity: fieldIdx === 0 ? 0.3 : 1 }}
-                              title="Move Up in Section"
-                            >
-                              ▲
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => moveFieldPositionInSection(field.id, sectionId, 'down')}
-                              disabled={fieldIdx === sectionFields.length - 1}
-                              style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '3px 9px', fontSize: '0.85rem', cursor: fieldIdx === sectionFields.length - 1 ? 'not-allowed' : 'pointer', opacity: fieldIdx === sectionFields.length - 1 ? 0.3 : 1 }}
-                              title="Move Down in Section"
-                            >
-                              ▼
-                            </button>
-
                             {/* Red Remove Button */}
                             <button 
                               type="button" 
