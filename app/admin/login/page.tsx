@@ -19,20 +19,37 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
+      if (!auth || !auth.app) {
+        setError('Firebase Auth is not initialized. Please check configuration.');
+        setLoading(false);
+        return;
+      }
+
       let idToken = '';
-      if (auth && auth.app) {
-        try {
-          const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
-          idToken = await userCredential.user.getIdToken();
-        } catch (fbErr: any) {
-          console.warn('Firebase Client Auth note:', fbErr?.code || fbErr?.message);
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
+        idToken = await userCredential.user.getIdToken();
+      } catch (fbErr: any) {
+        let msg = 'Invalid email or password';
+        const code = fbErr?.code || '';
+        if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+          msg = 'Invalid email or password.';
+        } else if (code === 'auth/invalid-email') {
+          msg = 'Please enter a valid email address.';
+        } else if (code === 'auth/too-many-requests') {
+          msg = 'Access temporarily disabled due to too many failed attempts. Try again later.';
+        } else if (fbErr?.message) {
+          msg = fbErr.message.replace(/^Firebase:\s*/, '');
         }
+        setError(msg);
+        setLoading(false);
+        return;
       }
 
       const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password, idToken }),
+        body: JSON.stringify({ idToken }),
       });
 
       let resData: any = null;
@@ -46,7 +63,7 @@ export default function AdminLogin() {
         router.push('/admin');
         router.refresh();
       } else {
-        setError(resData?.error || 'Invalid email or password');
+        setError(resData?.error || 'Authentication failed. Please check credentials.');
       }
     } catch (err: any) {
       setError(err.message || 'Login failed. Please check credentials.');
@@ -68,7 +85,7 @@ export default function AdminLogin() {
             className="form-control"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="admin@example.com"
+            placeholder="Enter admin email..."
             required
           />
         </div>
