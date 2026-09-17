@@ -168,71 +168,75 @@ export default function SingleBrochurePrintPage() {
           {(internships.length > 0 || getCustomFieldsForSection('internships', student).length > 0) && (
             <div className="section">
               <h3>{formConfig.sectionTitles?.internships || 'Internships'}</h3>
-              {internships.map((i: any, idx: number) => {
-                const role = i.role || '';
-                const company = i.company || '';
-                const duration = i.duration || '';
+              <ul className="bullet-list">
+                {internships.map((i: any, idx: number) => {
+                  const role = i.role || '';
+                  const company = i.company || '';
+                  const duration = i.duration || '';
 
-                return (
-                  <div key={idx} style={{ marginBottom: '0.5rem' }}>
-                    {role ? (
-                      <>
-                        <div style={{ fontWeight: 700, color: '#113666', fontSize: '0.9rem', lineHeight: '1.3' }}>
-                          {renderWithLinks(role)}
-                        </div>
-                        <div style={{ color: '#113666', fontSize: '0.85rem', lineHeight: '1.3' }}>
-                          {renderWithLinks(company)}
-                          {duration && <> | {renderWithLinks(duration)}</>}
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div style={{ fontWeight: 700, color: '#113666', fontSize: '0.9rem', lineHeight: '1.3' }}>
-                          {renderWithLinks(company)}
-                        </div>
-                        {duration && (
-                          <div style={{ color: '#113666', fontSize: '0.85rem', lineHeight: '1.3' }}>
-                            Duration: {renderWithLinks(duration)}
+                  return (
+                    <li key={idx} style={{ marginBottom: '0.4rem' }}>
+                      {role ? (
+                        <>
+                          <div style={{ fontWeight: 700, color: '#113666', fontSize: '0.9rem', lineHeight: '1.3' }}>
+                            {renderWithLinks(role)}
                           </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-              {getCustomFieldsForSection('internships', student).map((cf, idx) => (
-                <div key={'cf_' + idx} style={{ marginBottom: '0.4rem', color: '#113666', fontSize: '0.85rem' }}>
-                  <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
-                </div>
-              ))}
+                          <div style={{ color: '#113666', fontSize: '0.85rem', lineHeight: '1.3' }}>
+                            {renderWithLinks(company)}
+                            {duration && <> | {renderWithLinks(duration)}</>}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div style={{ fontWeight: 700, color: '#113666', fontSize: '0.9rem', lineHeight: '1.3' }}>
+                            {renderWithLinks(company)}
+                          </div>
+                          {duration && (
+                            <div style={{ color: '#113666', fontSize: '0.85rem', lineHeight: '1.3' }}>
+                              Duration: {renderWithLinks(duration)}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </li>
+                  );
+                })}
+                {getCustomFieldsForSection('internships', student).map((cf, idx) => (
+                  <li key={'cf_' + idx} style={{ color: '#113666', fontSize: '0.85rem' }}>
+                    <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 
           {(projs.length > 0 || getCustomFieldsForSection('projects', student).length > 0) && (
             <div className="section">
               <h3>{formConfig.sectionTitles?.projects || 'Projects'}</h3>
-              {projs.map((p: any, idx: number) => {
-                const title = typeof p === 'string' ? p : (p.title || p.name || '');
-                const tools = typeof p === 'object' && p.toolsUsed ? p.toolsUsed : '';
+              <ul className="bullet-list">
+                {projs.map((p: any, idx: number) => {
+                  const title = typeof p === 'string' ? p : (p.title || p.name || '');
+                  const tools = typeof p === 'object' && p.toolsUsed ? p.toolsUsed : '';
 
-                return (
-                  <div key={idx} style={{ marginBottom: '0.5rem' }}>
-                    <div style={{ fontWeight: 700, color: '#113666', fontSize: '0.9rem', lineHeight: '1.3' }}>
-                      {renderWithLinks(title)}
-                    </div>
-                    {tools && (
-                      <div style={{ color: '#113666', fontSize: '0.85rem', lineHeight: '1.3' }}>
-                        Tools Used: {renderWithLinks(tools)}
+                  return (
+                    <li key={idx} style={{ marginBottom: '0.4rem' }}>
+                      <div style={{ fontWeight: 700, color: '#113666', fontSize: '0.9rem', lineHeight: '1.3' }}>
+                        {renderWithLinks(title)}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-              {getCustomFieldsForSection('projects', student).map((cf, idx) => (
-                <div key={'cf_' + idx} style={{ marginBottom: '0.4rem', color: '#113666', fontSize: '0.85rem' }}>
-                  <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
-                </div>
-              ))}
+                      {tools && (
+                        <div style={{ color: '#113666', fontSize: '0.85rem', lineHeight: '1.3' }}>
+                          Tools Used: {renderWithLinks(tools)}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+                {getCustomFieldsForSection('projects', student).map((cf, idx) => (
+                  <li key={'cf_' + idx} style={{ color: '#113666', fontSize: '0.85rem' }}>
+                    <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 
