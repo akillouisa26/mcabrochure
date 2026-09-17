@@ -20,6 +20,20 @@ function AdminDashboardContent() {
   const [viewStudentModal, setViewStudentModal] = useState<any | null>(null);
 
   // Form Settings Config state
+  const DEFAULT_SECTIONS = ['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths', 'additional'];
+  
+  const SECTION_LABELS: Record<string, string> = {
+    personal: 'Personal Details',
+    contact: 'Contact Info',
+    education: 'Educational Qualifications',
+    certifications: 'Certifications',
+    technical: 'Technical Expertise',
+    internships: 'Internships',
+    projects: 'Projects',
+    strengths: 'Strengths',
+    additional: 'Additional Information',
+  };
+
   const [formConfig, setFormConfig] = useState<{
     showTagline: boolean;
     showProfilePicture: boolean;
@@ -28,7 +42,8 @@ function AdminDashboardContent() {
     showInternships: boolean;
     showProjects: boolean;
     showStrengths: boolean;
-    customFields: Array<{ id: string; label: string; type: string }>;
+    sectionOrder: string[];
+    customFields: Array<{ id: string; label: string; type: string; section: string; required?: boolean; order?: number }>;
   }>({
     showTagline: true,
     showProfilePicture: true,
@@ -37,14 +52,22 @@ function AdminDashboardContent() {
     showInternships: true,
     showProjects: true,
     showStrengths: true,
+    sectionOrder: DEFAULT_SECTIONS,
     customFields: [],
   });
+
   const [configSaving, setConfigSaving] = useState(false);
   const [configSuccess, setConfigSuccess] = useState('');
 
   // New Custom Field input state
   const [newFieldLabel, setNewFieldLabel] = useState('');
   const [newFieldType, setNewFieldType] = useState<'text' | 'textarea' | 'list'>('text');
+  const [newFieldSection, setNewFieldSection] = useState<string>('personal');
+  const [newFieldRequired, setNewFieldRequired] = useState<boolean>(false);
+
+  // Drag & Drop State
+  const [draggedFieldId, setDraggedFieldId] = useState<string | null>(null);
+  const [dragOverSection, setDragOverSection] = useState<string | null>(null);
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -69,7 +92,13 @@ function AdminDashboardContent() {
         setFormConfig(prev => ({
           ...prev,
           ...data,
-          customFields: Array.isArray(data.customFields) ? data.customFields : []
+          sectionOrder: Array.isArray(data.sectionOrder) && data.sectionOrder.length > 0 ? data.sectionOrder : DEFAULT_SECTIONS,
+          customFields: Array.isArray(data.customFields) 
+            ? data.customFields.map((f: any) => ({
+                ...f,
+                section: f.section || 'additional',
+              }))
+            : []
         }));
       }
     } catch (err) {
@@ -92,7 +121,7 @@ function AdminDashboardContent() {
         body: JSON.stringify(formConfig),
       });
       if (res.ok) {
-        setConfigSuccess('Form configuration saved! Changes are now live on the student submission form.');
+        setConfigSuccess('Form configuration saved! Changes are live on the student submission form.');
         setTimeout(() => setConfigSuccess(''), 5000);
       }
     } catch (e) {
@@ -111,6 +140,9 @@ function AdminDashboardContent() {
       id: 'field_' + Date.now(),
       label: newFieldLabel.trim(),
       type: newFieldType,
+      section: newFieldSection,
+      required: newFieldRequired,
+      order: Date.now(),
     };
     setFormConfig(prev => ({
       ...prev,
@@ -118,6 +150,7 @@ function AdminDashboardContent() {
     }));
     setNewFieldLabel('');
     setNewFieldType('text');
+    setNewFieldRequired(false);
   };
 
   const removeCustomField = (id: string) => {
@@ -125,6 +158,62 @@ function AdminDashboardContent() {
       ...prev,
       customFields: (prev.customFields || []).filter(f => f.id !== id),
     }));
+  };
+
+  const moveFieldToSection = (fieldId: string, targetSection: string) => {
+    setFormConfig(prev => ({
+      ...prev,
+      customFields: (prev.customFields || []).map(f => 
+        f.id === fieldId ? { ...f, section: targetSection } : f
+      ),
+    }));
+  };
+
+  const moveCustomFieldInList = (fieldId: string, direction: 'up' | 'down') => {
+    setFormConfig(prev => {
+      const fields = [...(prev.customFields || [])];
+      const fieldIndex = fields.findIndex(f => f.id === fieldId);
+      if (fieldIndex < 0) return prev;
+      
+      const targetSec = fields[fieldIndex].section;
+      // Get all indices of fields in the same section
+      const sameSecIndices = fields
+        .map((f, i) => f.section === targetSec ? i : -1)
+        .filter(i => i !== -1);
+      
+      const secPos = sameSecIndices.indexOf(fieldIndex);
+      if (direction === 'up' && secPos > 0) {
+        const swapIndex = sameSecIndices[secPos - 1];
+        const temp = fields[fieldIndex];
+        fields[fieldIndex] = fields[swapIndex];
+        fields[swapIndex] = temp;
+      } else if (direction === 'down' && secPos < sameSecIndices.length - 1) {
+        const swapIndex = sameSecIndices[secPos + 1];
+        const temp = fields[fieldIndex];
+        fields[fieldIndex] = fields[swapIndex];
+        fields[swapIndex] = temp;
+      }
+      
+      return { ...prev, customFields: fields };
+    });
+  };
+
+  const moveSectionOrder = (sectionId: string, direction: 'up' | 'down') => {
+    setFormConfig(prev => {
+      const currentOrder = [...(prev.sectionOrder || DEFAULT_SECTIONS)];
+      const idx = currentOrder.indexOf(sectionId);
+      if (idx < 0) return prev;
+      if (direction === 'up' && idx > 0) {
+        const temp = currentOrder[idx];
+        currentOrder[idx] = currentOrder[idx - 1];
+        currentOrder[idx - 1] = temp;
+      } else if (direction === 'down' && idx < currentOrder.length - 1) {
+        const temp = currentOrder[idx];
+        currentOrder[idx] = currentOrder[idx + 1];
+        currentOrder[idx + 1] = temp;
+      }
+      return { ...prev, sectionOrder: currentOrder };
+    });
   };
 
   const deleteStudent = async (id: string) => {
@@ -539,9 +628,24 @@ function AdminDashboardContent() {
           )}
         </div>
       ) : (
-        /* Form Settings Tab (Add/Remove Form Fields) */
+        /* Form Settings Tab (Interactive Drag & Drop Form Builder) */
         <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-          <h2 style={{ fontSize: '1.4rem', marginTop: 0, marginBottom: '1.5rem', color: '#111827' }}>Student Form Fields Configurator</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h2 style={{ fontSize: '1.4rem', margin: 0, color: '#111827' }}>Student Form Configurator</h2>
+              <p style={{ margin: '0.25rem 0 0 0', color: '#6b7280', fontSize: '0.9rem' }}>
+                Customize your form: press & drag fields to move them between sections, reorder sections, add or remove custom fields.
+              </p>
+            </div>
+            <button 
+              onClick={saveFormConfig} 
+              className="btn btn-primary" 
+              style={{ padding: '0.6rem 1.4rem', fontSize: '0.95rem', background: '#113666', fontWeight: 600 }}
+              disabled={configSaving}
+            >
+              {configSaving ? 'Saving Changes...' : '💾 Save Form Settings'}
+            </button>
+          </div>
 
           {configSuccess && (
             <div style={{ padding: '0.75rem 1rem', background: '#d1fae5', color: '#065f46', marginBottom: '1.5rem', borderRadius: '4px', border: '1px solid #a7f3d0', fontWeight: 600 }}>
@@ -549,149 +653,293 @@ function AdminDashboardContent() {
             </div>
           )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '650px' }}>
-            <h3 style={{ fontSize: '1.1rem', color: '#1f2937', marginBottom: '0.25rem' }}>Default Form Sections</h3>
-
-            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb', cursor: 'pointer' }}>
-              <span style={{ fontWeight: 600, color: '#374151' }}>Tagline Field</span>
+          {/* Add New Custom Field Box */}
+          <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '8px', border: '1px dashed #cbd5e1', marginBottom: '2rem' }}>
+            <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#1e293b' }}>+ Add New Custom Field</h3>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <input 
-                type="checkbox" 
-                checked={formConfig.showTagline} 
-                onChange={e => setFormConfig({ ...formConfig, showTagline: e.target.checked })} 
-                style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                type="text" 
+                placeholder="Field Label (e.g. GitHub URL, Hobbies)" 
+                value={newFieldLabel} 
+                onChange={e => setNewFieldLabel(e.target.value)} 
+                className="form-control" 
+                style={{ flex: '2 1 200px' }}
               />
-            </label>
-
-            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb', cursor: 'pointer' }}>
-              <span style={{ fontWeight: 600, color: '#374151' }}>Profile Picture Upload</span>
-              <input 
-                type="checkbox" 
-                checked={formConfig.showProfilePicture} 
-                onChange={e => setFormConfig({ ...formConfig, showProfilePicture: e.target.checked })} 
-                style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-              />
-            </label>
-
-            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb', cursor: 'pointer' }}>
-              <span style={{ fontWeight: 600, color: '#374151' }}>Certifications Section</span>
-              <input 
-                type="checkbox" 
-                checked={formConfig.showCertifications} 
-                onChange={e => setFormConfig({ ...formConfig, showCertifications: e.target.checked })} 
-                style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-              />
-            </label>
-
-            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb', cursor: 'pointer' }}>
-              <span style={{ fontWeight: 600, color: '#374151' }}>Technical Expertise Section</span>
-              <input 
-                type="checkbox" 
-                checked={formConfig.showTechnicalExpertise} 
-                onChange={e => setFormConfig({ ...formConfig, showTechnicalExpertise: e.target.checked })} 
-                style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-              />
-            </label>
-
-            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb', cursor: 'pointer' }}>
-              <span style={{ fontWeight: 600, color: '#374151' }}>Internships Section</span>
-              <input 
-                type="checkbox" 
-                checked={formConfig.showInternships !== false} 
-                onChange={e => setFormConfig({ ...formConfig, showInternships: e.target.checked })} 
-                style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-              />
-            </label>
-
-            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb', cursor: 'pointer' }}>
-              <span style={{ fontWeight: 600, color: '#374151' }}>Projects Section</span>
-              <input 
-                type="checkbox" 
-                checked={formConfig.showProjects} 
-                onChange={e => setFormConfig({ ...formConfig, showProjects: e.target.checked })} 
-                style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-              />
-            </label>
-
-            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb', cursor: 'pointer' }}>
-              <span style={{ fontWeight: 600, color: '#374151' }}>Strengths Section</span>
-              <input 
-                type="checkbox" 
-                checked={formConfig.showStrengths} 
-                onChange={e => setFormConfig({ ...formConfig, showStrengths: e.target.checked })} 
-                style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-              />
-            </label>
-
-            <hr style={{ margin: '1.5rem 0 0.5rem 0', borderColor: '#e5e7eb' }} />
-            <h3 style={{ fontSize: '1.1rem', color: '#1f2937', marginBottom: '0.25rem' }}>Custom Additional Fields</h3>
-            
-            {/* Added Custom Fields List */}
-            {formConfig.customFields && formConfig.customFields.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {formConfig.customFields.map((field) => (
-                  <div key={field.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#f3f4f6', borderRadius: '6px', border: '1px solid #d1d5db' }}>
-                    <div>
-                      <span style={{ fontWeight: 600, color: '#111827' }}>{field.label}</span>
-                      <span style={{ marginLeft: '0.75rem', fontSize: '0.8rem', background: '#e5e7eb', padding: '2px 8px', borderRadius: '4px', color: '#4b5563' }}>Type: {field.type}</span>
-                    </div>
-                    <button 
-                      type="button" 
-                      onClick={() => removeCustomField(field.id)}
-                      className="btn btn-danger"
-                      style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem' }}
-                    >
-                      Remove Field
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p style={{ fontSize: '0.9rem', color: '#6b7280', margin: 0 }}>No custom fields added yet.</p>
-            )}
-
-            {/* Add New Custom Field Form */}
-            <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '6px', border: '1px dashed #cbd5e1', marginTop: '0.5rem' }}>
-              <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem', color: '#334155' }}>Add New Custom Field</h4>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <input 
-                  type="text" 
-                  placeholder="Field Label (e.g. GitHub URL, Hobbies)" 
-                  value={newFieldLabel} 
-                  onChange={e => setNewFieldLabel(e.target.value)} 
-                  className="form-control" 
-                  style={{ flex: 2, minWidth: '200px' }}
-                />
-                <select 
-                  value={newFieldType} 
-                  onChange={e => setNewFieldType(e.target.value as any)} 
-                  className="form-control"
-                  style={{ flex: 1, minWidth: '130px' }}
-                >
-                  <option value="text">Single Line Text</option>
-                  <option value="textarea">Paragraph Text</option>
-                  <option value="list">Bullet List</option>
-                </select>
-                <button 
-                  type="button" 
-                  onClick={addCustomField}
-                  className="btn btn-secondary"
-                  style={{ background: '#10b981', color: '#fff', fontWeight: 600 }}
-                >
-                  + Add Field
-                </button>
-              </div>
-            </div>
-
-            <div style={{ marginTop: '1.5rem' }}>
-              <button 
-                onClick={saveFormConfig} 
-                className="btn btn-primary" 
-                style={{ padding: '0.75rem 1.5rem', fontSize: '1rem', width: '100%', background: '#113666' }}
-                disabled={configSaving}
+              <select 
+                value={newFieldType} 
+                onChange={e => setNewFieldType(e.target.value as any)} 
+                className="form-control"
+                style={{ flex: '1 1 140px' }}
               >
-                {configSaving ? 'Saving Changes...' : 'Save Form Settings'}
+                <option value="text">Single Line Text</option>
+                <option value="textarea">Paragraph Text</option>
+                <option value="list">Bullet List</option>
+              </select>
+
+              <select 
+                value={newFieldSection} 
+                onChange={e => setNewFieldSection(e.target.value)} 
+                className="form-control"
+                style={{ flex: '1 1 180px' }}
+              >
+                {formConfig.sectionOrder.map(secId => (
+                  <option key={secId} value={secId}>Section: {SECTION_LABELS[secId] || secId}</option>
+                ))}
+              </select>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: '#334155', cursor: 'pointer', userSelect: 'none' }}>
+                <input 
+                  type="checkbox" 
+                  checked={newFieldRequired} 
+                  onChange={e => setNewFieldRequired(e.target.checked)} 
+                  style={{ width: '16px', height: '16px' }}
+                />
+                Required
+              </label>
+
+              <button 
+                type="button" 
+                onClick={addCustomField}
+                className="btn btn-secondary"
+                style={{ background: '#10b981', color: '#fff', fontWeight: 600, padding: '0.5rem 1rem' }}
+              >
+                + Add Field
               </button>
             </div>
+          </div>
+
+          {/* Form Sections & Moveable Fields Container */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {formConfig.sectionOrder.map((sectionId, sectionIndex) => {
+              const sectionTitle = SECTION_LABELS[sectionId] || sectionId;
+              const sectionCustomFields = (formConfig.customFields || []).filter(f => (f.section || 'additional') === sectionId);
+              const isDragOver = dragOverSection === sectionId;
+
+              return (
+                <div 
+                  key={sectionId}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    if (dragOverSection !== sectionId) {
+                      setDragOverSection(sectionId);
+                    }
+                  }}
+                  onDragLeave={() => {
+                    if (dragOverSection === sectionId) {
+                      setDragOverSection(null);
+                    }
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragOverSection(null);
+                    if (draggedFieldId) {
+                      moveFieldToSection(draggedFieldId, sectionId);
+                      setDraggedFieldId(null);
+                    }
+                  }}
+                  style={{
+                    border: isDragOver ? '2px dashed #2563eb' : '1px solid #e2e8f0',
+                    background: isDragOver ? '#eff6ff' : '#ffffff',
+                    borderRadius: '8px',
+                    padding: '1.25rem',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                  }}
+                >
+                  {/* Section Header */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>
+                        {sectionIndex + 1}. {sectionTitle}
+                      </span>
+                      {sectionId === 'certifications' && (
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer' }}>
+                          <input type="checkbox" checked={formConfig.showCertifications} onChange={e => setFormConfig({ ...formConfig, showCertifications: e.target.checked })} /> Enabled
+                        </label>
+                      )}
+                      {sectionId === 'technical' && (
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer' }}>
+                          <input type="checkbox" checked={formConfig.showTechnicalExpertise} onChange={e => setFormConfig({ ...formConfig, showTechnicalExpertise: e.target.checked })} /> Enabled
+                        </label>
+                      )}
+                      {sectionId === 'internships' && (
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer' }}>
+                          <input type="checkbox" checked={formConfig.showInternships !== false} onChange={e => setFormConfig({ ...formConfig, showInternships: e.target.checked })} /> Enabled
+                        </label>
+                      )}
+                      {sectionId === 'projects' && (
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer' }}>
+                          <input type="checkbox" checked={formConfig.showProjects} onChange={e => setFormConfig({ ...formConfig, showProjects: e.target.checked })} /> Enabled
+                        </label>
+                      )}
+                      {sectionId === 'strengths' && (
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer' }}>
+                          <input type="checkbox" checked={formConfig.showStrengths} onChange={e => setFormConfig({ ...formConfig, showStrengths: e.target.checked })} /> Enabled
+                        </label>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#64748b', marginRight: '0.5rem' }}>Section Position:</span>
+                      <button 
+                        type="button" 
+                        onClick={() => moveSectionOrder(sectionId, 'up')}
+                        disabled={sectionIndex === 0}
+                        style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '2px 8px', cursor: sectionIndex === 0 ? 'not-allowed' : 'pointer', opacity: sectionIndex === 0 ? 0.4 : 1 }}
+                        title="Move Section Up"
+                      >
+                        ▲
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={() => moveSectionOrder(sectionId, 'down')}
+                        disabled={sectionIndex === formConfig.sectionOrder.length - 1}
+                        style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '2px 8px', cursor: sectionIndex === formConfig.sectionOrder.length - 1 ? 'not-allowed' : 'pointer', opacity: sectionIndex === formConfig.sectionOrder.length - 1 ? 0.4 : 1 }}
+                        title="Move Section Down"
+                      >
+                        ▼
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Section Content & Fields */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    {/* Standard built-in fields preview */}
+                    {sectionId === 'personal' && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>📌 Full Name (Standard)</span>
+                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>📌 Register Number (Standard)</span>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
+                          <input type="checkbox" checked={formConfig.showTagline} onChange={e => setFormConfig({ ...formConfig, showTagline: e.target.checked })} /> Tagline Field
+                        </label>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
+                          <input type="checkbox" checked={formConfig.showProfilePicture} onChange={e => setFormConfig({ ...formConfig, showProfilePicture: e.target.checked })} /> Profile Picture Upload
+                        </label>
+                      </div>
+                    )}
+
+                    {sectionId === 'contact' && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>📌 Phone (Standard)</span>
+                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>📌 Email (Standard)</span>
+                      </div>
+                    )}
+
+                    {sectionId === 'education' && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>📌 Educational Qualifications List (Standard)</span>
+                      </div>
+                    )}
+
+                    {/* Moveable Custom Fields in this Section */}
+                    {sectionCustomFields.length > 0 ? (
+                      sectionCustomFields.map((field, fieldIdx) => (
+                        <div
+                          key={field.id}
+                          draggable={true}
+                          onDragStart={(e) => {
+                            setDraggedFieldId(field.id);
+                            e.dataTransfer.setData('text/plain', field.id);
+                          }}
+                          onDragEnd={() => {
+                            setDraggedFieldId(null);
+                            setDragOverSection(null);
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '0.75rem 1rem',
+                            background: draggedFieldId === field.id ? '#fef3c7' : '#ffffff',
+                            borderRadius: '6px',
+                            border: '1px solid #cbd5e1',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                            cursor: 'grab',
+                            flexWrap: 'wrap',
+                            gap: '0.75rem',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 220px' }}>
+                            <span 
+                              style={{ cursor: 'grab', fontSize: '1.2rem', color: '#94a3b8', userSelect: 'none' }}
+                              title="Press and drag to move field"
+                            >
+                              ⠿
+                            </span>
+                            <div>
+                              <span style={{ fontWeight: 600, color: '#0f172a' }}>{field.label}</span>
+                              {field.required && <span style={{ color: '#ef4444', marginLeft: '4px' }}>*</span>}
+                              <div style={{ display: 'flex', gap: '0.4rem', marginTop: '2px' }}>
+                                <span style={{ fontSize: '0.75rem', background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px', color: '#64748b' }}>Type: {field.type}</span>
+                                <span style={{ fontSize: '0.75rem', background: '#dbeafe', padding: '1px 6px', borderRadius: '4px', color: '#1e40af' }}>Moveable Field</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            {/* Move to another section dropdown */}
+                            <select
+                              value={field.section || sectionId}
+                              onChange={(e) => moveFieldToSection(field.id, e.target.value)}
+                              style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#fff' }}
+                              title="Move field to a different section"
+                            >
+                              {formConfig.sectionOrder.map(secKey => (
+                                <option key={secKey} value={secKey}>Move to: {SECTION_LABELS[secKey] || secKey}</option>
+                              ))}
+                            </select>
+
+                            {/* Move Up / Down Buttons */}
+                            <button
+                              type="button"
+                              onClick={() => moveCustomFieldInList(field.id, 'up')}
+                              disabled={fieldIdx === 0}
+                              style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '2px 6px', fontSize: '0.8rem', cursor: fieldIdx === 0 ? 'not-allowed' : 'pointer', opacity: fieldIdx === 0 ? 0.4 : 1 }}
+                              title="Move Up"
+                            >
+                              ▲
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => moveCustomFieldInList(field.id, 'down')}
+                              disabled={fieldIdx === sectionCustomFields.length - 1}
+                              style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '2px 6px', fontSize: '0.8rem', cursor: fieldIdx === sectionCustomFields.length - 1 ? 'not-allowed' : 'pointer', opacity: fieldIdx === sectionCustomFields.length - 1 ? 0.4 : 1 }}
+                              title="Move Down"
+                            >
+                              ▼
+                            </button>
+
+                            <button 
+                              type="button" 
+                              onClick={() => removeCustomField(field.id)}
+                              className="btn btn-danger"
+                              style={{ padding: '0.25rem 0.55rem', fontSize: '0.8rem' }}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ padding: '0.6rem 1rem', background: '#f8fafc', borderRadius: '6px', border: '1px dashed #cbd5e1', color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center' }}>
+                        Drag & Drop any custom field here or use "+ Add Field" above to place fields in {sectionTitle}.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ marginTop: '2rem' }}>
+            <button 
+              onClick={saveFormConfig} 
+              className="btn btn-primary" 
+              style={{ padding: '0.85rem 1.5rem', fontSize: '1.05rem', width: '100%', background: '#113666', fontWeight: 600 }}
+              disabled={configSaving}
+            >
+              {configSaving ? 'Saving Changes...' : '💾 Save Form Settings'}
+            </button>
           </div>
         </div>
       )}

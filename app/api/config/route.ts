@@ -12,6 +12,7 @@ const defaultConfig = {
   showInternships: true,
   showProjects: true,
   showStrengths: true,
+  sectionOrder: ['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths', 'additional'],
   customFields: [],
 };
 
