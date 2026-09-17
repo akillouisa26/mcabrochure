@@ -1107,118 +1107,101 @@ function AdminDashboardContent() {
 
                   {/* Section Fields (Uniform 2-row Cards matching Screenshot) */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {sectionFields.length === 0 ? (
-                      <div style={{ padding: '1rem', color: '#94a3b8', fontStyle: 'italic', fontSize: '0.9rem', textAlign: 'center', background: '#f8fafc', borderRadius: '6px', border: '1px dashed #e2e8f0' }}>
-                        No fields in this section. Drag a field here or select "Move to: {currentSectionTitle}" on any field card.
-                      </div>
-                    ) : (
-                      sectionFields.map((field, fieldIdx) => (
-                        <div
-                          key={field.id}
-                          draggable={true}
-                          onDragStart={(e) => {
-                            setDraggedFieldId(field.id);
-                            e.dataTransfer.setData('text/plain', field.id);
-                          }}
-                          onDragOver={(e) => {
-                            e.preventDefault();
-                            if (draggedFieldId && draggedFieldId !== field.id) {
-                              reorderFieldInSection(draggedFieldId, field.id, sectionId);
-                            }
-                          }}
-                          onDragEnd={() => {
-                            setDraggedFieldId(null);
-                            setDragOverSection(null);
-                          }}
-                          style={{
-                            border: '1px solid #cbd5e1',
-                            borderRadius: '8px',
-                            padding: '0.85rem 1rem',
-                            background: draggedFieldId === field.id ? '#fef3c7' : '#ffffff',
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-                            marginBottom: '0.25rem',
-                          }}
-                        >
-                          {/* Row 1: Drag handle + Full width editable label input */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.6rem' }}>
-                            <span 
-                              style={{ cursor: 'grab', fontSize: '1.2rem', color: '#94a3b8', userSelect: 'none' }}
-                              title="Press and drag to reorder within this section"
-                            >
-                              ⠿
-                            </span>
-                            <input 
-                              type="text"
-                              value={field.label}
-                              onChange={e => updateAnyFieldLabel(field.id, field.isCustom, e.target.value)}
-                              className="form-control"
-                              style={{ fontWeight: 600, fontSize: '0.95rem', width: '100%' }}
-                              placeholder="Field Label"
-                            />
-                          </div>
-
-                          {/* Row 2: Controls matching screenshot */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', fontSize: '0.85rem' }}>
-                            {/* Enabled Checkbox */}
-                            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer', userSelect: 'none' }}>
-                              <input 
-                                type="checkbox"
-                                checked={field.enabled}
-                                onChange={e => toggleAnyFieldEnabled(field.id, field.isCustom, field.stateKey, e.target.checked)}
-                                style={{ width: '16px', height: '16px' }}
-                              />
-                              Enabled
-                            </label>
-
-                            {/* Type selector */}
-                            <select
-                              value={field.type}
-                              onChange={e => updateAnyFieldType(field.id, field.isCustom, e.target.value)}
-                              style={{ padding: '0.3rem 0.6rem', fontSize: '0.825rem', borderRadius: '5px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#334155' }}
-                            >
-                              <option value="text">Single Line Text</option>
-                              <option value="textarea">Paragraph Text</option>
-                              <option value="list">Bullet List</option>
-                              <option value="file">File Upload</option>
-                              <option value="array">Array List</option>
-                            </select>
-
-                            {/* Move to another section dropdown */}
-                            <select
-                              value={sectionId}
-                              onChange={e => moveAnyFieldSection(field.id, field.isCustom, e.target.value)}
-                              style={{ padding: '0.3rem 0.6rem', fontSize: '0.825rem', borderRadius: '5px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#334155' }}
-                            >
-                              {formConfig.sectionOrder.map(secKey => (
-                                <option key={secKey} value={secKey}>
-                                  Move to: {formConfig.sectionTitles?.[secKey] || DEFAULT_SECTION_TITLES[secKey] || secKey}
-                                </option>
-                              ))}
-                            </select>
-
-                            {/* Required Checkbox */}
-                            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 500, color: '#334155', cursor: 'pointer', userSelect: 'none' }}>
-                              <input 
-                                type="checkbox"
-                                checked={field.required}
-                                onChange={e => toggleAnyFieldRequired(field.id, field.isCustom, e.target.checked)}
-                                style={{ width: '15px', height: '15px' }}
-                              />
-                              Required
-                            </label>
-
-                            {/* Red Remove Button */}
-                            <button 
-                              type="button" 
-                              onClick={() => removeAnyField(field.id, field.isCustom, field.stateKey)}
-                              style={{ background: '#ef4444', color: '#ffffff', border: 'none', borderRadius: '5px', padding: '0.35rem 0.85rem', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}
-                            >
-                              Remove
-                            </button>
-                          </div>
+                    {sectionFields.map((field, fieldIdx) => (
+                      <div
+                        key={field.id}
+                        draggable={true}
+                        onDragStart={(e) => {
+                          setDraggedFieldId(field.id);
+                          e.dataTransfer.setData('text/plain', field.id);
+                        }}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          if (draggedFieldId && draggedFieldId !== field.id) {
+                            reorderFieldInSection(draggedFieldId, field.id, sectionId);
+                          }
+                        }}
+                        onDragEnd={() => {
+                          setDraggedFieldId(null);
+                          setDragOverSection(null);
+                        }}
+                        style={{
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '8px',
+                          padding: '0.85rem 1rem',
+                          background: draggedFieldId === field.id ? '#fef3c7' : '#ffffff',
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                          marginBottom: '0.25rem',
+                        }}
+                      >
+                        {/* Row 1: Drag handle + Full width editable label input */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.6rem' }}>
+                          <span 
+                            style={{ cursor: 'grab', fontSize: '1.2rem', color: '#94a3b8', userSelect: 'none' }}
+                            title="Press and drag to reorder within this section"
+                          >
+                            ⠿
+                          </span>
+                          <input 
+                            type="text"
+                            value={field.label}
+                            onChange={e => updateAnyFieldLabel(field.id, field.isCustom, e.target.value)}
+                            className="form-control"
+                            style={{ fontWeight: 600, fontSize: '0.95rem', width: '100%' }}
+                            placeholder="Field Label"
+                          />
                         </div>
-                      ))
-                    )}
+
+                        {/* Row 2: Controls matching screenshot */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', fontSize: '0.85rem' }}>
+                          {/* Enabled Checkbox */}
+                          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer', userSelect: 'none' }}>
+                            <input 
+                              type="checkbox"
+                              checked={field.enabled}
+                              onChange={e => toggleAnyFieldEnabled(field.id, field.isCustom, field.stateKey, e.target.checked)}
+                              style={{ width: '16px', height: '16px' }}
+                            />
+                            Enabled
+                          </label>
+
+                          {/* Type selector */}
+                          <select
+                            value={field.type}
+                            onChange={e => updateAnyFieldType(field.id, field.isCustom, e.target.value)}
+                            style={{ padding: '0.3rem 0.6rem', fontSize: '0.825rem', borderRadius: '5px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#334155' }}
+                          >
+                            <option value="text">Single Line Text</option>
+                            <option value="textarea">Paragraph Text</option>
+                            <option value="list">Bullet List</option>
+                            <option value="file">File Upload</option>
+                            <option value="array">Array List</option>
+                          </select>
+
+                          {/* Move to another section dropdown */}
+                          <select
+                            value={sectionId}
+                            onChange={e => moveAnyFieldSection(field.id, field.isCustom, e.target.value)}
+                            style={{ padding: '0.3rem 0.6rem', fontSize: '0.825rem', borderRadius: '5px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#334155' }}
+                          >
+                            {formConfig.sectionOrder.map(secKey => (
+                              <option key={secKey} value={secKey}>
+                                Move to: {formConfig.sectionTitles?.[secKey] || DEFAULT_SECTION_TITLES[secKey] || secKey}
+                              </option>
+                            ))}
+                          </select>
+
+                          {/* Red Remove Button */}
+                          <button 
+                            type="button" 
+                            onClick={() => removeAnyField(field.id, field.isCustom, field.stateKey)}
+                            style={{ background: '#ef4444', color: '#ffffff', border: 'none', borderRadius: '5px', padding: '0.35rem 0.85rem', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               );
