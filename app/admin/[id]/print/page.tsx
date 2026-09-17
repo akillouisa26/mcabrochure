@@ -102,8 +102,11 @@ export default function SingleBrochurePrintPage() {
           <div className="left-col">
             <div className="section contact-section">
               <h3>Contact</h3>
-              <div className="contact-item"><span>Phone</span>: {renderWithLinks(student.contactPhone)}</div>
-              <div className="contact-item"><span>Email</span>: {renderWithLinks(student.contactEmail)}</div>
+              {student.contactPhone && <div className="contact-item"><span>Phone</span>: {renderWithLinks(student.contactPhone)}</div>}
+              {student.contactEmail && <div className="contact-item"><span>Email</span>: {renderWithLinks(student.contactEmail)}</div>}
+              {student.linkedIn && <div className="contact-item"><span>LinkedIn</span>: {renderWithLinks(student.linkedIn)}</div>}
+              {student.github && <div className="contact-item"><span>GitHub</span>: {renderWithLinks(student.github)}</div>}
+              {student.portfolio && <div className="contact-item"><span>Portfolio</span>: {renderWithLinks(student.portfolio)}</div>}
               {getCustomFieldsForSection('contact', student).map((cf, idx) => (
                 <div key={idx} className="contact-item">
                   <span>{cf.label}</span>: {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}

@@ -9,6 +9,9 @@ const initialFormState = {
   objective: '',
   contactPhone: '',
   contactEmail: '',
+  linkedIn: '',
+  github: '',
+  portfolio: '',
   educationalQualifications: [
     { qualification: '', institution: '', year: '', cgpa: '' },
     { qualification: '', institution: '', year: '', cgpa: '' },
@@ -28,6 +31,11 @@ export default function Home() {
     showTagline: true,
     showObjective: true,
     showProfilePicture: true,
+    showPhone: true,
+    showEmail: true,
+    showLinkedIn: true,
+    showGithub: true,
+    showPortfolio: true,
     showCertifications: true,
     showTechnicalExpertise: true,
     showInternships: true,
@@ -420,6 +428,9 @@ export default function Home() {
             (getSection('profilePicture', 'personal') === secId && formConfig.showProfilePicture !== false) ||
             (getSection('phone', 'contact') === secId && formConfig.showPhone !== false) ||
             (getSection('email', 'contact') === secId && formConfig.showEmail !== false) ||
+            (getSection('linkedIn', 'contact') === secId && formConfig.showLinkedIn !== false) ||
+            (getSection('github', 'contact') === secId && formConfig.showGithub !== false) ||
+            (getSection('portfolio', 'contact') === secId && formConfig.showPortfolio !== false) ||
             (getSection('education', 'education') === secId && formConfig.showEducation !== false) ||
             (getSection('certifications', 'certifications') === secId && formConfig.showCertifications !== false) ||
             (getSection('technical', 'technical') === secId && formConfig.showTechnicalExpertise !== false) ||
@@ -459,7 +470,7 @@ export default function Home() {
 
               {getSection('objective', 'personal') === secId && formConfig.showObjective !== false && (
                 <div className="form-group">
-                  <label>{getLabel('objective', 'Vision Statement / Objective')}</label>
+                  <label>{getLabel('objective', 'Vision Statement (2 Lines)')}</label>
                   <textarea className="form-control" rows={2} required={isReq('objective', false)} name="objective" value={formData.objective} onChange={handleChange} placeholder="To secure a challenging position in a reputable organization..." />
                 </div>
               )}
@@ -482,6 +493,27 @@ export default function Home() {
                 <div className="form-group">
                   <label>{getLabel('email', 'Email')}</label>
                   <input className="form-control" type="email" required={isReq('email', true)} name="contactEmail" value={formData.contactEmail} onChange={handleChange} placeholder="vimal@gmail.com" />
+                </div>
+              )}
+
+              {getSection('linkedIn', 'contact') === secId && formConfig.showLinkedIn !== false && (
+                <div className="form-group">
+                  <label>{getLabel('linkedIn', 'LinkedIn')}</label>
+                  <input className="form-control" type="url" required={isReq('linkedIn', false)} name="linkedIn" value={formData.linkedIn} onChange={handleChange} placeholder="https://linkedin.com/in/username" />
+                </div>
+              )}
+
+              {getSection('github', 'contact') === secId && formConfig.showGithub !== false && (
+                <div className="form-group">
+                  <label>{getLabel('github', 'GitHub')}</label>
+                  <input className="form-control" type="url" required={isReq('github', false)} name="github" value={formData.github} onChange={handleChange} placeholder="https://github.com/username" />
+                </div>
+              )}
+
+              {getSection('portfolio', 'contact') === secId && formConfig.showPortfolio !== false && (
+                <div className="form-group">
+                  <label>{getLabel('portfolio', 'Portfolio')}</label>
+                  <input className="form-control" type="url" required={isReq('portfolio', false)} name="portfolio" value={formData.portfolio} onChange={handleChange} placeholder="https://myportfolio.com" />
                 </div>
               )}
 

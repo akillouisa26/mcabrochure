@@ -94,10 +94,13 @@ function AdminDashboardContent() {
     name: 'Full Name',
     registerNumber: 'Register Number',
     tagline: 'Tagline',
-    objective: 'Vision Statement / Objective',
+    objective: 'Vision Statement (2 Lines)',
     profilePicture: 'Profile Picture',
     phone: 'Phone',
     email: 'Email',
+    linkedIn: 'LinkedIn',
+    github: 'GitHub',
+    portfolio: 'Portfolio',
     education: 'Educational Qualifications',
     certifications: 'Certifications',
     technical: 'Technical Expertise',
@@ -114,6 +117,9 @@ function AdminDashboardContent() {
     showProfilePicture: boolean;
     showPhone: boolean;
     showEmail: boolean;
+    showLinkedIn: boolean;
+    showGithub: boolean;
+    showPortfolio: boolean;
     showEducation: boolean;
     showCertifications: boolean;
     showTechnicalExpertise: boolean;
@@ -136,6 +142,9 @@ function AdminDashboardContent() {
     showProfilePicture: true,
     showPhone: true,
     showEmail: true,
+    showLinkedIn: true,
+    showGithub: true,
+    showPortfolio: true,
     showEducation: true,
     showCertifications: true,
     showTechnicalExpertise: true,
@@ -151,6 +160,9 @@ function AdminDashboardContent() {
       profilePicture: 'personal',
       phone: 'contact',
       email: 'contact',
+      linkedIn: 'contact',
+      github: 'contact',
+      portfolio: 'contact',
       education: 'education',
       certifications: 'certifications',
       technical: 'technical',
@@ -904,8 +916,11 @@ function AdminDashboardContent() {
                       <div className="left-col">
                         <div className="section contact-section">
                           <h3>Contact</h3>
-                          <div className="contact-item"><span>Phone</span>: {renderWithLinks(student.contactPhone)}</div>
-                          <div className="contact-item"><span>Email</span>: {renderWithLinks(student.contactEmail)}</div>
+                          {student.contactPhone && <div className="contact-item"><span>Phone</span>: {renderWithLinks(student.contactPhone)}</div>}
+                          {student.contactEmail && <div className="contact-item"><span>Email</span>: {renderWithLinks(student.contactEmail)}</div>}
+                          {student.linkedIn && <div className="contact-item"><span>LinkedIn</span>: {renderWithLinks(student.linkedIn)}</div>}
+                          {student.github && <div className="contact-item"><span>GitHub</span>: {renderWithLinks(student.github)}</div>}
+                          {student.portfolio && <div className="contact-item"><span>Portfolio</span>: {renderWithLinks(student.portfolio)}</div>}
                           {getCustomFieldsForSection('contact', student).map((cf, idx) => (
                             <div key={idx} className="contact-item">
                               <span>{cf.label}</span>: {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
@@ -1608,7 +1623,7 @@ function AdminDashboardContent() {
                     />
                   </div>
                   <div style={{ gridColumn: '1 / -1' }}>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Vision Statement / Objective</label>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Vision Statement (2 Lines)</label>
                     <textarea 
                       rows={2}
                       value={editStudentModal.objective || ''} 
@@ -1626,13 +1641,43 @@ function AdminDashboardContent() {
                       className="form-control" 
                     />
                   </div>
-                  <div style={{ gridColumn: '1 / -1' }}>
+                  <div>
                     <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Email Address</label>
                     <input 
                       type="email" 
                       value={editStudentModal.contactEmail || ''} 
                       onChange={e => setEditStudentModal({ ...editStudentModal, contactEmail: e.target.value })} 
                       className="form-control" 
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>LinkedIn</label>
+                    <input 
+                      type="url" 
+                      value={editStudentModal.linkedIn || ''} 
+                      onChange={e => setEditStudentModal({ ...editStudentModal, linkedIn: e.target.value })} 
+                      className="form-control" 
+                      placeholder="https://linkedin.com/in/username"
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>GitHub</label>
+                    <input 
+                      type="url" 
+                      value={editStudentModal.github || ''} 
+                      onChange={e => setEditStudentModal({ ...editStudentModal, github: e.target.value })} 
+                      className="form-control" 
+                      placeholder="https://github.com/username"
+                    />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Portfolio</label>
+                    <input 
+                      type="url" 
+                      value={editStudentModal.portfolio || ''} 
+                      onChange={e => setEditStudentModal({ ...editStudentModal, portfolio: e.target.value })} 
+                      className="form-control" 
+                      placeholder="https://myportfolio.com"
                     />
                   </div>
                 </div>
