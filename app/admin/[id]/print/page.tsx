@@ -65,7 +65,7 @@ export default function SingleBrochurePrintPage() {
       
       <div className="no-print" style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem' }}>
         <button className="btn btn-primary" onClick={() => window.print()} style={{ fontSize: '1.1rem', padding: '0.75rem 1.5rem', background: '#113666' }}>
-          🖨️ Download PDF / Print Brochure
+          Download PDF / Print Brochure
         </button>
         <button className="btn btn-secondary" onClick={() => window.location.href = '/admin'} style={{ fontSize: '1.1rem', padding: '0.75rem 1.5rem' }}>
           ← Back to Admin Panel

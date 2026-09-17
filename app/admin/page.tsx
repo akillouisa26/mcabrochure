@@ -1282,6 +1282,17 @@ function AdminDashboardContent() {
                             Enabled
                           </label>
 
+                          {/* Required Checkbox */}
+                          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer', userSelect: 'none' }}>
+                            <input 
+                              type="checkbox"
+                              checked={!!field.required}
+                              onChange={e => toggleAnyFieldRequired(field.id, field.isCustom, e.target.checked)}
+                              style={{ width: '16px', height: '16px' }}
+                            />
+                            Required
+                          </label>
+
                           {/* Type selector */}
                           <select
                             value={field.type}

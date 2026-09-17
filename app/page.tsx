@@ -158,30 +158,39 @@ export default function Home() {
     setSuccess('');
     setErrorMsg('');
 
-    // Form Field Validations (Only validate if field is enabled)
-    if (formConfig.showName !== false && !formData.name.trim()) {
+    const isFieldReq = (key: string, defaultReq: boolean = false) => {
+      if (formConfig.fieldRequired && key in formConfig.fieldRequired) {
+        return Boolean(formConfig.fieldRequired[key]);
+      }
+      return defaultReq;
+    };
+
+    // Form Field Validations (Only validate if field is enabled and marked Required in Form Settings)
+    if (formConfig.showName !== false && isFieldReq('name', true) && !formData.name.trim()) {
       setErrorMsg(`Please enter your ${formConfig.fieldLabels?.name || 'Full Name'}.`);
       return;
     }
-    if (formConfig.showRegisterNumber !== false && !formData.registerNumber.trim()) {
+    if (formConfig.showRegisterNumber !== false && isFieldReq('registerNumber', true) && !formData.registerNumber.trim()) {
       setErrorMsg(`Please enter your ${formConfig.fieldLabels?.registerNumber || 'Register Number'}.`);
       return;
     }
-    if (formConfig.showTagline !== false && !formData.tagline.trim()) {
+    if (formConfig.showTagline !== false && isFieldReq('tagline', false) && !formData.tagline.trim()) {
       setErrorMsg(`Please enter your ${formConfig.fieldLabels?.tagline || 'Tagline'}.`);
       return;
     }
-    if (formConfig.showPhone !== false && !/^\d{10}$/.test(formData.contactPhone)) {
-      setErrorMsg(`Please enter a valid 10-digit ${formConfig.fieldLabels?.phone || 'Phone number'}.`);
-      return;
+    if (formConfig.showPhone !== false && isFieldReq('phone', true)) {
+      if (!/^\d{10}$/.test(formData.contactPhone)) {
+        setErrorMsg(`Please enter a valid 10-digit ${formConfig.fieldLabels?.phone || 'Phone number'}.`);
+        return;
+      }
     }
-    if (formConfig.showEmail !== false && !formData.contactEmail.trim()) {
+    if (formConfig.showEmail !== false && isFieldReq('email', true) && !formData.contactEmail.trim()) {
       setErrorMsg(`Please enter a valid ${formConfig.fieldLabels?.email || 'Email address'}.`);
       return;
     }
 
-    // Validate Education Items if enabled
-    if (formConfig.showEducation !== false) {
+    // Validate Education Items if enabled and required
+    if (formConfig.showEducation !== false && isFieldReq('education', true)) {
       if (!formData.educationalQualifications || formData.educationalQualifications.length === 0) {
         setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.education || 'Educational Qualification'} entry.`);
         return;
@@ -194,8 +203,8 @@ export default function Home() {
       }
     }
 
-    // Validate Certifications if enabled
-    if (formConfig.showCertifications !== false) {
+    // Validate Certifications if enabled and required
+    if (formConfig.showCertifications !== false && isFieldReq('certifications', false)) {
       if (!formData.certifications || formData.certifications.length === 0) {
         setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.certifications || 'Certification'}.`);
         return;
@@ -208,8 +217,8 @@ export default function Home() {
       }
     }
 
-    // Validate Technical Expertise if enabled
-    if (formConfig.showTechnicalExpertise !== false) {
+    // Validate Technical Expertise if enabled and required
+    if (formConfig.showTechnicalExpertise !== false && isFieldReq('technical', false)) {
       if (!formData.technicalExpertise || formData.technicalExpertise.length === 0) {
         setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.technical || 'Technical Expertise'} item.`);
         return;
@@ -222,8 +231,8 @@ export default function Home() {
       }
     }
 
-    // Validate Internships if enabled
-    if (formConfig.showInternships !== false) {
+    // Validate Internships if enabled and required
+    if (formConfig.showInternships !== false && isFieldReq('internships', false)) {
       if (!formData.internships || formData.internships.length === 0) {
         setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.internships || 'Internship'} entry.`);
         return;
@@ -236,8 +245,8 @@ export default function Home() {
       }
     }
 
-    // Validate Projects if enabled
-    if (formConfig.showProjects !== false) {
+    // Validate Projects if enabled and required
+    if (formConfig.showProjects !== false && isFieldReq('projects', false)) {
       if (!formData.projects || formData.projects.length === 0) {
         setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.projects || 'Project'} entry.`);
         return;
@@ -250,8 +259,8 @@ export default function Home() {
       }
     }
 
-    // Validate Strengths if enabled
-    if (formConfig.showStrengths !== false) {
+    // Validate Strengths if enabled and required
+    if (formConfig.showStrengths !== false && isFieldReq('strengths', false)) {
       if (!formData.strengths || formData.strengths.length === 0) {
         setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.strengths || 'Strength'} entry.`);
         return;
@@ -264,8 +273,8 @@ export default function Home() {
       }
     }
 
-    // Validate Profile Picture if enabled
-    if (formConfig.showProfilePicture !== false && !formData.profileImageBase64) {
+    // Validate Profile Picture if enabled and required
+    if (formConfig.showProfilePicture !== false && isFieldReq('profilePicture', false) && !formData.profileImageBase64) {
       setErrorMsg(`Please upload your ${formConfig.fieldLabels?.profilePicture || 'Profile Picture'} before submitting.`);
       return;
     }
