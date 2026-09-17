@@ -25,9 +25,19 @@ function AdminDashboardContent() {
 
   const handleOpenEditModal = (student: any) => {
     setEditError('');
+    let parsedEdu = parseEducationList(student.educationalQualifications);
+    if (!parsedEdu || parsedEdu.length === 0) {
+      parsedEdu = [
+        { qualification: '', institution: '', year: '', cgpa: '' },
+        { qualification: '', institution: '', year: '', cgpa: '' },
+      ];
+    } else if (parsedEdu.length === 1) {
+      parsedEdu.push({ qualification: '', institution: '', year: '', cgpa: '' });
+    }
+
     setEditStudentModal({
       ...student,
-      educationalQualifications: parseEducationList(student.educationalQualifications),
+      educationalQualifications: parsedEdu,
       certifications: parseStringList(student.certifications),
       technicalExpertise: parseStringList(student.technicalExpertise),
       internships: parseInternshipsList(student.internships),
@@ -1581,49 +1591,93 @@ function AdminDashboardContent() {
 
               {/* Educational Qualifications */}
               <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <h3 style={{ margin: 0, fontSize: '1rem', color: '#1e293b' }}>Educational Qualifications</h3>
-                  <button 
-                    type="button" 
-                    onClick={() => setEditStudentModal({
-                      ...editStudentModal,
-                      educationalQualifications: [...(editStudentModal.educationalQualifications || []), { qualification: '', institution: '', year: '', cgpa: '' }]
-                    })}
-                    className="btn btn-secondary" 
-                    style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem', background: '#3b82f6', color: '#fff' }}
-                  >
-                    + Add Row
-                  </button>
-                </div>
-                {(editStudentModal.educationalQualifications || []).map((edu: any, idx: number) => (
-                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.5fr 1fr 0.8fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
-                    <input type="text" placeholder="Degree (e.g. MCA)" value={edu.qualification || ''} onChange={e => {
-                      const updated = [...editStudentModal.educationalQualifications];
-                      updated[idx].qualification = e.target.value;
-                      setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
-                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
-                    <input type="text" placeholder="Institution" value={edu.institution || ''} onChange={e => {
-                      const updated = [...editStudentModal.educationalQualifications];
-                      updated[idx].institution = e.target.value;
-                      setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
-                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
-                    <input type="text" placeholder="Year (2022-2025)" value={edu.year || ''} onChange={e => {
-                      const updated = [...editStudentModal.educationalQualifications];
-                      updated[idx].year = e.target.value;
-                      setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
-                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
-                    <input type="text" placeholder="CGPA" value={edu.cgpa || ''} onChange={e => {
-                      const updated = [...editStudentModal.educationalQualifications];
-                      updated[idx].cgpa = e.target.value;
-                      setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
-                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
-                    <button type="button" onClick={() => {
-                      const updated = [...editStudentModal.educationalQualifications];
-                      updated.splice(idx, 1);
-                      setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
-                    }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+                <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#1e293b' }}>Educational Qualifications</h3>
+                
+                {/* Under Graduate */}
+                <div style={{ marginBottom: '0.85rem', padding: '0.75rem', background: '#ffffff', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
+                  <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#113666', fontWeight: 700 }}>Under Graduate</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.5fr 1fr 0.8fr', gap: '0.5rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Qualification</label>
+                      <input type="text" placeholder="e.g. BCA, B.Sc" value={editStudentModal.educationalQualifications?.[0]?.qualification || ''} onChange={e => {
+                        const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
+                        if (!updated[0]) updated[0] = { qualification: '', institution: '', year: '', cgpa: '' };
+                        updated[0].qualification = e.target.value;
+                        setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                      }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Institution</label>
+                      <input type="text" placeholder="Institution" value={editStudentModal.educationalQualifications?.[0]?.institution || ''} onChange={e => {
+                        const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
+                        if (!updated[0]) updated[0] = { qualification: '', institution: '', year: '', cgpa: '' };
+                        updated[0].institution = e.target.value;
+                        setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                      }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Year</label>
+                      <input type="text" placeholder="2022-2025" value={editStudentModal.educationalQualifications?.[0]?.year || ''} onChange={e => {
+                        const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
+                        if (!updated[0]) updated[0] = { qualification: '', institution: '', year: '', cgpa: '' };
+                        updated[0].year = e.target.value;
+                        setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                      }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>CGPA</label>
+                      <input type="text" placeholder="CGPA" value={editStudentModal.educationalQualifications?.[0]?.cgpa || ''} onChange={e => {
+                        const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
+                        if (!updated[0]) updated[0] = { qualification: '', institution: '', year: '', cgpa: '' };
+                        updated[0].cgpa = e.target.value;
+                        setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                      }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    </div>
                   </div>
-                ))}
+                </div>
+
+                {/* Post Graduate */}
+                <div style={{ padding: '0.75rem', background: '#ffffff', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
+                  <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#113666', fontWeight: 700 }}>Post Graduate</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.5fr 1fr 0.8fr', gap: '0.5rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Qualification</label>
+                      <input type="text" placeholder="e.g. MCA" value={editStudentModal.educationalQualifications?.[1]?.qualification || ''} onChange={e => {
+                        const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
+                        if (!updated[1]) updated[1] = { qualification: '', institution: '', year: '', cgpa: '' };
+                        updated[1].qualification = e.target.value;
+                        setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                      }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Institution</label>
+                      <input type="text" placeholder="Institution" value={editStudentModal.educationalQualifications?.[1]?.institution || ''} onChange={e => {
+                        const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
+                        if (!updated[1]) updated[1] = { qualification: '', institution: '', year: '', cgpa: '' };
+                        updated[1].institution = e.target.value;
+                        setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                      }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Year</label>
+                      <input type="text" placeholder="2025-2027" value={editStudentModal.educationalQualifications?.[1]?.year || ''} onChange={e => {
+                        const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
+                        if (!updated[1]) updated[1] = { qualification: '', institution: '', year: '', cgpa: '' };
+                        updated[1].year = e.target.value;
+                        setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                      }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>CGPA</label>
+                      <input type="text" placeholder="CGPA" value={editStudentModal.educationalQualifications?.[1]?.cgpa || ''} onChange={e => {
+                        const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
+                        if (!updated[1]) updated[1] = { qualification: '', institution: '', year: '', cgpa: '' };
+                        updated[1].cgpa = e.target.value;
+                        setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                      }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Certifications */}
@@ -1643,17 +1697,20 @@ function AdminDashboardContent() {
                   </button>
                 </div>
                 {(editStudentModal.certifications || []).map((cert: string, idx: number) => (
-                  <div key={idx} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
-                    <input type="text" placeholder="Certification Name" value={cert} onChange={e => {
-                      const updated = [...editStudentModal.certifications];
-                      updated[idx] = e.target.value;
-                      setEditStudentModal({ ...editStudentModal, certifications: updated });
-                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem', flex: 1 }} />
-                    <button type="button" onClick={() => {
-                      const updated = [...editStudentModal.certifications];
-                      updated.splice(idx, 1);
-                      setEditStudentModal({ ...editStudentModal, certifications: updated });
-                    }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+                  <div key={idx} style={{ marginBottom: '0.5rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Certification Name</label>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <input type="text" placeholder="Certification Name" value={cert} onChange={e => {
+                        const updated = [...editStudentModal.certifications];
+                        updated[idx] = e.target.value;
+                        setEditStudentModal({ ...editStudentModal, certifications: updated });
+                      }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem', flex: 1 }} />
+                      <button type="button" onClick={() => {
+                        const updated = [...editStudentModal.certifications];
+                        updated.splice(idx, 1);
+                        setEditStudentModal({ ...editStudentModal, certifications: updated });
+                      }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1675,17 +1732,20 @@ function AdminDashboardContent() {
                   </button>
                 </div>
                 {(editStudentModal.technicalExpertise || []).map((tech: string, idx: number) => (
-                  <div key={idx} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
-                    <input type="text" placeholder="Skill / Technology (e.g. Python)" value={tech} onChange={e => {
-                      const updated = [...editStudentModal.technicalExpertise];
-                      updated[idx] = e.target.value;
-                      setEditStudentModal({ ...editStudentModal, technicalExpertise: updated });
-                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem', flex: 1 }} />
-                    <button type="button" onClick={() => {
-                      const updated = [...editStudentModal.technicalExpertise];
-                      updated.splice(idx, 1);
-                      setEditStudentModal({ ...editStudentModal, technicalExpertise: updated });
-                    }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+                  <div key={idx} style={{ marginBottom: '0.5rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Skill / Technology</label>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <input type="text" placeholder="Skill / Technology (e.g. Python)" value={tech} onChange={e => {
+                        const updated = [...editStudentModal.technicalExpertise];
+                        updated[idx] = e.target.value;
+                        setEditStudentModal({ ...editStudentModal, technicalExpertise: updated });
+                      }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem', flex: 1 }} />
+                      <button type="button" onClick={() => {
+                        const updated = [...editStudentModal.technicalExpertise];
+                        updated.splice(idx, 1);
+                        setEditStudentModal({ ...editStudentModal, technicalExpertise: updated });
+                      }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1707,27 +1767,38 @@ function AdminDashboardContent() {
                   </button>
                 </div>
                 {(editStudentModal.internships || []).map((i: any, idx: number) => (
-                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1.2fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
-                    <input type="text" placeholder="Company Name" value={i.company || ''} onChange={e => {
-                      const updated = [...editStudentModal.internships];
-                      updated[idx].company = e.target.value;
-                      setEditStudentModal({ ...editStudentModal, internships: updated });
-                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
-                    <input type="text" placeholder="Role (e.g. Web Dev Intern)" value={i.role || ''} onChange={e => {
-                      const updated = [...editStudentModal.internships];
-                      updated[idx].role = e.target.value;
-                      setEditStudentModal({ ...editStudentModal, internships: updated });
-                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
-                    <input type="text" placeholder="Tools Used" value={i.duration || ''} onChange={e => {
-                      const updated = [...editStudentModal.internships];
-                      updated[idx].duration = e.target.value;
-                      setEditStudentModal({ ...editStudentModal, internships: updated });
-                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
-                    <button type="button" onClick={() => {
-                      const updated = [...editStudentModal.internships];
-                      updated.splice(idx, 1);
-                      setEditStudentModal({ ...editStudentModal, internships: updated });
-                    }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+                  <div key={idx} style={{ marginBottom: '0.75rem', border: '1px solid #cbd5e1', padding: '0.75rem', borderRadius: '4px', background: '#ffffff' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1.2fr auto', gap: '0.5rem', alignItems: 'center' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Company Name</label>
+                        <input type="text" placeholder="Company Name" value={i.company || ''} onChange={e => {
+                          const updated = [...editStudentModal.internships];
+                          updated[idx].company = e.target.value;
+                          setEditStudentModal({ ...editStudentModal, internships: updated });
+                        }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Role</label>
+                        <input type="text" placeholder="Role (e.g. Web Dev Intern)" value={i.role || ''} onChange={e => {
+                          const updated = [...editStudentModal.internships];
+                          updated[idx].role = e.target.value;
+                          setEditStudentModal({ ...editStudentModal, internships: updated });
+                        }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Duration</label>
+                        <input type="text" placeholder="Duration (e.g. 3 Months)" value={i.duration || ''} onChange={e => {
+                          const updated = [...editStudentModal.internships];
+                          updated[idx].duration = e.target.value;
+                          setEditStudentModal({ ...editStudentModal, internships: updated });
+                        }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                      </div>
+                      <button type="button" onClick={() => {
+                        const updated = [...editStudentModal.internships];
+                        updated.splice(idx, 1);
+                        setEditStudentModal({ ...editStudentModal, internships: updated });
+                      }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem', marginTop: '1rem' }}>✕</button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1749,30 +1820,38 @@ function AdminDashboardContent() {
                   </button>
                 </div>
                 {(editStudentModal.projects || []).map((p: any, idx: number) => (
-                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
-                    <input type="text" placeholder="Project Title" value={p.title || (typeof p === 'string' ? p : '')} onChange={e => {
-                      const updated = [...editStudentModal.projects];
-                      if (typeof updated[idx] === 'string') {
-                        updated[idx] = { title: e.target.value, toolsUsed: '' };
-                      } else {
-                        updated[idx].title = e.target.value;
-                      }
-                      setEditStudentModal({ ...editStudentModal, projects: updated });
-                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
-                    <input type="text" placeholder="Tools Used (Optional)" value={p.toolsUsed || ''} onChange={e => {
-                      const updated = [...editStudentModal.projects];
-                      if (typeof updated[idx] === 'string') {
-                        updated[idx] = { title: updated[idx], toolsUsed: e.target.value };
-                      } else {
-                        updated[idx].toolsUsed = e.target.value;
-                      }
-                      setEditStudentModal({ ...editStudentModal, projects: updated });
-                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
-                    <button type="button" onClick={() => {
-                      const updated = [...editStudentModal.projects];
-                      updated.splice(idx, 1);
-                      setEditStudentModal({ ...editStudentModal, projects: updated });
-                    }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+                  <div key={idx} style={{ marginBottom: '0.75rem', border: '1px solid #cbd5e1', padding: '0.75rem', borderRadius: '4px', background: '#ffffff' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr auto', gap: '0.5rem', alignItems: 'center' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Project Title</label>
+                        <input type="text" placeholder="Project Title" value={p.title || (typeof p === 'string' ? p : '')} onChange={e => {
+                          const updated = [...editStudentModal.projects];
+                          if (typeof updated[idx] === 'string') {
+                            updated[idx] = { title: e.target.value, toolsUsed: '' };
+                          } else {
+                            updated[idx].title = e.target.value;
+                          }
+                          setEditStudentModal({ ...editStudentModal, projects: updated });
+                        }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Tools Used</label>
+                        <input type="text" placeholder="Tools Used" value={p.toolsUsed || ''} onChange={e => {
+                          const updated = [...editStudentModal.projects];
+                          if (typeof updated[idx] === 'string') {
+                            updated[idx] = { title: updated[idx], toolsUsed: e.target.value };
+                          } else {
+                            updated[idx].toolsUsed = e.target.value;
+                          }
+                          setEditStudentModal({ ...editStudentModal, projects: updated });
+                        }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                      </div>
+                      <button type="button" onClick={() => {
+                        const updated = [...editStudentModal.projects];
+                        updated.splice(idx, 1);
+                        setEditStudentModal({ ...editStudentModal, projects: updated });
+                      }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem', marginTop: '1rem' }}>✕</button>
+                    </div>
                   </div>
                 ))}
               </div>

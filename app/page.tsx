@@ -8,7 +8,10 @@ const initialFormState = {
   tagline: '',
   contactPhone: '',
   contactEmail: '',
-  educationalQualifications: [{ qualification: '', institution: '', year: '', cgpa: '' }],
+  educationalQualifications: [
+    { qualification: '', institution: '', year: '', cgpa: '' },
+    { qualification: '', institution: '', year: '', cgpa: '' },
+  ],
   certifications: [''],
   technicalExpertise: [''],
   internships: [{ company: '', role: '', duration: '' }],
@@ -191,13 +194,15 @@ export default function Home() {
 
     // Validate Education Items if enabled and required
     if (formConfig.showEducation !== false && isFieldReq('education', true)) {
-      if (!formData.educationalQualifications || formData.educationalQualifications.length === 0) {
-        setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.education || 'Educational Qualification'} entry.`);
+      const ug = formData.educationalQualifications[0];
+      if (!ug || !ug.qualification.trim() || !ug.institution.trim() || !ug.year.trim() || !ug.cgpa.trim()) {
+        setErrorMsg('Please complete all Under Graduate details (Qualification, Institution, Year, CGPA).');
         return;
       }
-      for (const edu of formData.educationalQualifications) {
-        if (!edu.qualification.trim() || !edu.institution.trim() || !edu.year.trim() || !edu.cgpa.trim()) {
-          setErrorMsg('Please complete all Educational Qualification details (Qualification, Institution, Year, CGPA).');
+      const pg = formData.educationalQualifications[1];
+      if (pg && (pg.qualification.trim() || pg.institution.trim() || pg.year.trim() || pg.cgpa.trim())) {
+        if (!pg.qualification.trim() || !pg.institution.trim() || !pg.year.trim() || !pg.cgpa.trim()) {
+          setErrorMsg('Please complete all Post Graduate details (Qualification, Institution, Year, CGPA).');
           return;
         }
       }
@@ -465,26 +470,66 @@ export default function Home() {
               )}
 
               {getSection('education', 'education') === secId && formConfig.showEducation !== false && (
-                <div style={{ marginBottom: '1.5rem' }}>
-                  {formData.educationalQualifications.map((edu, idx) => (
-                    <div key={idx} className="array-item">
-                      <input className="form-control" required={isReq('education', true)} placeholder="Qualification (e.g. MCA)" value={edu.qualification} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'qualification')} />
-                      <input className="form-control" required={isReq('education', true)} placeholder="Institution" value={edu.institution} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'institution')} />
-                      <input className="form-control" required={isReq('education', true)} placeholder="Year (e.g. 2025-2027)" value={edu.year} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'year')} />
-                      <input className="form-control" required={isReq('education', true)} placeholder="CGPA" value={edu.cgpa} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'cgpa')} />
-                      <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('educationalQualifications', idx)}>X</button>
+                <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  {/* Under Graduate Set */}
+                  <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                    <h4 style={{ margin: '0 0 0.85rem 0', fontSize: '1rem', color: '#113666', fontWeight: 700 }}>Under Graduate</h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.85rem' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Qualification</label>
+                        <input className="form-control" required={isReq('education', true)} placeholder="Qualification (e.g. BCA, B.Sc)" value={formData.educationalQualifications[0]?.qualification || ''} onChange={e => handleArrayChange('educationalQualifications', 0, e.target.value, 'qualification')} />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Institution</label>
+                        <input className="form-control" required={isReq('education', true)} placeholder="Institution" value={formData.educationalQualifications[0]?.institution || ''} onChange={e => handleArrayChange('educationalQualifications', 0, e.target.value, 'institution')} />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Year</label>
+                        <input className="form-control" required={isReq('education', true)} placeholder="Year (e.g. 2022-2025)" value={formData.educationalQualifications[0]?.year || ''} onChange={e => handleArrayChange('educationalQualifications', 0, e.target.value, 'year')} />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>CGPA</label>
+                        <input className="form-control" required={isReq('education', true)} placeholder="CGPA" value={formData.educationalQualifications[0]?.cgpa || ''} onChange={e => handleArrayChange('educationalQualifications', 0, e.target.value, 'cgpa')} />
+                      </div>
                     </div>
-                  ))}
-                  <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('educationalQualifications', { qualification: '', institution: '', year: '', cgpa: ''})}>+ Add Education</button>
+                  </div>
+
+                  {/* Post Graduate Set */}
+                  <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                    <h4 style={{ margin: '0 0 0.85rem 0', fontSize: '1rem', color: '#113666', fontWeight: 700 }}>Post Graduate</h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.85rem' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Qualification</label>
+                        <input className="form-control" placeholder="Qualification (e.g. MCA)" value={formData.educationalQualifications[1]?.qualification || ''} onChange={e => handleArrayChange('educationalQualifications', 1, e.target.value, 'qualification')} />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Institution</label>
+                        <input className="form-control" placeholder="Institution" value={formData.educationalQualifications[1]?.institution || ''} onChange={e => handleArrayChange('educationalQualifications', 1, e.target.value, 'institution')} />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Year</label>
+                        <input className="form-control" placeholder="Year (e.g. 2025-2027)" value={formData.educationalQualifications[1]?.year || ''} onChange={e => handleArrayChange('educationalQualifications', 1, e.target.value, 'year')} />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>CGPA</label>
+                        <input className="form-control" placeholder="CGPA" value={formData.educationalQualifications[1]?.cgpa || ''} onChange={e => handleArrayChange('educationalQualifications', 1, e.target.value, 'cgpa')} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
               {getSection('certifications', 'certifications') === secId && formConfig.showCertifications !== false && (
                 <div style={{ marginBottom: '1.5rem' }}>
                   {formData.certifications.map((cert, idx) => (
-                    <div key={idx} className="array-item">
-                      <input className="form-control" required={isReq('certifications', false)} placeholder="Certification Name" value={cert} onChange={e => handleArrayChange('certifications', idx, e.target.value)} />
-                      <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('certifications', idx)}>X</button>
+                    <div key={idx} style={{ marginBottom: '0.85rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Certification Name</label>
+                      <div className="array-item">
+                        <input className="form-control" required={isReq('certifications', false)} placeholder="Certification Name" value={cert} onChange={e => handleArrayChange('certifications', idx, e.target.value)} />
+                        {formData.certifications.length > 1 && (
+                          <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('certifications', idx)}>X</button>
+                        )}
+                      </div>
                     </div>
                   ))}
                   <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('certifications', '')}>+ Add Certification</button>
@@ -494,9 +539,14 @@ export default function Home() {
               {getSection('technical', 'technical') === secId && formConfig.showTechnicalExpertise !== false && (
                 <div style={{ marginBottom: '1.5rem' }}>
                   {formData.technicalExpertise.map((tech, idx) => (
-                    <div key={idx} className="array-item">
-                      <input className="form-control" required={isReq('technical', false)} placeholder="Skill/Expertise" value={tech} onChange={e => handleArrayChange('technicalExpertise', idx, e.target.value)} />
-                      <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('technicalExpertise', idx)}>X</button>
+                    <div key={idx} style={{ marginBottom: '0.85rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Skill / Expertise</label>
+                      <div className="array-item">
+                        <input className="form-control" required={isReq('technical', false)} placeholder="Skill/Expertise (e.g. React, Python)" value={tech} onChange={e => handleArrayChange('technicalExpertise', idx, e.target.value)} />
+                        {formData.technicalExpertise.length > 1 && (
+                          <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('technicalExpertise', idx)}>X</button>
+                        )}
+                      </div>
                     </div>
                   ))}
                   <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('technicalExpertise', '')}>+ Add Expertise</button>
@@ -506,11 +556,22 @@ export default function Home() {
               {getSection('internships', 'internships') === secId && formConfig.showInternships !== false && (
                 <div style={{ marginBottom: '1.5rem' }}>
                   {formData.internships?.map((intern, idx) => (
-                    <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #ddd', padding: '1rem', borderRadius: '4px' }}>
-                      <input className="form-control" required={isReq('internships', false)} placeholder="Company Name" value={intern.company} onChange={e => handleArrayChange('internships', idx, e.target.value, 'company')} style={{marginBottom:'0.5rem'}} />
-                      <input className="form-control" required={isReq('internships', false)} placeholder="Role (e.g. Web Developer Intern)" value={intern.role} onChange={e => handleArrayChange('internships', idx, e.target.value, 'role')} style={{marginBottom:'0.5rem'}} />
-                      <input className="form-control" required={isReq('internships', false)} placeholder="Tools Used (e.g. React, Node.js)" value={intern.duration} onChange={e => handleArrayChange('internships', idx, e.target.value, 'duration')} style={{marginBottom:'0.5rem'}} />
-                      <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('internships', idx)}>Remove Internship</button>
+                    <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #cbd5e1', padding: '1.25rem', borderRadius: '6px', background: '#f8fafc' }}>
+                      <div style={{ marginBottom: '0.75rem' }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Company Name</label>
+                        <input className="form-control" required={isReq('internships', false)} placeholder="Company Name" value={intern.company} onChange={e => handleArrayChange('internships', idx, e.target.value, 'company')} />
+                      </div>
+                      <div style={{ marginBottom: '0.75rem' }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Role</label>
+                        <input className="form-control" required={isReq('internships', false)} placeholder="Role (e.g. Web Developer Intern)" value={intern.role} onChange={e => handleArrayChange('internships', idx, e.target.value, 'role')} />
+                      </div>
+                      <div style={{ marginBottom: '0.75rem' }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Duration</label>
+                        <input className="form-control" required={isReq('internships', false)} placeholder="Duration (e.g. 3 Months)" value={intern.duration} onChange={e => handleArrayChange('internships', idx, e.target.value, 'duration')} />
+                      </div>
+                      {formData.internships.length > 1 && (
+                        <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('internships', idx)}>Remove Internship</button>
+                      )}
                     </div>
                   ))}
                   <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('internships', { company: '', role: '', duration: ''})}>+ Add Internship</button>
@@ -520,10 +581,18 @@ export default function Home() {
               {getSection('projects', 'projects') === secId && formConfig.showProjects !== false && (
                 <div style={{ marginBottom: '1.5rem' }}>
                   {formData.projects?.map((proj, idx) => (
-                    <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #ddd', padding: '1rem', borderRadius: '4px' }}>
-                      <input className="form-control" required={isReq('projects', false)} placeholder="Project Name" value={proj.title} onChange={e => handleArrayChange('projects', idx, e.target.value, 'title')} style={{marginBottom:'0.5rem'}} />
-                      <input className="form-control" required={isReq('projects', false)} placeholder="Tools Used (e.g. React, Node.js, Firebase)" value={proj.toolsUsed} onChange={e => handleArrayChange('projects', idx, e.target.value, 'toolsUsed')} style={{marginBottom:'0.5rem'}} />
-                      <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('projects', idx)}>Remove Project</button>
+                    <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #cbd5e1', padding: '1.25rem', borderRadius: '6px', background: '#f8fafc' }}>
+                      <div style={{ marginBottom: '0.75rem' }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Project Name</label>
+                        <input className="form-control" required={isReq('projects', false)} placeholder="Project Name" value={proj.title} onChange={e => handleArrayChange('projects', idx, e.target.value, 'title')} />
+                      </div>
+                      <div style={{ marginBottom: '0.75rem' }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Tools Used</label>
+                        <input className="form-control" required={isReq('projects', false)} placeholder="Tools Used (e.g. React, Node.js, Firebase)" value={proj.toolsUsed} onChange={e => handleArrayChange('projects', idx, e.target.value, 'toolsUsed')} />
+                      </div>
+                      {formData.projects.length > 1 && (
+                        <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('projects', idx)}>Remove Project</button>
+                      )}
                     </div>
                   ))}
                   <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('projects', { title: '', toolsUsed: ''})}>+ Add Project</button>
@@ -533,9 +602,14 @@ export default function Home() {
               {getSection('strengths', 'strengths') === secId && formConfig.showStrengths !== false && (
                 <div style={{ marginBottom: '1.5rem' }}>
                   {formData.strengths.map((strength, idx) => (
-                    <div key={idx} className="array-item">
-                      <input className="form-control" required={isReq('strengths', false)} placeholder="Strength details" value={strength} onChange={e => handleArrayChange('strengths', idx, e.target.value)} />
-                      <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('strengths', idx)}>X</button>
+                    <div key={idx} style={{ marginBottom: '0.85rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Strength Detail</label>
+                      <div className="array-item">
+                        <input className="form-control" required={isReq('strengths', false)} placeholder="Strength details (e.g. Fast Learner)" value={strength} onChange={e => handleArrayChange('strengths', idx, e.target.value)} />
+                        {formData.strengths.length > 1 && (
+                          <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('strengths', idx)}>X</button>
+                        )}
+                      </div>
                     </div>
                   ))}
                   <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('strengths', '')}>+ Add Strength</button>
