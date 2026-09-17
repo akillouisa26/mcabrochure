@@ -344,13 +344,25 @@ export default function Home() {
       
       <form onSubmit={handleSubmit}>
         {sectionOrder.map((secId: string, sIdx: number) => {
+          const sectionTitle = formConfig.sectionTitles?.[secId] || {
+            personal: 'Personal Details',
+            contact: 'Contact Info',
+            education: 'Educational Qualifications',
+            certifications: 'Certifications',
+            technical: 'Technical Expertise',
+            internships: 'Internships',
+            projects: 'Projects',
+            strengths: 'Strengths',
+            additional: 'Additional Information',
+          }[secId] || secId;
+
           return (
             <div key={secId}>
               {sIdx > 0 && <hr style={{ margin: '2rem 0' }}/>}
               
               {secId === 'personal' && (
                 <div>
-                  <h3>Personal Details</h3>
+                  <h3>{sectionTitle}</h3>
                   <div className="form-group">
                     <label>Full Name *</label>
                     <input className="form-control" required name="name" value={formData.name} onChange={handleChange} placeholder="e.g. Vimal Jerald" />
@@ -380,7 +392,7 @@ export default function Home() {
 
               {secId === 'contact' && (
                 <div>
-                  <h3>Contact Info</h3>
+                  <h3>{sectionTitle}</h3>
                   <div className="form-group">
                     <label>Phone * (10 Digits)</label>
                     <input className="form-control" type="tel" required maxLength={10} name="contactPhone" value={formData.contactPhone} onChange={handlePhoneChange} placeholder="9876543210" />
@@ -395,7 +407,7 @@ export default function Home() {
 
               {secId === 'education' && (
                 <div>
-                  <h3>Educational Qualifications</h3>
+                  <h3>{sectionTitle}</h3>
                   {formData.educationalQualifications.map((edu, idx) => (
                     <div key={idx} className="array-item">
                       <input className="form-control" required placeholder="Qualification (e.g. MCA)" value={edu.qualification} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'qualification')} />
@@ -414,7 +426,7 @@ export default function Home() {
                 <div>
                   {formConfig.showCertifications && (
                     <>
-                      <h3>Certifications</h3>
+                      <h3>{sectionTitle}</h3>
                       {formData.certifications.map((cert, idx) => (
                         <div key={idx} className="array-item">
                           <input className="form-control" required placeholder="Certification Name" value={cert} onChange={e => handleArrayChange('certifications', idx, e.target.value)} />
@@ -432,7 +444,7 @@ export default function Home() {
                 <div>
                   {formConfig.showTechnicalExpertise && (
                     <>
-                      <h3>Technical Expertise</h3>
+                      <h3>{sectionTitle}</h3>
                       {formData.technicalExpertise.map((tech, idx) => (
                         <div key={idx} className="array-item">
                           <input className="form-control" required placeholder="Skill/Expertise" value={tech} onChange={e => handleArrayChange('technicalExpertise', idx, e.target.value)} />
@@ -450,7 +462,7 @@ export default function Home() {
                 <div>
                   {formConfig.showInternships !== false && (
                     <>
-                      <h3>Internships</h3>
+                      <h3>{sectionTitle}</h3>
                       {formData.internships?.map((intern, idx) => (
                         <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #ddd', padding: '1rem', borderRadius: '4px' }}>
                           <input className="form-control" required placeholder="Company Name" value={intern.company} onChange={e => handleArrayChange('internships', idx, e.target.value, 'company')} style={{marginBottom:'0.5rem'}} />
@@ -470,7 +482,7 @@ export default function Home() {
                 <div>
                   {formConfig.showProjects && (
                     <>
-                      <h3>Projects</h3>
+                      <h3>{sectionTitle}</h3>
                       {formData.projects?.map((proj, idx) => (
                         <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #ddd', padding: '1rem', borderRadius: '4px' }}>
                           <input className="form-control" required placeholder="Project Name" value={proj.title} onChange={e => handleArrayChange('projects', idx, e.target.value, 'title')} style={{marginBottom:'0.5rem'}} />
@@ -489,7 +501,7 @@ export default function Home() {
                 <div>
                   {formConfig.showStrengths && (
                     <>
-                      <h3>Strengths</h3>
+                      <h3>{sectionTitle}</h3>
                       {formData.strengths.map((strength, idx) => (
                         <div key={idx} className="array-item">
                           <input className="form-control" placeholder="Strength details" value={strength} onChange={e => handleArrayChange('strengths', idx, e.target.value)} />
@@ -505,7 +517,7 @@ export default function Home() {
 
               {secId === 'additional' && renderCustomFieldsForSection('additional') && (
                 <div>
-                  <h3>Additional Information</h3>
+                  <h3>{sectionTitle}</h3>
                   {renderCustomFieldsForSection('additional')}
                 </div>
               )}

@@ -22,7 +22,7 @@ function AdminDashboardContent() {
   // Form Settings Config state
   const DEFAULT_SECTIONS = ['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths', 'additional'];
   
-  const SECTION_LABELS: Record<string, string> = {
+  const DEFAULT_SECTION_TITLES: Record<string, string> = {
     personal: 'Personal Details',
     contact: 'Contact Info',
     education: 'Educational Qualifications',
@@ -43,6 +43,7 @@ function AdminDashboardContent() {
     showProjects: boolean;
     showStrengths: boolean;
     sectionOrder: string[];
+    sectionTitles: Record<string, string>;
     customFields: Array<{ id: string; label: string; type: string; section: string; required?: boolean; order?: number }>;
   }>({
     showTagline: true,
@@ -53,6 +54,7 @@ function AdminDashboardContent() {
     showProjects: true,
     showStrengths: true,
     sectionOrder: DEFAULT_SECTIONS,
+    sectionTitles: DEFAULT_SECTION_TITLES,
     customFields: [],
   });
 
@@ -93,6 +95,9 @@ function AdminDashboardContent() {
           ...prev,
           ...data,
           sectionOrder: Array.isArray(data.sectionOrder) && data.sectionOrder.length > 0 ? data.sectionOrder : DEFAULT_SECTIONS,
+          sectionTitles: data.sectionTitles && typeof data.sectionTitles === 'object' 
+            ? { ...DEFAULT_SECTION_TITLES, ...data.sectionTitles } 
+            : DEFAULT_SECTION_TITLES,
           customFields: Array.isArray(data.customFields) 
             ? data.customFields.map((f: any) => ({
                 ...f,
@@ -129,6 +134,25 @@ function AdminDashboardContent() {
     } finally {
       setConfigSaving(false);
     }
+  };
+
+  const updateSectionTitle = (sectionId: string, newTitle: string) => {
+    setFormConfig(prev => ({
+      ...prev,
+      sectionTitles: {
+        ...(prev.sectionTitles || DEFAULT_SECTION_TITLES),
+        [sectionId]: newTitle,
+      },
+    }));
+  };
+
+  const updateCustomField = (fieldId: string, updates: Partial<{ label: string; type: string; section: string; required: boolean }>) => {
+    setFormConfig(prev => ({
+      ...prev,
+      customFields: (prev.customFields || []).map(f => 
+        f.id === fieldId ? { ...f, ...updates } : f
+      ),
+    }));
   };
 
   const addCustomField = () => {
@@ -628,23 +652,13 @@ function AdminDashboardContent() {
           )}
         </div>
       ) : (
-        /* Form Settings Tab (Interactive Drag & Drop Form Builder) */
+        /* Form Settings Tab (Clean Interactive Form Configurator) */
         <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <h2 style={{ fontSize: '1.4rem', margin: 0, color: '#111827' }}>Student Form Configurator</h2>
-              <p style={{ margin: '0.25rem 0 0 0', color: '#6b7280', fontSize: '0.9rem' }}>
-                Customize your form: press & drag fields to move them between sections, reorder sections, add or remove custom fields.
-              </p>
-            </div>
-            <button 
-              onClick={saveFormConfig} 
-              className="btn btn-primary" 
-              style={{ padding: '0.6rem 1.4rem', fontSize: '0.95rem', background: '#113666', fontWeight: 600 }}
-              disabled={configSaving}
-            >
-              {configSaving ? 'Saving Changes...' : '💾 Save Form Settings'}
-            </button>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h2 style={{ fontSize: '1.4rem', margin: 0, color: '#111827' }}>Student Form Configurator</h2>
+            <p style={{ margin: '0.3rem 0 0 0', color: '#6b7280', fontSize: '0.9rem' }}>
+              Edit section headings, rename field labels, drag or move fields between sections, and configure your student submission form.
+            </p>
           </div>
 
           {configSuccess && (
@@ -655,7 +669,7 @@ function AdminDashboardContent() {
 
           {/* Add New Custom Field Box */}
           <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '8px', border: '1px dashed #cbd5e1', marginBottom: '2rem' }}>
-            <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#1e293b' }}>+ Add New Custom Field</h3>
+            <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#1e293b' }}>Add New Custom Field</h3>
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <input 
                 type="text" 
@@ -683,7 +697,9 @@ function AdminDashboardContent() {
                 style={{ flex: '1 1 180px' }}
               >
                 {formConfig.sectionOrder.map(secId => (
-                  <option key={secId} value={secId}>Section: {SECTION_LABELS[secId] || secId}</option>
+                  <option key={secId} value={secId}>
+                    Section: {formConfig.sectionTitles?.[secId] || DEFAULT_SECTION_TITLES[secId] || secId}
+                  </option>
                 ))}
               </select>
 
@@ -703,7 +719,7 @@ function AdminDashboardContent() {
                 className="btn btn-secondary"
                 style={{ background: '#10b981', color: '#fff', fontWeight: 600, padding: '0.5rem 1rem' }}
               >
-                + Add Field
+                Add Field
               </button>
             </div>
           </div>
@@ -711,7 +727,7 @@ function AdminDashboardContent() {
           {/* Form Sections & Moveable Fields Container */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {formConfig.sectionOrder.map((sectionId, sectionIndex) => {
-              const sectionTitle = SECTION_LABELS[sectionId] || sectionId;
+              const currentSectionTitle = formConfig.sectionTitles?.[sectionId] || DEFAULT_SECTION_TITLES[sectionId] || sectionId;
               const sectionCustomFields = (formConfig.customFields || []).filter(f => (f.section || 'additional') === sectionId);
               const isDragOver = dragOverSection === sectionId;
 
@@ -746,58 +762,63 @@ function AdminDashboardContent() {
                     boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                   }}
                 >
-                  {/* Section Header */}
+                  {/* Section Header with Editable Heading */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>
-                        {sectionIndex + 1}. {sectionTitle}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 300px' }}>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#64748b' }}>
+                        Section {sectionIndex + 1}:
                       </span>
+                      <input 
+                        type="text"
+                        value={currentSectionTitle}
+                        onChange={e => updateSectionTitle(sectionId, e.target.value)}
+                        placeholder="Section Heading"
+                        className="form-control"
+                        style={{ fontWeight: 700, fontSize: '1.05rem', color: '#0f172a', padding: '0.35rem 0.6rem', width: 'auto', flex: 1, minWidth: '180px' }}
+                      />
                       {sectionId === 'certifications' && (
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer' }}>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>
                           <input type="checkbox" checked={formConfig.showCertifications} onChange={e => setFormConfig({ ...formConfig, showCertifications: e.target.checked })} /> Enabled
                         </label>
                       )}
                       {sectionId === 'technical' && (
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer' }}>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>
                           <input type="checkbox" checked={formConfig.showTechnicalExpertise} onChange={e => setFormConfig({ ...formConfig, showTechnicalExpertise: e.target.checked })} /> Enabled
                         </label>
                       )}
                       {sectionId === 'internships' && (
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer' }}>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>
                           <input type="checkbox" checked={formConfig.showInternships !== false} onChange={e => setFormConfig({ ...formConfig, showInternships: e.target.checked })} /> Enabled
                         </label>
                       )}
                       {sectionId === 'projects' && (
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer' }}>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>
                           <input type="checkbox" checked={formConfig.showProjects} onChange={e => setFormConfig({ ...formConfig, showProjects: e.target.checked })} /> Enabled
                         </label>
                       )}
                       {sectionId === 'strengths' && (
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer' }}>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>
                           <input type="checkbox" checked={formConfig.showStrengths} onChange={e => setFormConfig({ ...formConfig, showStrengths: e.target.checked })} /> Enabled
                         </label>
                       )}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.75rem', color: '#64748b', marginRight: '0.5rem' }}>Section Position:</span>
+                    <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
                       <button 
                         type="button" 
                         onClick={() => moveSectionOrder(sectionId, 'up')}
                         disabled={sectionIndex === 0}
-                        style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '2px 8px', cursor: sectionIndex === 0 ? 'not-allowed' : 'pointer', opacity: sectionIndex === 0 ? 0.4 : 1 }}
-                        title="Move Section Up"
+                        style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '4px 10px', fontSize: '0.8rem', cursor: sectionIndex === 0 ? 'not-allowed' : 'pointer', opacity: sectionIndex === 0 ? 0.4 : 1 }}
                       >
-                        ▲
+                        Move Section Up
                       </button>
                       <button 
                         type="button" 
                         onClick={() => moveSectionOrder(sectionId, 'down')}
                         disabled={sectionIndex === formConfig.sectionOrder.length - 1}
-                        style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '2px 8px', cursor: sectionIndex === formConfig.sectionOrder.length - 1 ? 'not-allowed' : 'pointer', opacity: sectionIndex === formConfig.sectionOrder.length - 1 ? 0.4 : 1 }}
-                        title="Move Section Down"
+                        style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '4px 10px', fontSize: '0.8rem', cursor: sectionIndex === formConfig.sectionOrder.length - 1 ? 'not-allowed' : 'pointer', opacity: sectionIndex === formConfig.sectionOrder.length - 1 ? 0.4 : 1 }}
                       >
-                        ▼
+                        Move Section Down
                       </button>
                     </div>
                   </div>
@@ -807,8 +828,8 @@ function AdminDashboardContent() {
                     {/* Standard built-in fields preview */}
                     {sectionId === 'personal' && (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>📌 Full Name (Standard)</span>
-                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>📌 Register Number (Standard)</span>
+                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>Full Name (Standard)</span>
+                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>Register Number (Standard)</span>
                         <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
                           <input type="checkbox" checked={formConfig.showTagline} onChange={e => setFormConfig({ ...formConfig, showTagline: e.target.checked })} /> Tagline Field
                         </label>
@@ -820,14 +841,14 @@ function AdminDashboardContent() {
 
                     {sectionId === 'contact' && (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>📌 Phone (Standard)</span>
-                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>📌 Email (Standard)</span>
+                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>Phone (Standard)</span>
+                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>Email (Standard)</span>
                       </div>
                     )}
 
                     {sectionId === 'education' && (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>📌 Educational Qualifications List (Standard)</span>
+                        <span style={{ background: '#e2e8f0', color: '#334155', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>Educational Qualifications List (Standard)</span>
                       </div>
                     )}
 
@@ -859,61 +880,83 @@ function AdminDashboardContent() {
                             gap: '0.75rem',
                           }}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 220px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '2 1 280px' }}>
                             <span 
-                              style={{ cursor: 'grab', fontSize: '1.2rem', color: '#94a3b8', userSelect: 'none' }}
+                              style={{ cursor: 'grab', fontSize: '0.8rem', background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', color: '#64748b', fontWeight: 600, userSelect: 'none' }}
                               title="Press and drag to move field"
                             >
-                              ⠿
+                              Drag
                             </span>
-                            <div>
-                              <span style={{ fontWeight: 600, color: '#0f172a' }}>{field.label}</span>
-                              {field.required && <span style={{ color: '#ef4444', marginLeft: '4px' }}>*</span>}
-                              <div style={{ display: 'flex', gap: '0.4rem', marginTop: '2px' }}>
-                                <span style={{ fontSize: '0.75rem', background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px', color: '#64748b' }}>Type: {field.type}</span>
-                                <span style={{ fontSize: '0.75rem', background: '#dbeafe', padding: '1px 6px', borderRadius: '4px', color: '#1e40af' }}>Moveable Field</span>
-                              </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                              <input 
+                                type="text"
+                                value={field.label}
+                                onChange={e => updateCustomField(field.id, { label: e.target.value })}
+                                placeholder="Field Label"
+                                className="form-control"
+                                style={{ fontWeight: 600, padding: '0.3rem 0.5rem', fontSize: '0.9rem' }}
+                              />
                             </div>
                           </div>
 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            {/* Type selector */}
+                            <select
+                              value={field.type}
+                              onChange={e => updateCustomField(field.id, { type: e.target.value as any })}
+                              style={{ padding: '0.3rem 0.5rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#fff' }}
+                            >
+                              <option value="text">Single Line Text</option>
+                              <option value="textarea">Paragraph Text</option>
+                              <option value="list">Bullet List</option>
+                            </select>
+
                             {/* Move to another section dropdown */}
                             <select
                               value={field.section || sectionId}
                               onChange={(e) => moveFieldToSection(field.id, e.target.value)}
-                              style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#fff' }}
-                              title="Move field to a different section"
+                              style={{ padding: '0.3rem 0.5rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#fff' }}
                             >
                               {formConfig.sectionOrder.map(secKey => (
-                                <option key={secKey} value={secKey}>Move to: {SECTION_LABELS[secKey] || secKey}</option>
+                                <option key={secKey} value={secKey}>
+                                  Move to: {formConfig.sectionTitles?.[secKey] || DEFAULT_SECTION_TITLES[secKey] || secKey}
+                                </option>
                               ))}
                             </select>
+
+                            {/* Required toggle */}
+                            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem', color: '#334155', cursor: 'pointer' }}>
+                              <input 
+                                type="checkbox"
+                                checked={field.required || false}
+                                onChange={e => updateCustomField(field.id, { required: e.target.checked })}
+                              />
+                              Required
+                            </label>
 
                             {/* Move Up / Down Buttons */}
                             <button
                               type="button"
                               onClick={() => moveCustomFieldInList(field.id, 'up')}
                               disabled={fieldIdx === 0}
-                              style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '2px 6px', fontSize: '0.8rem', cursor: fieldIdx === 0 ? 'not-allowed' : 'pointer', opacity: fieldIdx === 0 ? 0.4 : 1 }}
-                              title="Move Up"
+                              style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '3px 8px', fontSize: '0.8rem', cursor: fieldIdx === 0 ? 'not-allowed' : 'pointer', opacity: fieldIdx === 0 ? 0.4 : 1 }}
                             >
-                              ▲
+                              Move Up
                             </button>
                             <button
                               type="button"
                               onClick={() => moveCustomFieldInList(field.id, 'down')}
                               disabled={fieldIdx === sectionCustomFields.length - 1}
-                              style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '2px 6px', fontSize: '0.8rem', cursor: fieldIdx === sectionCustomFields.length - 1 ? 'not-allowed' : 'pointer', opacity: fieldIdx === sectionCustomFields.length - 1 ? 0.4 : 1 }}
-                              title="Move Down"
+                              style={{ border: '1px solid #cbd5e1', background: '#f8fafc', borderRadius: '4px', padding: '3px 8px', fontSize: '0.8rem', cursor: fieldIdx === sectionCustomFields.length - 1 ? 'not-allowed' : 'pointer', opacity: fieldIdx === sectionCustomFields.length - 1 ? 0.4 : 1 }}
                             >
-                              ▼
+                              Move Down
                             </button>
 
                             <button 
                               type="button" 
                               onClick={() => removeCustomField(field.id)}
                               className="btn btn-danger"
-                              style={{ padding: '0.25rem 0.55rem', fontSize: '0.8rem' }}
+                              style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
                             >
                               Remove
                             </button>
@@ -922,7 +965,7 @@ function AdminDashboardContent() {
                       ))
                     ) : (
                       <div style={{ padding: '0.6rem 1rem', background: '#f8fafc', borderRadius: '6px', border: '1px dashed #cbd5e1', color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center' }}>
-                        Drag & Drop any custom field here or use "+ Add Field" above to place fields in {sectionTitle}.
+                        Drag & Drop any custom field here or use "Add Field" above to place fields in {currentSectionTitle}.
                       </div>
                     )}
                   </div>
@@ -931,6 +974,7 @@ function AdminDashboardContent() {
             })}
           </div>
 
+          {/* Single Save Button at Bottom */}
           <div style={{ marginTop: '2rem' }}>
             <button 
               onClick={saveFormConfig} 
@@ -938,7 +982,7 @@ function AdminDashboardContent() {
               style={{ padding: '0.85rem 1.5rem', fontSize: '1.05rem', width: '100%', background: '#113666', fontWeight: 600 }}
               disabled={configSaving}
             >
-              {configSaving ? 'Saving Changes...' : '💾 Save Form Settings'}
+              {configSaving ? 'Saving Changes...' : 'Save Form Settings'}
             </button>
           </div>
         </div>

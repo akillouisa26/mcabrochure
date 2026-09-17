@@ -13,6 +13,17 @@ const defaultConfig = {
   showProjects: true,
   showStrengths: true,
   sectionOrder: ['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths', 'additional'],
+  sectionTitles: {
+    personal: 'Personal Details',
+    contact: 'Contact Info',
+    education: 'Educational Qualifications',
+    certifications: 'Certifications',
+    technical: 'Technical Expertise',
+    internships: 'Internships',
+    projects: 'Projects',
+    strengths: 'Strengths',
+    additional: 'Additional Information',
+  },
   customFields: [],
 };
 
