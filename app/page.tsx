@@ -365,183 +365,160 @@ export default function Home() {
             additional: 'Additional Information',
           }[secId] || secId;
 
+          const getSection = (key: string, defaultSec: string) => formConfig.fieldSections?.[key] || defaultSec;
+          const isReq = (key: string, defaultReq: boolean) => formConfig.fieldRequired?.[key] ?? defaultReq;
+
+          const hasFieldsInSec = 
+            (getSection('name', 'personal') === secId && formConfig.showName !== false) ||
+            (getSection('registerNumber', 'personal') === secId && formConfig.showRegisterNumber !== false) ||
+            (getSection('tagline', 'personal') === secId && formConfig.showTagline !== false) ||
+            (getSection('profilePicture', 'personal') === secId && formConfig.showProfilePicture !== false) ||
+            (getSection('phone', 'contact') === secId && formConfig.showPhone !== false) ||
+            (getSection('email', 'contact') === secId && formConfig.showEmail !== false) ||
+            (getSection('education', 'education') === secId && formConfig.showEducation !== false) ||
+            (getSection('certifications', 'certifications') === secId && formConfig.showCertifications !== false) ||
+            (getSection('technical', 'technical') === secId && formConfig.showTechnicalExpertise !== false) ||
+            (getSection('internships', 'internships') === secId && formConfig.showInternships !== false) ||
+            (getSection('projects', 'projects') === secId && formConfig.showProjects !== false) ||
+            (getSection('strengths', 'strengths') === secId && formConfig.showStrengths !== false) ||
+            renderCustomFieldsForSection(secId);
+
+          if (!hasFieldsInSec) return null;
+
           return (
             <div key={secId}>
               {sIdx > 0 && <hr style={{ margin: '2rem 0' }}/>}
-              
-              {secId === 'personal' && (
-                <div>
-                  <h3>{sectionTitle}</h3>
-                  {formConfig.showName !== false && (
-                    <div className="form-group">
-                      <label>{getLabel('name', 'Full Name')} *</label>
-                      <input className="form-control" required name="name" value={formData.name} onChange={handleChange} placeholder="e.g. Vimal Jerald" />
+              <h3>{sectionTitle}</h3>
+
+              {/* Standard Fields assigned to this section */}
+              {getSection('name', 'personal') === secId && formConfig.showName !== false && (
+                <div className="form-group">
+                  <label>{getLabel('name', 'Full Name')} {isReq('name', true) ? '*' : ''}</label>
+                  <input className="form-control" required={isReq('name', true)} name="name" value={formData.name} onChange={handleChange} placeholder="e.g. Vimal Jerald" />
+                </div>
+              )}
+
+              {getSection('registerNumber', 'personal') === secId && formConfig.showRegisterNumber !== false && (
+                <div className="form-group">
+                  <label>{getLabel('registerNumber', 'Register Number')} {isReq('registerNumber', true) ? '*' : ''}</label>
+                  <input className="form-control" required={isReq('registerNumber', true)} name="registerNumber" value={formData.registerNumber} onChange={handleRegisterNumberChange} placeholder="e.g. 25PCA101" />
+                </div>
+              )}
+
+              {getSection('tagline', 'personal') === secId && formConfig.showTagline !== false && (
+                <div className="form-group">
+                  <label>{getLabel('tagline', 'Tagline')} {isReq('tagline', false) ? '*' : ''} (e.g. Aspiring Full Stack Developer)</label>
+                  <input className="form-control" required={isReq('tagline', false)} name="tagline" value={formData.tagline} onChange={handleChange} placeholder="e.g. Software Engineer & Web Developer" />
+                </div>
+              )}
+
+              {getSection('profilePicture', 'personal') === secId && formConfig.showProfilePicture !== false && (
+                <div className="form-group">
+                  <label>{getLabel('profilePicture', 'Profile Picture')} {isReq('profilePicture', false) ? '*' : ''}</label>
+                  <input type="file" accept="image/*" required={isReq('profilePicture', false)} className="form-control" onChange={handleFileChange} />
+                </div>
+              )}
+
+              {getSection('phone', 'contact') === secId && formConfig.showPhone !== false && (
+                <div className="form-group">
+                  <label>{getLabel('phone', 'Phone')} {isReq('phone', true) ? '*' : ''} (10 Digits)</label>
+                  <input className="form-control" type="tel" required={isReq('phone', true)} maxLength={10} name="contactPhone" value={formData.contactPhone} onChange={handlePhoneChange} placeholder="9876543210" />
+                </div>
+              )}
+
+              {getSection('email', 'contact') === secId && formConfig.showEmail !== false && (
+                <div className="form-group">
+                  <label>{getLabel('email', 'Email')} {isReq('email', true) ? '*' : ''}</label>
+                  <input className="form-control" type="email" required={isReq('email', true)} name="contactEmail" value={formData.contactEmail} onChange={handleChange} placeholder="vimal@gmail.com" />
+                </div>
+              )}
+
+              {getSection('education', 'education') === secId && formConfig.showEducation !== false && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>{getLabel('education', 'Educational Qualifications')} {isReq('education', true) ? '*' : ''}</label>
+                  {formData.educationalQualifications.map((edu, idx) => (
+                    <div key={idx} className="array-item">
+                      <input className="form-control" required={isReq('education', true)} placeholder="Qualification (e.g. MCA)" value={edu.qualification} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'qualification')} />
+                      <input className="form-control" required={isReq('education', true)} placeholder="Institution" value={edu.institution} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'institution')} />
+                      <input className="form-control" required={isReq('education', true)} placeholder="Year (e.g. 2025-2027)" value={edu.year} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'year')} />
+                      <input className="form-control" required={isReq('education', true)} placeholder="CGPA" value={edu.cgpa} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'cgpa')} />
+                      <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('educationalQualifications', idx)}>X</button>
                     </div>
-                  )}
+                  ))}
+                  <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('educationalQualifications', { qualification: '', institution: '', year: '', cgpa: ''})}>+ Add Education</button>
+                </div>
+              )}
 
-                  {formConfig.showRegisterNumber !== false && (
-                    <div className="form-group">
-                      <label>{getLabel('registerNumber', 'Register Number')} *</label>
-                      <input className="form-control" required name="registerNumber" value={formData.registerNumber} onChange={handleRegisterNumberChange} placeholder="e.g. 25PCA101" />
+              {getSection('certifications', 'certifications') === secId && formConfig.showCertifications !== false && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>{getLabel('certifications', 'Certifications')} {isReq('certifications', false) ? '*' : ''}</label>
+                  {formData.certifications.map((cert, idx) => (
+                    <div key={idx} className="array-item">
+                      <input className="form-control" required={isReq('certifications', false)} placeholder="Certification Name" value={cert} onChange={e => handleArrayChange('certifications', idx, e.target.value)} />
+                      <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('certifications', idx)}>X</button>
                     </div>
-                  )}
+                  ))}
+                  <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('certifications', '')}>+ Add Certification</button>
+                </div>
+              )}
 
-                  {formConfig.showTagline !== false && (
-                    <div className="form-group">
-                      <label>{getLabel('tagline', 'Tagline')} * (e.g. Aspiring Full Stack Developer)</label>
-                      <input className="form-control" required name="tagline" value={formData.tagline} onChange={handleChange} placeholder="e.g. Software Engineer & Web Developer" />
+              {getSection('technical', 'technical') === secId && formConfig.showTechnicalExpertise !== false && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>{getLabel('technical', 'Technical Expertise')} {isReq('technical', false) ? '*' : ''}</label>
+                  {formData.technicalExpertise.map((tech, idx) => (
+                    <div key={idx} className="array-item">
+                      <input className="form-control" required={isReq('technical', false)} placeholder="Skill/Expertise" value={tech} onChange={e => handleArrayChange('technicalExpertise', idx, e.target.value)} />
+                      <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('technicalExpertise', idx)}>X</button>
                     </div>
-                  )}
+                  ))}
+                  <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('technicalExpertise', '')}>+ Add Expertise</button>
+                </div>
+              )}
 
-                  {formConfig.showProfilePicture !== false && (
-                    <div className="form-group">
-                      <label>{getLabel('profilePicture', 'Profile Picture')} *</label>
-                      <input type="file" accept="image/*" required className="form-control" onChange={handleFileChange} />
+              {getSection('internships', 'internships') === secId && formConfig.showInternships !== false && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>{getLabel('internships', 'Internships')} {isReq('internships', false) ? '*' : ''}</label>
+                  {formData.internships?.map((intern, idx) => (
+                    <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #ddd', padding: '1rem', borderRadius: '4px' }}>
+                      <input className="form-control" required={isReq('internships', false)} placeholder="Company Name" value={intern.company} onChange={e => handleArrayChange('internships', idx, e.target.value, 'company')} style={{marginBottom:'0.5rem'}} />
+                      <input className="form-control" required={isReq('internships', false)} placeholder="Role (e.g. Web Developer Intern)" value={intern.role} onChange={e => handleArrayChange('internships', idx, e.target.value, 'role')} style={{marginBottom:'0.5rem'}} />
+                      <input className="form-control" required={isReq('internships', false)} placeholder="Duration (e.g. 3 Months / June - Aug 2024)" value={intern.duration} onChange={e => handleArrayChange('internships', idx, e.target.value, 'duration')} style={{marginBottom:'0.5rem'}} />
+                      <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('internships', idx)}>Remove Internship</button>
                     </div>
-                  )}
-                  {renderCustomFieldsForSection('personal')}
+                  ))}
+                  <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('internships', { company: '', role: '', duration: ''})}>+ Add Internship</button>
                 </div>
               )}
 
-              {secId === 'contact' && (
-                <div>
-                  <h3>{sectionTitle}</h3>
-                  {formConfig.showPhone !== false && (
-                    <div className="form-group">
-                      <label>{getLabel('phone', 'Phone')} * (10 Digits)</label>
-                      <input className="form-control" type="tel" required maxLength={10} name="contactPhone" value={formData.contactPhone} onChange={handlePhoneChange} placeholder="9876543210" />
+              {getSection('projects', 'projects') === secId && formConfig.showProjects !== false && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>{getLabel('projects', 'Projects')} {isReq('projects', false) ? '*' : ''}</label>
+                  {formData.projects?.map((proj, idx) => (
+                    <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #ddd', padding: '1rem', borderRadius: '4px' }}>
+                      <input className="form-control" required={isReq('projects', false)} placeholder="Project Name" value={proj.title} onChange={e => handleArrayChange('projects', idx, e.target.value, 'title')} style={{marginBottom:'0.5rem'}} />
+                      <input className="form-control" required={isReq('projects', false)} placeholder="Tools Used (e.g. React, Node.js, Firebase)" value={proj.toolsUsed} onChange={e => handleArrayChange('projects', idx, e.target.value, 'toolsUsed')} style={{marginBottom:'0.5rem'}} />
+                      <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('projects', idx)}>Remove Project</button>
                     </div>
-                  )}
-                  {formConfig.showEmail !== false && (
-                    <div className="form-group">
-                      <label>{getLabel('email', 'Email')} *</label>
-                      <input className="form-control" type="email" required name="contactEmail" value={formData.contactEmail} onChange={handleChange} placeholder="vimal@gmail.com" />
+                  ))}
+                  <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('projects', { title: '', toolsUsed: ''})}>+ Add Project</button>
+                </div>
+              )}
+
+              {getSection('strengths', 'strengths') === secId && formConfig.showStrengths !== false && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>{getLabel('strengths', 'Strengths')} {isReq('strengths', false) ? '*' : ''}</label>
+                  {formData.strengths.map((strength, idx) => (
+                    <div key={idx} className="array-item">
+                      <input className="form-control" required={isReq('strengths', false)} placeholder="Strength details" value={strength} onChange={e => handleArrayChange('strengths', idx, e.target.value)} />
+                      <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('strengths', idx)}>X</button>
                     </div>
-                  )}
-                  {renderCustomFieldsForSection('contact')}
+                  ))}
+                  <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('strengths', '')}>+ Add Strength</button>
                 </div>
               )}
 
-              {secId === 'education' && (
-                <div>
-                  <h3>{sectionTitle}</h3>
-                  {formConfig.showEducation !== false && (
-                    <>
-                      {formData.educationalQualifications.map((edu, idx) => (
-                        <div key={idx} className="array-item">
-                          <input className="form-control" required placeholder="Qualification (e.g. MCA)" value={edu.qualification} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'qualification')} />
-                          <input className="form-control" required placeholder="Institution" value={edu.institution} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'institution')} />
-                          <input className="form-control" required placeholder="Year (e.g. 2025-2027)" value={edu.year} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'year')} />
-                          <input className="form-control" required placeholder="CGPA" value={edu.cgpa} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'cgpa')} />
-                          <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('educationalQualifications', idx)}>X</button>
-                        </div>
-                      ))}
-                      <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('educationalQualifications', { qualification: '', institution: '', year: '', cgpa: ''})}>+ Add Education</button>
-                    </>
-                  )}
-                  {renderCustomFieldsForSection('education')}
-                </div>
-              )}
-
-              {secId === 'certifications' && (formConfig.showCertifications !== false || renderCustomFieldsForSection('certifications')) && (
-                <div>
-                  {formConfig.showCertifications !== false && (
-                    <>
-                      <h3>{sectionTitle}</h3>
-                      {formData.certifications.map((cert, idx) => (
-                        <div key={idx} className="array-item">
-                          <input className="form-control" required placeholder="Certification Name" value={cert} onChange={e => handleArrayChange('certifications', idx, e.target.value)} />
-                          <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('certifications', idx)}>X</button>
-                        </div>
-                      ))}
-                      <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('certifications', '')}>+ Add Certification</button>
-                    </>
-                  )}
-                  {renderCustomFieldsForSection('certifications')}
-                </div>
-              )}
-
-              {secId === 'technical' && (formConfig.showTechnicalExpertise !== false || renderCustomFieldsForSection('technical')) && (
-                <div>
-                  {formConfig.showTechnicalExpertise !== false && (
-                    <>
-                      <h3>{sectionTitle}</h3>
-                      {formData.technicalExpertise.map((tech, idx) => (
-                        <div key={idx} className="array-item">
-                          <input className="form-control" required placeholder="Skill/Expertise" value={tech} onChange={e => handleArrayChange('technicalExpertise', idx, e.target.value)} />
-                          <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('technicalExpertise', idx)}>X</button>
-                        </div>
-                      ))}
-                      <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('technicalExpertise', '')}>+ Add Expertise</button>
-                    </>
-                  )}
-                  {renderCustomFieldsForSection('technical')}
-                </div>
-              )}
-
-              {secId === 'internships' && (formConfig.showInternships !== false || renderCustomFieldsForSection('internships')) && (
-                <div>
-                  {formConfig.showInternships !== false && (
-                    <>
-                      <h3>{sectionTitle}</h3>
-                      {formData.internships?.map((intern, idx) => (
-                        <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #ddd', padding: '1rem', borderRadius: '4px' }}>
-                          <input className="form-control" required placeholder="Company Name" value={intern.company} onChange={e => handleArrayChange('internships', idx, e.target.value, 'company')} style={{marginBottom:'0.5rem'}} />
-                          <input className="form-control" required placeholder="Role (e.g. Web Developer Intern)" value={intern.role} onChange={e => handleArrayChange('internships', idx, e.target.value, 'role')} style={{marginBottom:'0.5rem'}} />
-                          <input className="form-control" required placeholder="Duration (e.g. 3 Months / June - Aug 2024)" value={intern.duration} onChange={e => handleArrayChange('internships', idx, e.target.value, 'duration')} style={{marginBottom:'0.5rem'}} />
-                          <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('internships', idx)}>Remove Internship</button>
-                        </div>
-                      ))}
-                      <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('internships', { company: '', role: '', duration: ''})}>+ Add Internship</button>
-                    </>
-                  )}
-                  {renderCustomFieldsForSection('internships')}
-                </div>
-              )}
-
-              {secId === 'projects' && (formConfig.showProjects !== false || renderCustomFieldsForSection('projects')) && (
-                <div>
-                  {formConfig.showProjects !== false && (
-                    <>
-                      <h3>{sectionTitle}</h3>
-                      {formData.projects?.map((proj, idx) => (
-                        <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #ddd', padding: '1rem', borderRadius: '4px' }}>
-                          <input className="form-control" required placeholder="Project Name" value={proj.title} onChange={e => handleArrayChange('projects', idx, e.target.value, 'title')} style={{marginBottom:'0.5rem'}} />
-                          <input className="form-control" required placeholder="Tools Used (e.g. React, Node.js, Firebase)" value={proj.toolsUsed} onChange={e => handleArrayChange('projects', idx, e.target.value, 'toolsUsed')} style={{marginBottom:'0.5rem'}} />
-                          <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('projects', idx)}>Remove Project</button>
-                        </div>
-                      ))}
-                      <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('projects', { title: '', toolsUsed: ''})}>+ Add Project</button>
-                    </>
-                  )}
-                  {renderCustomFieldsForSection('projects')}
-                </div>
-              )}
-
-              {secId === 'strengths' && (formConfig.showStrengths !== false || renderCustomFieldsForSection('strengths')) && (
-                <div>
-                  {formConfig.showStrengths !== false && (
-                    <>
-                      <h3>{sectionTitle}</h3>
-                      {formData.strengths.map((strength, idx) => (
-                        <div key={idx} className="array-item">
-                          <input className="form-control" placeholder="Strength details" value={strength} onChange={e => handleArrayChange('strengths', idx, e.target.value)} />
-                          <button type="button" className="btn btn-danger" onClick={() => removeArrayItem('strengths', idx)}>X</button>
-                        </div>
-                      ))}
-                      <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('strengths', '')}>+ Add Strength</button>
-                    </>
-                  )}
-                  {renderCustomFieldsForSection('strengths')}
-                </div>
-              )}
-
-              {secId === 'additional' && renderCustomFieldsForSection('additional') && (
-                <div>
-                  <h3>{sectionTitle}</h3>
-                  {renderCustomFieldsForSection('additional')}
-                </div>
-              )}
+              {/* Render Custom Fields assigned to this section */}
+              {renderCustomFieldsForSection(secId)}
             </div>
           );
         })}
