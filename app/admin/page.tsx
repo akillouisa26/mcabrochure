@@ -878,14 +878,17 @@ function AdminDashboardContent() {
                         {projs.length > 0 && (
                           <div className="section">
                             <h3>Projects</h3>
-                            {projs.map((p: any, idx: number) => (
-                              <div key={idx} className="project-item">
-                                <div className="project-header">
-                                  <span className="project-title">{p.title}</span>
-                                  {p.toolsUsed && <span className="project-role"> | Tools: {p.toolsUsed}</span>}
-                                </div>
-                              </div>
-                            ))}
+                            <ul className="bullet-list">
+                              {projs.map((p: any, idx: number) => {
+                                const title = typeof p === 'string' ? p : (p.title || p.name || '');
+                                const tools = typeof p === 'object' && p.toolsUsed ? ` | Tools: ${p.toolsUsed}` : '';
+                                return (
+                                  <li key={idx}>
+                                    {title}{tools}
+                                  </li>
+                                );
+                              })}
+                            </ul>
                           </div>
                         )}
 
@@ -924,9 +927,12 @@ function AdminDashboardContent() {
                         St. Joseph's College<br/>
                         MCA Batch 2025-2027
                         {student.registerNumber && (
-                          <div style={{ fontSize: '0.75rem', opacity: 0.85, marginTop: '3px', fontWeight: 500 }}>
-                            Reg No: {student.registerNumber}
-                          </div>
+                          <>
+                            <br/>
+                            <span style={{ fontSize: '0.75rem', opacity: 0.85, fontWeight: 500 }}>
+                              Reg No: {student.registerNumber}
+                            </span>
+                          </>
                         )}
                       </div>
                     </div>
