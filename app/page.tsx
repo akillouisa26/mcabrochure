@@ -306,7 +306,7 @@ export default function Home() {
     return fields.map((field: any) => (
       <div key={field.id} className="form-group" style={{ marginTop: '1rem' }}>
         <label style={{ fontWeight: 600 }}>
-          {field.label} {field.required ? '*' : ''}
+          {field.label}
         </label>
         {field.type === 'textarea' ? (
           <textarea
@@ -393,49 +393,48 @@ export default function Home() {
               {/* Standard Fields assigned to this section */}
               {getSection('name', 'personal') === secId && formConfig.showName !== false && (
                 <div className="form-group">
-                  <label>{getLabel('name', 'Full Name')} {isReq('name', true) ? '*' : ''}</label>
-                  <input className="form-control" required={isReq('name', true)} name="name" value={formData.name} onChange={handleChange} placeholder="e.g. Vimal Jerald" />
+                  <label>{getLabel('name', 'Full Name')}</label>
+                  <input className="form-control" required={isReq('name', true)} name="name" value={formData.name} onChange={handleChange} placeholder="Vimal Jerald" />
                 </div>
               )}
 
               {getSection('registerNumber', 'personal') === secId && formConfig.showRegisterNumber !== false && (
                 <div className="form-group">
-                  <label>{getLabel('registerNumber', 'Register Number')} {isReq('registerNumber', true) ? '*' : ''}</label>
-                  <input className="form-control" required={isReq('registerNumber', true)} name="registerNumber" value={formData.registerNumber} onChange={handleRegisterNumberChange} placeholder="e.g. 25PCA101" />
+                  <label>{getLabel('registerNumber', 'Register Number')}</label>
+                  <input className="form-control" required={isReq('registerNumber', true)} name="registerNumber" value={formData.registerNumber} onChange={handleRegisterNumberChange} placeholder="25PCA101" />
                 </div>
               )}
 
               {getSection('tagline', 'personal') === secId && formConfig.showTagline !== false && (
                 <div className="form-group">
-                  <label>{getLabel('tagline', 'Tagline')} {isReq('tagline', false) ? '*' : ''} (e.g. Aspiring Full Stack Developer)</label>
-                  <input className="form-control" required={isReq('tagline', false)} name="tagline" value={formData.tagline} onChange={handleChange} placeholder="e.g. Software Engineer & Web Developer" />
+                  <label>{getLabel('tagline', 'Tagline')}</label>
+                  <input className="form-control" required={isReq('tagline', false)} name="tagline" value={formData.tagline} onChange={handleChange} placeholder="Software Engineer & Web Developer" />
                 </div>
               )}
 
               {getSection('profilePicture', 'personal') === secId && formConfig.showProfilePicture !== false && (
                 <div className="form-group">
-                  <label>{getLabel('profilePicture', 'Profile Picture')} {isReq('profilePicture', false) ? '*' : ''}</label>
+                  <label>{getLabel('profilePicture', 'Profile Picture')}</label>
                   <input type="file" accept="image/*" required={isReq('profilePicture', false)} className="form-control" onChange={handleFileChange} />
                 </div>
               )}
 
               {getSection('phone', 'contact') === secId && formConfig.showPhone !== false && (
                 <div className="form-group">
-                  <label>{getLabel('phone', 'Phone')} {isReq('phone', true) ? '*' : ''} (10 Digits)</label>
+                  <label>{getLabel('phone', 'Phone')}</label>
                   <input className="form-control" type="tel" required={isReq('phone', true)} maxLength={10} name="contactPhone" value={formData.contactPhone} onChange={handlePhoneChange} placeholder="9876543210" />
                 </div>
               )}
 
               {getSection('email', 'contact') === secId && formConfig.showEmail !== false && (
                 <div className="form-group">
-                  <label>{getLabel('email', 'Email')} {isReq('email', true) ? '*' : ''}</label>
+                  <label>{getLabel('email', 'Email')}</label>
                   <input className="form-control" type="email" required={isReq('email', true)} name="contactEmail" value={formData.contactEmail} onChange={handleChange} placeholder="vimal@gmail.com" />
                 </div>
               )}
 
               {getSection('education', 'education') === secId && formConfig.showEducation !== false && (
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>{getLabel('education', 'Educational Qualifications')} {isReq('education', true) ? '*' : ''}</label>
                   {formData.educationalQualifications.map((edu, idx) => (
                     <div key={idx} className="array-item">
                       <input className="form-control" required={isReq('education', true)} placeholder="Qualification (e.g. MCA)" value={edu.qualification} onChange={e => handleArrayChange('educationalQualifications', idx, e.target.value, 'qualification')} />
@@ -451,7 +450,6 @@ export default function Home() {
 
               {getSection('certifications', 'certifications') === secId && formConfig.showCertifications !== false && (
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>{getLabel('certifications', 'Certifications')} {isReq('certifications', false) ? '*' : ''}</label>
                   {formData.certifications.map((cert, idx) => (
                     <div key={idx} className="array-item">
                       <input className="form-control" required={isReq('certifications', false)} placeholder="Certification Name" value={cert} onChange={e => handleArrayChange('certifications', idx, e.target.value)} />
@@ -464,7 +462,6 @@ export default function Home() {
 
               {getSection('technical', 'technical') === secId && formConfig.showTechnicalExpertise !== false && (
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>{getLabel('technical', 'Technical Expertise')} {isReq('technical', false) ? '*' : ''}</label>
                   {formData.technicalExpertise.map((tech, idx) => (
                     <div key={idx} className="array-item">
                       <input className="form-control" required={isReq('technical', false)} placeholder="Skill/Expertise" value={tech} onChange={e => handleArrayChange('technicalExpertise', idx, e.target.value)} />
@@ -477,7 +474,6 @@ export default function Home() {
 
               {getSection('internships', 'internships') === secId && formConfig.showInternships !== false && (
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>{getLabel('internships', 'Internships')} {isReq('internships', false) ? '*' : ''}</label>
                   {formData.internships?.map((intern, idx) => (
                     <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #ddd', padding: '1rem', borderRadius: '4px' }}>
                       <input className="form-control" required={isReq('internships', false)} placeholder="Company Name" value={intern.company} onChange={e => handleArrayChange('internships', idx, e.target.value, 'company')} style={{marginBottom:'0.5rem'}} />
@@ -492,7 +488,6 @@ export default function Home() {
 
               {getSection('projects', 'projects') === secId && formConfig.showProjects !== false && (
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>{getLabel('projects', 'Projects')} {isReq('projects', false) ? '*' : ''}</label>
                   {formData.projects?.map((proj, idx) => (
                     <div key={idx} style={{ marginBottom: '1rem', border: '1px solid #ddd', padding: '1rem', borderRadius: '4px' }}>
                       <input className="form-control" required={isReq('projects', false)} placeholder="Project Name" value={proj.title} onChange={e => handleArrayChange('projects', idx, e.target.value, 'title')} style={{marginBottom:'0.5rem'}} />
@@ -506,7 +501,6 @@ export default function Home() {
 
               {getSection('strengths', 'strengths') === secId && formConfig.showStrengths !== false && (
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ fontWeight: 600, display: 'block', marginBottom: '0.5rem' }}>{getLabel('strengths', 'Strengths')} {isReq('strengths', false) ? '*' : ''}</label>
                   {formData.strengths.map((strength, idx) => (
                     <div key={idx} className="array-item">
                       <input className="form-control" required={isReq('strengths', false)} placeholder="Strength details" value={strength} onChange={e => handleArrayChange('strengths', idx, e.target.value)} />

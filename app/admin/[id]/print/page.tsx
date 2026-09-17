@@ -171,7 +171,7 @@ export default function SingleBrochurePrintPage() {
           <div className="footer-text">
             <strong>Student Profile</strong><br/>
             St. Joseph's College<br/>
-            MCA batch 2025-2027
+            MCA Batch 2025-2027
           </div>
         </div>
       </div>
