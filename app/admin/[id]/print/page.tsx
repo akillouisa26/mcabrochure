@@ -289,7 +289,7 @@ export default function SingleBrochurePrintPage() {
         {/* Footer text */}
         <div className="brochure-footer">
           <div className="footer-text">
-            St. Joseph's College<br/>
+            St. Joseph's College (Autonomous)<br/>
             MCA Batch 2025-2027
             {student.registerNumber && (
               <>
