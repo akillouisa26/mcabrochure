@@ -111,12 +111,12 @@ export default function SingleBrochurePrintPage() {
           {/* Left Column */}
           <div className="left-col">
             <div className="section contact-section">
-              <h3>Contact</h3>
-              {student.contactPhone && <div className="contact-item"><span>Phone</span>: {renderWithLinks(student.contactPhone)}</div>}
-              {student.contactEmail && <div className="contact-item"><span>Email</span>: {renderWithLinks(student.contactEmail)}</div>}
-              {linkedInVal && <div className="contact-item"><span>LinkedIn</span>: {renderWithLinks(linkedInVal)}</div>}
-              {githubVal && <div className="contact-item"><span>GitHub</span>: {renderWithLinks(githubVal)}</div>}
-              {portfolioVal && <div className="contact-item"><span>Portfolio</span>: {renderWithLinks(portfolioVal)}</div>}
+              <h3>{formConfig.sectionTitles?.contact || 'Contact'}</h3>
+              {student.contactPhone && <div className="contact-item"><span>{formConfig.fieldLabels?.phone || 'Phone'}</span>: {renderWithLinks(student.contactPhone)}</div>}
+              {student.contactEmail && <div className="contact-item"><span>{formConfig.fieldLabels?.email || 'Email'}</span>: {renderWithLinks(student.contactEmail)}</div>}
+              {linkedInVal && <div className="contact-item"><span>{formConfig.fieldLabels?.linkedIn || 'LinkedIn'}</span>: {renderWithLinks(linkedInVal)}</div>}
+              {githubVal && <div className="contact-item"><span>{formConfig.fieldLabels?.github || 'GitHub'}</span>: {renderWithLinks(githubVal)}</div>}
+              {portfolioVal && <div className="contact-item"><span>{formConfig.fieldLabels?.portfolio || 'Portfolio'}</span>: {renderWithLinks(portfolioVal)}</div>}
               {getCustomFieldsForSection('contact', student).map((cf, idx) => (
                 <div key={idx} className="contact-item">
                   <span>{cf.label}</span>: {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
@@ -125,7 +125,7 @@ export default function SingleBrochurePrintPage() {
             </div>
 
             <div className="section">
-              <h3>Educational Qualification</h3>
+              <h3>{formConfig.sectionTitles?.education || 'Educational Qualification'}</h3>
               <table className="edu-table">
                 <thead>
                   <tr>
@@ -157,22 +157,10 @@ export default function SingleBrochurePrintPage() {
 
             {(certs.length > 0 || getCustomFieldsForSection('certifications', student).length > 0) && (
               <div className="section">
-                <h3>Certifications</h3>
+                <h3>{formConfig.sectionTitles?.certifications || 'Certifications'}</h3>
                 <ul className="bullet-list">
                   {certs.map((c: string, idx: number) => <li key={idx}>{renderWithLinks(c)}</li>)}
                   {getCustomFieldsForSection('certifications', student).map((cf, idx) => (
-                    <li key={'cf_' + idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {(tech.length > 0 || getCustomFieldsForSection('technical', student).length > 0) && (
-              <div className="section">
-                <h3>Technical Expertise</h3>
-                <ul className="bullet-list">
-                  {tech.map((t: string, idx: number) => <li key={idx}>{renderWithLinks(t)}</li>)}
-                  {getCustomFieldsForSection('technical', student).map((cf, idx) => (
                     <li key={'cf_' + idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
                   ))}
                 </ul>
@@ -184,31 +172,31 @@ export default function SingleBrochurePrintPage() {
           <div className="right-col">
             {(internships.length > 0 || getCustomFieldsForSection('internships', student).length > 0) && (
               <div className="section">
-                <h3>Internships</h3>
+                <h3>{formConfig.sectionTitles?.internships || 'Internships'}</h3>
                 {internships.map((i: any, idx: number) => {
                   const role = i.role || '';
                   const company = i.company || '';
                   const duration = i.duration || '';
 
                   return (
-                    <div key={idx} style={{ marginBottom: '0.65rem' }}>
+                    <div key={idx} style={{ marginBottom: '0.5rem' }}>
                       {role ? (
                         <>
-                          <div style={{ fontWeight: 700, color: '#000000', fontSize: '0.95rem', lineHeight: '1.35' }}>
+                          <div style={{ fontWeight: 700, color: '#000000', fontSize: '0.9rem', lineHeight: '1.3' }}>
                             {renderWithLinks(role)}
                           </div>
-                          <div style={{ color: '#000000', fontSize: '0.875rem', lineHeight: '1.35' }}>
+                          <div style={{ color: '#000000', fontSize: '0.85rem', lineHeight: '1.3' }}>
                             {renderWithLinks(company)}
                             {duration && <> | {renderWithLinks(duration)}</>}
                           </div>
                         </>
                       ) : (
                         <>
-                          <div style={{ fontWeight: 700, color: '#000000', fontSize: '0.95rem', lineHeight: '1.35' }}>
+                          <div style={{ fontWeight: 700, color: '#000000', fontSize: '0.9rem', lineHeight: '1.3' }}>
                             {renderWithLinks(company)}
                           </div>
                           {duration && (
-                            <div style={{ color: '#000000', fontSize: '0.875rem', lineHeight: '1.35' }}>
+                            <div style={{ color: '#000000', fontSize: '0.85rem', lineHeight: '1.3' }}>
                               Duration: {renderWithLinks(duration)}
                             </div>
                           )}
@@ -218,7 +206,7 @@ export default function SingleBrochurePrintPage() {
                   );
                 })}
                 {getCustomFieldsForSection('internships', student).map((cf, idx) => (
-                  <div key={'cf_' + idx} style={{ marginBottom: '0.5rem', color: '#000000', fontSize: '0.875rem' }}>
+                  <div key={'cf_' + idx} style={{ marginBottom: '0.4rem', color: '#000000', fontSize: '0.85rem' }}>
                     <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
                   </div>
                 ))}
@@ -227,18 +215,18 @@ export default function SingleBrochurePrintPage() {
 
             {(projs.length > 0 || getCustomFieldsForSection('projects', student).length > 0) && (
               <div className="section">
-                <h3>Projects</h3>
+                <h3>{formConfig.sectionTitles?.projects || 'Projects'}</h3>
                 {projs.map((p: any, idx: number) => {
                   const title = typeof p === 'string' ? p : (p.title || p.name || '');
                   const tools = typeof p === 'object' && p.toolsUsed ? p.toolsUsed : '';
 
                   return (
-                    <div key={idx} style={{ marginBottom: '0.65rem' }}>
-                      <div style={{ fontWeight: 700, color: '#000000', fontSize: '0.95rem', lineHeight: '1.35' }}>
+                    <div key={idx} style={{ marginBottom: '0.5rem' }}>
+                      <div style={{ fontWeight: 700, color: '#000000', fontSize: '0.9rem', lineHeight: '1.3' }}>
                         {renderWithLinks(title)}
                       </div>
                       {tools && (
-                        <div style={{ color: '#000000', fontSize: '0.875rem', lineHeight: '1.35' }}>
+                        <div style={{ color: '#000000', fontSize: '0.85rem', lineHeight: '1.3' }}>
                           Tools Used: {renderWithLinks(tools)}
                         </div>
                       )}
@@ -246,16 +234,28 @@ export default function SingleBrochurePrintPage() {
                   );
                 })}
                 {getCustomFieldsForSection('projects', student).map((cf, idx) => (
-                  <div key={'cf_' + idx} style={{ marginBottom: '0.5rem', color: '#000000', fontSize: '0.875rem' }}>
+                  <div key={'cf_' + idx} style={{ marginBottom: '0.4rem', color: '#000000', fontSize: '0.85rem' }}>
                     <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
                   </div>
                 ))}
               </div>
             )}
 
+            {(tech.length > 0 || getCustomFieldsForSection('technical', student).length > 0) && (
+              <div className="section">
+                <h3>{formConfig.sectionTitles?.technical || 'Technical Expertise'}</h3>
+                <ul className="bullet-list">
+                  {tech.map((t: string, idx: number) => <li key={idx}>{renderWithLinks(t)}</li>)}
+                  {getCustomFieldsForSection('technical', student).map((cf, idx) => (
+                    <li key={'cf_' + idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {(strengths.length > 0 || getCustomFieldsForSection('strengths', student).length > 0) && (
               <div className="section">
-                <h3>Strengths</h3>
+                <h3>{formConfig.sectionTitles?.strengths || 'Strengths'}</h3>
                 <ul className="bullet-list strengths-list">
                   {strengths.map((s: string, idx: number) => <li key={idx}>{renderWithLinks(s)}</li>)}
                   {getCustomFieldsForSection('strengths', student).map((cf, idx) => (

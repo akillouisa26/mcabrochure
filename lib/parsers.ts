@@ -11,10 +11,10 @@ export const safeParseArray = (val: any): any[] => {
       if (Array.isArray(parsed)) return parsed;
       if (typeof parsed === 'object' && parsed !== null) return [parsed];
       if (typeof parsed === 'string') {
-        return parsed.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
+        return [parsed.trim()];
       }
     } catch {
-      return trimmed.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
+      return trimmed.split(/\n+/).map(s => s.trim()).filter(Boolean);
     }
   }
   if (typeof val === 'object') return [val];
@@ -26,13 +26,13 @@ export const parseStringList = (val: any): string[] => {
   const result: string[] = [];
   for (const item of rawArray) {
     if (typeof item === 'string') {
-      const subItems = item.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
-      result.push(...subItems);
+      const trimmed = item.trim();
+      if (trimmed) result.push(trimmed);
     } else if (item && typeof item === 'object') {
       const str = item.name || item.title || item.label || item.value || JSON.stringify(item);
       if (str) {
-        const subItems = String(str).split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
-        result.push(...subItems);
+        const trimmed = String(str).trim();
+        if (trimmed) result.push(trimmed);
       }
     }
   }

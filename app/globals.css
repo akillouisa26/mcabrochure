@@ -206,32 +206,32 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  padding: 1.5rem 2.5rem 2rem;
+  padding: 1.25rem 2.5rem 65px;
   flex: 1;
 }
 
 /* Column general styles */
 .section {
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.9rem;
 }
 .section h3 {
   color: #113666;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   border-bottom: 2px solid #b3cdef;
-  padding-bottom: 0.35rem;
-  margin-bottom: 0.75rem;
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 
 /* Left column specials */
 .contact-section {
   background: #f0f7ff;
-  padding: 1rem 1.25rem;
+  padding: 0.85rem 1.15rem;
   border-radius: 6px;
 }
 .contact-item {
   display: flex;
-  margin-bottom: 0.35rem;
-  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.875rem;
   word-break: break-all;
 }
 .contact-item span {
@@ -245,11 +245,11 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 .edu-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 0.825rem;
 }
 .edu-table th, .edu-table td {
   border: 1px solid #b3cdef;
-  padding: 0.35rem 0.5rem;
+  padding: 0.3rem 0.45rem;
   text-align: center;
 }
 .edu-table th {
@@ -268,8 +268,8 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   color: #2b5585;
 }
 .bullet-list li {
-  margin-bottom: 0.35rem;
-  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
 }
 .bullet-list li::marker {
   color: #113666;
@@ -287,7 +287,7 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 .project-title {
   font-weight: 600;
   color: #113666;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 .project-role {
   color: #4b5563;
@@ -300,29 +300,33 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 }
 
 .strengths-list li {
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.875rem;
 }
 
-/* Footer banner effect - smoothly anchored without overlapping content */
+/* Footer banner effect - cleanly anchored at bottom of A4 card */
 .brochure-footer {
-  position: relative;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   width: 100%;
-  min-height: 80px;
+  height: 55px;
   background-color: #113666;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 1rem 2.5rem;
+  padding: 0.4rem 2.5rem;
   color: white;
-  margin-top: auto;
+  box-sizing: border-box;
+  z-index: 50;
 }
 
 .footer-text {
   text-align: right;
-  font-size: 0.85rem;
-  line-height: 1.3;
-  opacity: 0.9;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  opacity: 0.95;
 }
 
 /* PRINT STYLES - STRICT SINGLE A4 PAGE */
