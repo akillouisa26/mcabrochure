@@ -76,7 +76,7 @@ function AdminDashboardContent() {
   };
 
   // Form Settings Config state
-  const DEFAULT_SECTIONS = ['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths', 'additional'];
+  const DEFAULT_SECTIONS = ['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths'];
   
   const DEFAULT_SECTION_TITLES: Record<string, string> = {
     personal: 'Personal Details',
@@ -87,7 +87,6 @@ function AdminDashboardContent() {
     internships: 'Internships',
     projects: 'Projects',
     strengths: 'Strengths',
-    additional: 'Additional Information',
   };
 
   const DEFAULT_FIELD_LABELS: Record<string, string> = {
@@ -173,9 +172,20 @@ function AdminDashboardContent() {
     fieldRequired: {
       name: true,
       registerNumber: true,
+      tagline: true,
+      objective: true,
+      profilePicture: true,
       phone: true,
       email: true,
+      linkedIn: true,
+      github: true,
+      portfolio: false,
       education: true,
+      certifications: true,
+      technical: true,
+      internships: true,
+      projects: true,
+      strengths: true,
     },
     fieldTypes: {},
     fieldOrder: {},

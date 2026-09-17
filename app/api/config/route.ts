@@ -60,22 +60,22 @@ const defaultConfig = {
   fieldRequired: {
     name: true,
     registerNumber: true,
-    tagline: false,
-    objective: false,
-    profilePicture: false,
+    tagline: true,
+    objective: true,
+    profilePicture: true,
     phone: true,
     email: true,
-    linkedIn: false,
-    github: false,
+    linkedIn: true,
+    github: true,
     portfolio: false,
     education: true,
-    certifications: false,
-    technical: false,
-    internships: false,
-    projects: false,
-    strengths: false,
+    certifications: true,
+    technical: true,
+    internships: true,
+    projects: true,
+    strengths: true,
   },
-  sectionOrder: ['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths', 'additional'],
+  sectionOrder: ['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths'],
   sectionTitles: {
     personal: 'Personal Details',
     contact: 'Contact Info',
@@ -85,13 +85,20 @@ const defaultConfig = {
     internships: 'Internships',
     projects: 'Projects',
     strengths: 'Strengths',
-    additional: 'Additional Information',
   },
   customFields: [],
 };
 
 // In-memory fallback for local session/dev server resilience
 let inMemoryConfig = { ...defaultConfig };
+
+const cleanConfig = (cfg: any) => {
+  const result = { ...cfg };
+  if (Array.isArray(result.sectionOrder)) {
+    result.sectionOrder = result.sectionOrder.filter((s: string) => s !== 'additional');
+  }
+  return result;
+};
 
 export async function GET() {
   try {
@@ -100,11 +107,13 @@ export async function GET() {
 
     if (docSnap.exists()) {
       const data = docSnap.data();
-      inMemoryConfig = { ...defaultConfig, ...data };
+      inMemoryConfig = cleanConfig({ ...defaultConfig, ...data });
       return NextResponse.json(inMemoryConfig);
     }
+    inMemoryConfig = cleanConfig(inMemoryConfig);
     return NextResponse.json(inMemoryConfig);
   } catch (error) {
+    inMemoryConfig = cleanConfig(inMemoryConfig);
     return NextResponse.json(inMemoryConfig);
   }
 }
@@ -112,11 +121,11 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    inMemoryConfig = { ...inMemoryConfig, ...body };
+    inMemoryConfig = cleanConfig({ ...inMemoryConfig, ...body });
 
     try {
       const docRef = doc(db, 'systemConfig', 'formSettings');
-      await setDoc(docRef, body, { merge: true });
+      await setDoc(docRef, inMemoryConfig, { merge: true });
     } catch (fsErr) {
       console.warn('Firestore setDoc warning (using in-memory fallback):', fsErr);
     }

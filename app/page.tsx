@@ -173,11 +173,11 @@ export default function Home() {
     setSuccess('');
     setErrorMsg('');
 
-    const isFieldReq = (key: string, defaultReq: boolean = false) => {
+    const isFieldReq = (key: string, defaultReq: boolean = true) => {
       if (formConfig.fieldRequired && key in formConfig.fieldRequired) {
         return Boolean(formConfig.fieldRequired[key]);
       }
-      return defaultReq;
+      return key !== 'portfolio';
     };
 
     // Form Field Validations (Only validate if field is enabled and marked Required in Form Settings)
@@ -189,11 +189,11 @@ export default function Home() {
       setErrorMsg(`Please enter your ${formConfig.fieldLabels?.registerNumber || 'Register Number'}.`);
       return;
     }
-    if (formConfig.showTagline !== false && isFieldReq('tagline', false) && !formData.tagline.trim()) {
+    if (formConfig.showTagline !== false && isFieldReq('tagline', true) && !formData.tagline.trim()) {
       setErrorMsg(`Please enter your ${formConfig.fieldLabels?.tagline || 'Tagline'}.`);
       return;
     }
-    if (formConfig.showObjective !== false && isFieldReq('objective', false) && !formData.objective.trim()) {
+    if (formConfig.showObjective !== false && isFieldReq('objective', true) && !formData.objective.trim()) {
       setErrorMsg(`Please enter your ${formConfig.fieldLabels?.objective || 'Vision Statement / Objective'}.`);
       return;
     }
@@ -205,6 +205,14 @@ export default function Home() {
     }
     if (formConfig.showEmail !== false && isFieldReq('email', true) && !formData.contactEmail.trim()) {
       setErrorMsg(`Please enter a valid ${formConfig.fieldLabels?.email || 'Email address'}.`);
+      return;
+    }
+    if (formConfig.showLinkedIn !== false && isFieldReq('linkedIn', true) && !formData.linkedIn.trim()) {
+      setErrorMsg(`Please enter your ${formConfig.fieldLabels?.linkedIn || 'LinkedIn URL'}.`);
+      return;
+    }
+    if (formConfig.showGithub !== false && isFieldReq('github', true) && !formData.github.trim()) {
+      setErrorMsg(`Please enter your ${formConfig.fieldLabels?.github || 'GitHub URL'}.`);
       return;
     }
 
@@ -225,7 +233,7 @@ export default function Home() {
     }
 
     // Validate Certifications if enabled and required
-    if (formConfig.showCertifications !== false && isFieldReq('certifications', false)) {
+    if (formConfig.showCertifications !== false && isFieldReq('certifications', true)) {
       if (!formData.certifications || formData.certifications.length === 0) {
         setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.certifications || 'Certification'}.`);
         return;
@@ -239,7 +247,7 @@ export default function Home() {
     }
 
     // Validate Technical Expertise if enabled and required
-    if (formConfig.showTechnicalExpertise !== false && isFieldReq('technical', false)) {
+    if (formConfig.showTechnicalExpertise !== false && isFieldReq('technical', true)) {
       if (!formData.technicalExpertise || formData.technicalExpertise.length === 0) {
         setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.technical || 'Technical Expertise'} item.`);
         return;
@@ -253,7 +261,7 @@ export default function Home() {
     }
 
     // Validate Internships if enabled and required
-    if (formConfig.showInternships !== false && isFieldReq('internships', false)) {
+    if (formConfig.showInternships !== false && isFieldReq('internships', true)) {
       if (!formData.internships || formData.internships.length === 0) {
         setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.internships || 'Internship'} entry.`);
         return;
@@ -267,7 +275,7 @@ export default function Home() {
     }
 
     // Validate Projects if enabled and required
-    if (formConfig.showProjects !== false && isFieldReq('projects', false)) {
+    if (formConfig.showProjects !== false && isFieldReq('projects', true)) {
       if (!formData.projects || formData.projects.length === 0) {
         setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.projects || 'Project'} entry.`);
         return;
@@ -281,7 +289,7 @@ export default function Home() {
     }
 
     // Validate Strengths if enabled and required
-    if (formConfig.showStrengths !== false && isFieldReq('strengths', false)) {
+    if (formConfig.showStrengths !== false && isFieldReq('strengths', true)) {
       if (!formData.strengths || formData.strengths.length === 0) {
         setErrorMsg(`Please add at least one ${formConfig.fieldLabels?.strengths || 'Strength'} entry.`);
         return;
@@ -295,7 +303,7 @@ export default function Home() {
     }
 
     // Validate Profile Picture if enabled and required
-    if (formConfig.showProfilePicture !== false && isFieldReq('profilePicture', false) && !formData.profileImageBase64) {
+    if (formConfig.showProfilePicture !== false && isFieldReq('profilePicture', true) && !formData.profileImageBase64) {
       setErrorMsg(`Please upload your ${formConfig.fieldLabels?.profilePicture || 'Profile Picture'} before submitting.`);
       return;
     }
@@ -347,12 +355,12 @@ export default function Home() {
     }
   };
 
-  const sectionOrder = Array.isArray(formConfig.sectionOrder) && formConfig.sectionOrder.length > 0
+  const sectionOrder = (Array.isArray(formConfig.sectionOrder) && formConfig.sectionOrder.length > 0
     ? formConfig.sectionOrder
-    : ['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths', 'additional'];
+    : ['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths']).filter((s: string) => s !== 'additional');
 
   const renderCustomFieldsForSection = (secId: string) => {
-    const fields = (formConfig.customFields || []).filter((f: any) => (f.section || 'additional') === secId && f.enabled !== false);
+    const fields = (formConfig.customFields || []).filter((f: any) => f.section === secId && f.enabled !== false);
     if (fields.length === 0) return null;
 
     return fields.map((field: any) => (
@@ -414,11 +422,15 @@ export default function Home() {
             internships: 'Internships',
             projects: 'Projects',
             strengths: 'Strengths',
-            additional: 'Additional Information',
           }[secId] || secId;
 
           const getSection = (key: string, defaultSec: string) => formConfig.fieldSections?.[key] || defaultSec;
-          const isReq = (key: string, defaultReq: boolean) => formConfig.fieldRequired?.[key] ?? defaultReq;
+          const isReq = (key: string, defaultReq: boolean = true) => {
+            if (formConfig.fieldRequired && key in formConfig.fieldRequired) {
+              return Boolean(formConfig.fieldRequired[key]);
+            }
+            return key !== 'portfolio';
+          };
 
           const hasFieldsInSec = 
             (getSection('name', 'personal') === secId && formConfig.showName !== false) ||
@@ -464,21 +476,21 @@ export default function Home() {
               {getSection('tagline', 'personal') === secId && formConfig.showTagline !== false && (
                 <div className="form-group">
                   <label>{getLabel('tagline', 'Tagline')}</label>
-                  <input className="form-control" required={isReq('tagline', false)} name="tagline" value={formData.tagline} onChange={handleChange} placeholder="Software Engineer & Web Developer" />
+                  <input className="form-control" required={isReq('tagline', true)} name="tagline" value={formData.tagline} onChange={handleChange} placeholder="Software Engineer & Web Developer" />
                 </div>
               )}
 
               {getSection('objective', 'personal') === secId && formConfig.showObjective !== false && (
                 <div className="form-group">
                   <label>{getLabel('objective', 'Vision Statement (2 Lines)')}</label>
-                  <textarea className="form-control" rows={2} required={isReq('objective', false)} name="objective" value={formData.objective} onChange={handleChange} placeholder="To secure a challenging position in a reputable organization..." />
+                  <textarea className="form-control" rows={2} required={isReq('objective', true)} name="objective" value={formData.objective} onChange={handleChange} placeholder="To secure a challenging position in a reputable organization..." />
                 </div>
               )}
 
               {getSection('profilePicture', 'personal') === secId && formConfig.showProfilePicture !== false && (
                 <div className="form-group">
                   <label>{getLabel('profilePicture', 'Profile Picture')}</label>
-                  <input type="file" accept="image/*" required={isReq('profilePicture', false)} className="form-control" onChange={handleFileChange} />
+                  <input type="file" accept="image/*" required={isReq('profilePicture', true)} className="form-control" onChange={handleFileChange} />
                 </div>
               )}
 
@@ -499,14 +511,14 @@ export default function Home() {
               {getSection('linkedIn', 'contact') === secId && formConfig.showLinkedIn !== false && (
                 <div className="form-group">
                   <label>{getLabel('linkedIn', 'LinkedIn')}</label>
-                  <input className="form-control" type="url" required={isReq('linkedIn', false)} name="linkedIn" value={formData.linkedIn} onChange={handleChange} placeholder="https://linkedin.com/in/username" />
+                  <input className="form-control" type="url" required={isReq('linkedIn', true)} name="linkedIn" value={formData.linkedIn} onChange={handleChange} placeholder="https://linkedin.com/in/username" />
                 </div>
               )}
 
               {getSection('github', 'contact') === secId && formConfig.showGithub !== false && (
                 <div className="form-group">
                   <label>{getLabel('github', 'GitHub')}</label>
-                  <input className="form-control" type="url" required={isReq('github', false)} name="github" value={formData.github} onChange={handleChange} placeholder="https://github.com/username" />
+                  <input className="form-control" type="url" required={isReq('github', true)} name="github" value={formData.github} onChange={handleChange} placeholder="https://github.com/username" />
                 </div>
               )}
 
