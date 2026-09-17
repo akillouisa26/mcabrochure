@@ -58,6 +58,11 @@ export default function Home() {
     setFormData(prev => ({ ...prev, contactPhone: val }));
   };
 
+  const handleRegisterNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.toUpperCase();
+    setFormData(prev => ({ ...prev, registerNumber: val }));
+  };
+
   const handleCustomFieldChange = (fieldId: string, value: any) => {
     setFormData(prev => ({
       ...prev,
@@ -310,7 +315,7 @@ export default function Home() {
 
         <div className="form-group">
           <label>Register Number *</label>
-          <input className="form-control" required name="registerNumber" value={formData.registerNumber} onChange={handleChange} placeholder="e.g. 25MCA101" />
+          <input className="form-control" required name="registerNumber" value={formData.registerNumber} onChange={handleRegisterNumberChange} placeholder="e.g. 25PCA101" />
         </div>
 
         {formConfig.showTagline && (
