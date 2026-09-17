@@ -98,6 +98,8 @@ export default function Home() {
     let cleanVal = value;
     if (subfield === 'cgpa') {
       cleanVal = value.replace(/[^0-9.]/g, '');
+    } else if (subfield === 'year') {
+      cleanVal = value.replace(/[^0-9-]/g, '');
     }
     if (subfield) {
       updated[index][subfield] = cleanVal;
