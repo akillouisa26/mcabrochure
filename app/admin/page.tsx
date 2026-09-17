@@ -18,6 +18,49 @@ function AdminDashboardContent() {
   const [activeTab, setActiveTab] = useState<'submissions' | 'brochures' | 'settings'>(initialTab);
   const [loading, setLoading] = useState(true);
   const [viewStudentModal, setViewStudentModal] = useState<any | null>(null);
+  const [editStudentModal, setEditStudentModal] = useState<any | null>(null);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState('');
+
+  const handleOpenEditModal = (student: any) => {
+    setEditError('');
+    setEditStudentModal({
+      ...student,
+      educationalQualifications: parseEducationList(student.educationalQualifications),
+      certifications: parseStringList(student.certifications),
+      technicalExpertise: parseStringList(student.technicalExpertise),
+      internships: parseInternshipsList(student.internships),
+      projects: parseProjectsList(student.projects),
+      strengths: parseStringList(student.strengths),
+      customFieldsData: student.customFieldsData ? { ...student.customFieldsData } : {},
+    });
+  };
+
+  const handleSaveEditStudent = async () => {
+    if (!editStudentModal) return;
+    setEditSaving(true);
+    setEditError('');
+    try {
+      const res = await fetch(`/api/students/${editStudentModal.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editStudentModal),
+      });
+      const data = await res.json();
+      if (res.ok && data.id) {
+        setStudents(students.map(s => s.id === data.id ? data : s));
+        setEditStudentModal(null);
+        setConfigSuccess('Student profile details updated successfully!');
+        setTimeout(() => setConfigSuccess(''), 4000);
+      } else {
+        setEditError(data.error || 'Failed to update student profile.');
+      }
+    } catch (e: any) {
+      setEditError(e?.message || 'Error updating student profile.');
+    } finally {
+      setEditSaving(false);
+    }
+  };
 
   // Form Settings Config state
   const DEFAULT_SECTIONS = ['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths', 'additional'];
@@ -751,6 +794,7 @@ function AdminDashboardContent() {
                         <button onClick={() => approveStudent(student.id)} className="btn btn-success" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', background: '#10b981', color: '#fff' }}>Verify & Approve</button>
                       )}
                       <button onClick={() => setViewStudentModal(student)} className="btn btn-primary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', background: '#2563eb' }}>View</button>
+                      <button onClick={() => handleOpenEditModal(student)} className="btn btn-primary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', background: '#f59e0b', color: '#fff' }}>Edit</button>
                       <Link href={`/admin/${student.id}/print`} className="btn btn-primary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', background: '#4b5563' }}>Generate</Link>
                       <button onClick={() => deleteStudent(student.id)} className="btn btn-danger" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}>Delete</button>
                     </div>
@@ -1362,6 +1406,300 @@ function AdminDashboardContent() {
             <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
               <button onClick={() => setViewStudentModal(null)} className="btn btn-secondary">Close Details</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Student Submission Modal */}
+      {editStudentModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '1rem'
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '8px',
+            maxWidth: '750px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            padding: '1.5rem',
+            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
+              <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#111827' }}>Edit Student Profile Details</h2>
+              <button 
+                onClick={() => setEditStudentModal(null)} 
+                style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.3rem 0.7rem', cursor: 'pointer', fontWeight: 600 }}
+              >
+                ✕ Close
+              </button>
+            </div>
+
+            {editError && (
+              <div style={{ padding: '0.75rem 1rem', background: '#fee2e2', color: '#991b1b', marginBottom: '1rem', borderRadius: '4px', border: '1px solid #fca5a5', fontWeight: 600 }}>
+                {editError}
+              </div>
+            )}
+
+            <form onSubmit={(e) => { e.preventDefault(); handleSaveEditStudent(); }} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {/* Personal Details */}
+              <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#1e293b' }}>Personal & Contact Details</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Full Name</label>
+                    <input 
+                      type="text" 
+                      value={editStudentModal.name || ''} 
+                      onChange={e => setEditStudentModal({ ...editStudentModal, name: e.target.value })} 
+                      className="form-control" 
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Register Number</label>
+                    <input 
+                      type="text" 
+                      value={editStudentModal.registerNumber || ''} 
+                      onChange={e => setEditStudentModal({ ...editStudentModal, registerNumber: e.target.value.toUpperCase() })} 
+                      className="form-control" 
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Tagline / Role</label>
+                    <input 
+                      type="text" 
+                      value={editStudentModal.tagline || ''} 
+                      onChange={e => setEditStudentModal({ ...editStudentModal, tagline: e.target.value })} 
+                      className="form-control" 
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Phone Number</label>
+                    <input 
+                      type="text" 
+                      value={editStudentModal.contactPhone || ''} 
+                      onChange={e => setEditStudentModal({ ...editStudentModal, contactPhone: e.target.value })} 
+                      className="form-control" 
+                    />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Email Address</label>
+                    <input 
+                      type="email" 
+                      value={editStudentModal.contactEmail || ''} 
+                      onChange={e => setEditStudentModal({ ...editStudentModal, contactEmail: e.target.value })} 
+                      className="form-control" 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Educational Qualifications */}
+              <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <h3 style={{ margin: 0, fontSize: '1rem', color: '#1e293b' }}>Educational Qualifications</h3>
+                  <button 
+                    type="button" 
+                    onClick={() => setEditStudentModal({
+                      ...editStudentModal,
+                      educationalQualifications: [...(editStudentModal.educationalQualifications || []), { qualification: '', institution: '', year: '', cgpa: '' }]
+                    })}
+                    className="btn btn-secondary" 
+                    style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem', background: '#3b82f6', color: '#fff' }}
+                  >
+                    + Add Row
+                  </button>
+                </div>
+                {(editStudentModal.educationalQualifications || []).map((edu: any, idx: number) => (
+                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.5fr 1fr 0.8fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+                    <input type="text" placeholder="Degree (e.g. MCA)" value={edu.qualification || ''} onChange={e => {
+                      const updated = [...editStudentModal.educationalQualifications];
+                      updated[idx].qualification = e.target.value;
+                      setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    <input type="text" placeholder="Institution" value={edu.institution || ''} onChange={e => {
+                      const updated = [...editStudentModal.educationalQualifications];
+                      updated[idx].institution = e.target.value;
+                      setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    <input type="text" placeholder="Year (2022-2025)" value={edu.year || ''} onChange={e => {
+                      const updated = [...editStudentModal.educationalQualifications];
+                      updated[idx].year = e.target.value;
+                      setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    <input type="text" placeholder="CGPA" value={edu.cgpa || ''} onChange={e => {
+                      const updated = [...editStudentModal.educationalQualifications];
+                      updated[idx].cgpa = e.target.value;
+                      setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    <button type="button" onClick={() => {
+                      const updated = [...editStudentModal.educationalQualifications];
+                      updated.splice(idx, 1);
+                      setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                    }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Certifications */}
+              <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <h3 style={{ margin: 0, fontSize: '1rem', color: '#1e293b' }}>Certifications</h3>
+                  <button 
+                    type="button" 
+                    onClick={() => setEditStudentModal({
+                      ...editStudentModal,
+                      certifications: [...(editStudentModal.certifications || []), '']
+                    })}
+                    className="btn btn-secondary" 
+                    style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem', background: '#3b82f6', color: '#fff' }}
+                  >
+                    + Add Certification
+                  </button>
+                </div>
+                {(editStudentModal.certifications || []).map((cert: string, idx: number) => (
+                  <div key={idx} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+                    <input type="text" placeholder="Certification Name" value={cert} onChange={e => {
+                      const updated = [...editStudentModal.certifications];
+                      updated[idx] = e.target.value;
+                      setEditStudentModal({ ...editStudentModal, certifications: updated });
+                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem', flex: 1 }} />
+                    <button type="button" onClick={() => {
+                      const updated = [...editStudentModal.certifications];
+                      updated.splice(idx, 1);
+                      setEditStudentModal({ ...editStudentModal, certifications: updated });
+                    }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Technical Expertise */}
+              <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <h3 style={{ margin: 0, fontSize: '1rem', color: '#1e293b' }}>Technical Expertise</h3>
+                  <button 
+                    type="button" 
+                    onClick={() => setEditStudentModal({
+                      ...editStudentModal,
+                      technicalExpertise: [...(editStudentModal.technicalExpertise || []), '']
+                    })}
+                    className="btn btn-secondary" 
+                    style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem', background: '#3b82f6', color: '#fff' }}
+                  >
+                    + Add Skill
+                  </button>
+                </div>
+                {(editStudentModal.technicalExpertise || []).map((tech: string, idx: number) => (
+                  <div key={idx} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+                    <input type="text" placeholder="Skill / Technology (e.g. Python)" value={tech} onChange={e => {
+                      const updated = [...editStudentModal.technicalExpertise];
+                      updated[idx] = e.target.value;
+                      setEditStudentModal({ ...editStudentModal, technicalExpertise: updated });
+                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem', flex: 1 }} />
+                    <button type="button" onClick={() => {
+                      const updated = [...editStudentModal.technicalExpertise];
+                      updated.splice(idx, 1);
+                      setEditStudentModal({ ...editStudentModal, technicalExpertise: updated });
+                    }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Projects */}
+              <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <h3 style={{ margin: 0, fontSize: '1rem', color: '#1e293b' }}>Projects</h3>
+                  <button 
+                    type="button" 
+                    onClick={() => setEditStudentModal({
+                      ...editStudentModal,
+                      projects: [...(editStudentModal.projects || []), { title: '', toolsUsed: '' }]
+                    })}
+                    className="btn btn-secondary" 
+                    style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem', background: '#3b82f6', color: '#fff' }}
+                  >
+                    + Add Project
+                  </button>
+                </div>
+                {(editStudentModal.projects || []).map((p: any, idx: number) => (
+                  <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+                    <input type="text" placeholder="Project Title" value={p.title || (typeof p === 'string' ? p : '')} onChange={e => {
+                      const updated = [...editStudentModal.projects];
+                      if (typeof updated[idx] === 'string') {
+                        updated[idx] = { title: e.target.value, toolsUsed: '' };
+                      } else {
+                        updated[idx].title = e.target.value;
+                      }
+                      setEditStudentModal({ ...editStudentModal, projects: updated });
+                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    <input type="text" placeholder="Tools Used (Optional)" value={p.toolsUsed || ''} onChange={e => {
+                      const updated = [...editStudentModal.projects];
+                      if (typeof updated[idx] === 'string') {
+                        updated[idx] = { title: updated[idx], toolsUsed: e.target.value };
+                      } else {
+                        updated[idx].toolsUsed = e.target.value;
+                      }
+                      setEditStudentModal({ ...editStudentModal, projects: updated });
+                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                    <button type="button" onClick={() => {
+                      const updated = [...editStudentModal.projects];
+                      updated.splice(idx, 1);
+                      setEditStudentModal({ ...editStudentModal, projects: updated });
+                    }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Strengths */}
+              <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <h3 style={{ margin: 0, fontSize: '1rem', color: '#1e293b' }}>Strengths</h3>
+                  <button 
+                    type="button" 
+                    onClick={() => setEditStudentModal({
+                      ...editStudentModal,
+                      strengths: [...(editStudentModal.strengths || []), '']
+                    })}
+                    className="btn btn-secondary" 
+                    style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem', background: '#3b82f6', color: '#fff' }}
+                  >
+                    + Add Strength
+                  </button>
+                </div>
+                {(editStudentModal.strengths || []).map((str: string, idx: number) => (
+                  <div key={idx} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+                    <input type="text" placeholder="Strength (e.g. Quick Learner)" value={str} onChange={e => {
+                      const updated = [...editStudentModal.strengths];
+                      updated[idx] = e.target.value;
+                      setEditStudentModal({ ...editStudentModal, strengths: updated });
+                    }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem', flex: 1 }} />
+                    <button type="button" onClick={() => {
+                      const updated = [...editStudentModal.strengths];
+                      updated.splice(idx, 1);
+                      setEditStudentModal({ ...editStudentModal, strengths: updated });
+                    }} style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.35rem 0.5rem', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Action buttons */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+                <button type="button" onClick={() => setEditStudentModal(null)} className="btn btn-secondary">Cancel</button>
+                <button type="submit" disabled={editSaving} className="btn btn-primary" style={{ background: '#10b981', color: '#fff', fontWeight: 600 }}>
+                  {editSaving ? 'Saving Changes...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

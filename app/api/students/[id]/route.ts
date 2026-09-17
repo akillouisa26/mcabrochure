@@ -36,6 +36,23 @@ export async function PUT(req: Request, context: any) {
 
     const data = await req.json();
 
+    if (data.registerNumber) {
+      const regNum = String(data.registerNumber).trim().toUpperCase();
+      const { collection, getDocs } = await import('firebase/firestore');
+      const collectionRef = collection(db, 'studentProfiles');
+      const snapshot = await getDocs(collectionRef);
+      const duplicateExists = snapshot.docs.some(docSnap => {
+        if (docSnap.id === id) return false;
+        const existingReg = String(docSnap.data().registerNumber || '').trim().toUpperCase();
+        return existingReg === regNum;
+      });
+      if (duplicateExists) {
+        return NextResponse.json({ 
+          error: `Register Number "${regNum}" is already assigned to another student profile.` 
+        }, { status: 400 });
+      }
+    }
+
     const parseArrayField = (val: any) => {
       if (typeof val === 'string') {
         try { return JSON.parse(val); } catch { return val; }
@@ -49,6 +66,7 @@ export async function PUT(req: Request, context: any) {
     if ('educationalQualifications' in data) updateData.educationalQualifications = parseArrayField(data.educationalQualifications);
     if ('certifications' in data) updateData.certifications = parseArrayField(data.certifications);
     if ('technicalExpertise' in data) updateData.technicalExpertise = parseArrayField(data.technicalExpertise);
+    if ('internships' in data) updateData.internships = parseArrayField(data.internships);
     if ('projects' in data) updateData.projects = parseArrayField(data.projects);
     if ('strengths' in data) updateData.strengths = parseArrayField(data.strengths);
 

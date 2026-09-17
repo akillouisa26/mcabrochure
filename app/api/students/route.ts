@@ -50,10 +50,26 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const data = await req.json();
+    const regNum = String(data.registerNumber || '').trim().toUpperCase();
+
+    if (regNum) {
+      const collectionRef = collection(db, 'studentProfiles');
+      const snapshot = await getDocs(collectionRef);
+      const duplicateExists = snapshot.docs.some(docSnap => {
+        const existingReg = String(docSnap.data().registerNumber || '').trim().toUpperCase();
+        return existingReg === regNum;
+      });
+
+      if (duplicateExists) {
+        return NextResponse.json({ 
+          error: `Register Number "${regNum}" has already filled out the brochure form. Duplicate submissions with the same Register Number are not allowed.` 
+        }, { status: 400 });
+      }
+    }
 
     const docData = {
       name: data.name || '',
-      registerNumber: data.registerNumber || '',
+      registerNumber: regNum || data.registerNumber || '',
       tagline: data.tagline || '',
       contactPhone: data.contactPhone || '',
       contactEmail: data.contactEmail || '',
