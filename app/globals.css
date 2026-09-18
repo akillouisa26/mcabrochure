@@ -277,6 +277,48 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   color: #113666;
 }
 
+/* Sparse Content Dynamic Scaling (For light/short profiles to fill page fully) */
+.brochure-body.sparse-content {
+  padding: 1.4rem 2.5rem 0.6rem;
+}
+.brochure-body.sparse-content .section {
+  margin-bottom: 1.45rem;
+}
+.brochure-body.sparse-content .section h3 {
+  font-size: 1.15rem;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+.brochure-body.sparse-content .contact-section {
+  padding: 1.15rem 1.4rem;
+  margin-bottom: 1.45rem;
+}
+.brochure-body.sparse-content .contact-item {
+  font-size: 0.925rem;
+  margin-bottom: 0.45rem;
+}
+.brochure-body.sparse-content .edu-table {
+  font-size: 0.9rem;
+}
+.brochure-body.sparse-content .edu-table th, 
+.brochure-body.sparse-content .edu-table td {
+  padding: 0.5rem 0.65rem;
+}
+.brochure-body.sparse-content .bullet-list {
+  padding-left: 1.35rem;
+}
+.brochure-body.sparse-content .bullet-list li {
+  margin-bottom: 0.45rem;
+  font-size: 0.925rem;
+  line-height: 1.42;
+}
+.brochure-body.sparse-content .item-title {
+  font-size: 0.975rem !important;
+}
+.brochure-body.sparse-content .item-sub {
+  font-size: 0.9rem !important;
+}
+
 /* Dense & Ultra-Dense Content Dynamic Scaling */
 .brochure-body.dense-content {
   padding: 0.85rem 2rem 0.5rem;
@@ -536,6 +578,10 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
     padding: 10mm 20mm 5mm !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
+  }
+
+  .brochure-body.sparse-content {
+    padding: 12mm 22mm 6mm !important;
   }
 
   .brochure-body.dense-content {

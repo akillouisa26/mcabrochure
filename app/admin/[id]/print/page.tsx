@@ -95,12 +95,13 @@ export default function SingleBrochurePrintPage() {
     const customCount = studentObj.customFieldsData ? Object.keys(studentObj.customFieldsData).length : 0;
     
     const visionLen = (studentObj.objective || studentObj.visionStatement || '').length;
-    const visionWeight = visionLen > 120 ? 2 : (visionLen > 60 ? 1 : 0);
+    const visionWeight = visionLen > 120 ? 3 : (visionLen > 60 ? 1.5 : 0);
 
-    const totalPoints = eduCount + certsCount + techCount + (internshipsCount * 1.5) + (projsCount * 1.5) + strengthsCount + customCount + visionWeight;
+    const totalPoints = (eduCount * 2.5) + (certsCount * 2) + (techCount * 2) + (internshipsCount * 3.5) + (projsCount * 3.5) + (strengthsCount * 1.5) + (customCount * 2) + visionWeight;
 
-    if (totalPoints > 16) return 'brochure-body ultra-dense-content';
-    if (totalPoints > 10) return 'brochure-body dense-content';
+    if (totalPoints > 75) return 'brochure-body ultra-dense-content';
+    if (totalPoints > 55) return 'brochure-body dense-content';
+    if (totalPoints <= 30) return 'brochure-body sparse-content';
     return 'brochure-body';
   };
 

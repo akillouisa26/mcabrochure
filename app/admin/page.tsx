@@ -1008,9 +1008,9 @@ function AdminDashboardContent() {
 
               const customCount = student.customFieldsData ? Object.keys(student.customFieldsData).length : 0;
               const visionLen = (student.objective || student.visionStatement || '').length;
-              const visionWeight = visionLen > 120 ? 2 : (visionLen > 60 ? 1 : 0);
-              const totalPoints = edu.length + certs.length + tech.length + (internships.length * 1.5) + (projs.length * 1.5) + strengths.length + customCount + visionWeight;
-              const densityClass = totalPoints > 16 ? 'brochure-body ultra-dense-content' : (totalPoints > 10 ? 'brochure-body dense-content' : 'brochure-body');
+              const visionWeight = visionLen > 120 ? 3 : (visionLen > 60 ? 1.5 : 0);
+              const totalPoints = (edu.length * 2.5) + (certs.length * 2) + (tech.length * 2) + (internships.length * 3.5) + (projs.length * 3.5) + (strengths.length * 1.5) + (customCount * 2) + visionWeight;
+              const densityClass = totalPoints > 75 ? 'brochure-body ultra-dense-content' : (totalPoints > 55 ? 'brochure-body dense-content' : (totalPoints <= 30 ? 'brochure-body sparse-content' : 'brochure-body'));
 
               return (
                 <div key={student.id} style={{ width: '100%', position: 'relative' }}>
