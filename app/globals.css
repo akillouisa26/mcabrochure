@@ -201,22 +201,16 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   border: 6px solid white;
 }
 
-/* Body */
+/* Body - Multi-column Left-to-Right Continuous Flow */
 .brochure-body {
-  display: flex;
-  gap: 1.5rem;
+  columns: 2;
+  column-gap: 1.5rem;
+  column-fill: auto;
+  display: block;
   height: 855px;
   padding: 1.25rem 2.25rem 0.6rem;
   box-sizing: border-box;
   overflow: hidden;
-}
-
-.brochure-column {
-  flex: 1;
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
 }
 
 .item-title {
@@ -228,13 +222,15 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 
 /* Default / Normal Content (Spacious & Well-Filled Page) */
 .section {
-  break-inside: avoid;
-  page-break-inside: avoid;
+  break-inside: auto;
+  page-break-inside: auto;
   margin-bottom: 1.35rem;
   display: inline-block;
   width: 100%;
 }
 .section h3 {
+  break-after: avoid;
+  page-break-after: avoid;
   color: #113666;
   font-size: 1.1rem;
   border-bottom: 2px solid #b3cdef;
@@ -246,6 +242,7 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   padding: 1.15rem 1.35rem;
   border-radius: 6px;
   margin-bottom: 1.35rem;
+  break-inside: auto;
 }
 .contact-item {
   display: flex;
@@ -253,6 +250,7 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   font-size: 0.9rem;
   word-break: break-all;
   color: #113666;
+  break-inside: avoid;
 }
 .contact-item span {
   min-width: 75px;
@@ -265,6 +263,9 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   border-collapse: collapse;
   font-size: 0.875rem;
   color: #113666;
+}
+.edu-table tr {
+  break-inside: avoid;
 }
 .edu-table th, .edu-table td {
   border: 1px solid #b3cdef;
@@ -281,6 +282,7 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   font-size: 0.9rem;
   line-height: 1.38;
   color: #113666;
+  break-inside: avoid;
 }
 
 /* Sparse Content Dynamic Scaling (For light/short profiles to fill page fully) */
@@ -618,20 +620,14 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   }
 
   .brochure-body {
-    display: flex !important;
-    gap: 1.5rem !important;
+    columns: 2 !important;
+    column-gap: 1.5rem !important;
+    column-fill: auto !important;
+    display: block !important;
     height: 220mm !important;
     padding: 10mm 20mm 5mm !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
-  }
-
-  .brochure-column {
-    flex: 1 !important;
-    width: 50% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    box-sizing: border-box !important;
   }
 
   .brochure-body.sparse-content {
