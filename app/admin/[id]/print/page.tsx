@@ -16,6 +16,7 @@ export default function SingleBrochurePrintPage() {
 
   const bodyRef = useRef<HTMLDivElement>(null);
   const [densityClass, setDensityClass] = useState<string>('brochure-body');
+  const [dynamicHeight, setDynamicHeight] = useState<number | null>(null);
 
   useEffect(() => {
     fetch(`/api/students/${params.id}`)
@@ -41,28 +42,45 @@ export default function SingleBrochurePrintPage() {
 
     const autoFit = () => {
       if (!bodyRef.current) return;
-      const MAX_H = 835;
-      const MIN_H = 750;
+      const STANDARD_BODY_H = 835;
 
       let currentIdx = 1;
       setDensityClass(modes[currentIdx]);
+      setDynamicHeight(null);
 
-      setTimeout(() => {
+      const checkStep = () => {
         if (!bodyRef.current) return;
-        let hasColumn3 = bodyRef.current.scrollWidth > bodyRef.current.clientWidth + 5;
-        let bodyH = bodyRef.current.scrollHeight;
 
-        if (hasColumn3 || bodyH > MAX_H) {
-          while ((hasColumn3 || bodyH > MAX_H) && currentIdx < modes.length - 1) {
-            currentIdx++;
-            setDensityClass(modes[currentIdx]);
-            hasColumn3 = bodyRef.current.scrollWidth > bodyRef.current.clientWidth + 5;
-            bodyH = bodyRef.current.scrollHeight;
+        const sections = Array.from(bodyRef.current.querySelectorAll('.section'));
+        let totalSecH = 0;
+        sections.forEach((sec) => {
+          const rect = sec.getBoundingClientRect();
+          const style = window.getComputedStyle(sec);
+          totalSecH += rect.height + (parseFloat(style.marginBottom) || 0);
+        });
+
+        const halfColH = Math.ceil(totalSecH / 2) + 25;
+        let hasColumn3 = bodyRef.current.scrollWidth > bodyRef.current.clientWidth + 5;
+
+        if ((hasColumn3 || halfColH > STANDARD_BODY_H) && currentIdx < modes.length - 1) {
+          currentIdx++;
+          setDensityClass(modes[currentIdx]);
+          setTimeout(checkStep, 35);
+        } else if (currentIdx === modes.length - 1 && halfColH > STANDARD_BODY_H) {
+          // Content is massive even at micro font size: dynamically expand height!
+          setDynamicHeight(halfColH);
+        } else if (halfColH < 720) {
+          // Content is sparse: contract height dynamically so layout is visually balanced without empty void
+          if (currentIdx === 1) {
+            setDensityClass(modes[0]);
           }
-        } else if (bodyH < MIN_H && !hasColumn3) {
-          setDensityClass(modes[0]);
+          setDynamicHeight(Math.max(420, halfColH));
+        } else {
+          setDynamicHeight(null);
         }
-      }, 50);
+      };
+
+      setTimeout(checkStep, 35);
     };
 
     autoFit();
@@ -161,7 +179,7 @@ export default function SingleBrochurePrintPage() {
         </div>
 
         {/* Main Content Sections - Continuous Left-to-Right Multi-column Flow */}
-        <div className={densityClass} ref={bodyRef}>
+        <div className={densityClass} ref={bodyRef} style={dynamicHeight ? { height: `${dynamicHeight}px`, minHeight: 'auto' } : undefined}>
           <div className="section contact-section">
             <h3>{formConfig.sectionTitles?.contact || 'Contact'}</h3>
             {student.contactPhone && <div className="contact-item"><span>{formConfig.fieldLabels?.phone || 'Phone'}</span>: {renderWithLinks(student.contactPhone)}</div>}
