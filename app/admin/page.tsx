@@ -682,6 +682,23 @@ function AdminDashboardContent() {
       return;
     }
 
+    const activeCustomFields = formConfig.customFields || [];
+    const extraCustomFieldKeysSet = new Set<string>();
+    students.forEach(s => {
+      if (s.customFieldsData && typeof s.customFieldsData === 'object') {
+        Object.keys(s.customFieldsData).forEach(k => {
+          if (!activeCustomFields.some(cf => cf.id === k)) {
+            extraCustomFieldKeysSet.add(k);
+          }
+        });
+      }
+    });
+    const extraCustomFields = Array.from(extraCustomFieldKeysSet).map(k => ({
+      id: k,
+      label: k.replace(/^field_/, 'Field ')
+    }));
+    const allCustomFieldCols = [...activeCustomFields, ...extraCustomFields];
+
     const headers = [
       'Register Number',
       'Student Name',
@@ -689,13 +706,25 @@ function AdminDashboardContent() {
       'Phone',
       'Email',
       'Tagline',
-      'Educational Qualifications',
+      'Vision Statement',
+      'LinkedIn',
+      'GitHub',
+      'Portfolio',
+      'UG Qualification',
+      'UG Institution',
+      'UG Year',
+      'UG CGPA',
+      'PG Qualification',
+      'PG Institution',
+      'PG Year',
+      'PG CGPA',
+      'All Educational Qualifications',
       'Certifications',
       'Technical Expertise',
       'Internships',
       'Projects',
       'Strengths',
-      'Custom Fields',
+      ...allCustomFieldCols.map(cf => cf.label),
       'Submitted At'
     ];
 
@@ -706,26 +735,36 @@ function AdminDashboardContent() {
     };
 
     const rows = students.map(student => {
-      const edu = parseEducationList(student.educationalQualifications)
+      const eduList = parseEducationList(student.educationalQualifications);
+      
+      let ugEdu = eduList.find((e: any) => e.qualification && (e.qualification.toLowerCase().includes('b.') || e.qualification.toLowerCase().includes('ug') || e.qualification.toLowerCase().includes('bachelor') || e.qualification.toLowerCase().includes('b.sc') || e.qualification.toLowerCase().includes('b.c.a') || e.qualification.toLowerCase().includes('bca') || e.qualification.toLowerCase().includes('bsc')));
+      let pgEdu = eduList.find((e: any) => e.qualification && (e.qualification.toLowerCase().includes('m.') || e.qualification.toLowerCase().includes('pg') || e.qualification.toLowerCase().includes('master') || e.qualification.toLowerCase().includes('m.c.a') || e.qualification.toLowerCase().includes('mca') || e.qualification.toLowerCase().includes('m.sc') || e.qualification.toLowerCase().includes('msc')));
+
+      if (!ugEdu && eduList[0]) ugEdu = eduList[0];
+      if (!pgEdu && eduList[1] && eduList[1] !== ugEdu) pgEdu = eduList[1];
+
+      const allEduStr = eduList
         .map((e: any) => `${e.qualification || ''} (${e.institution || ''}, ${e.year || ''}, CGPA: ${e.cgpa || ''})`)
+        .filter(Boolean)
         .join('; ');
+
       const certs = parseStringList(student.certifications).join('; ');
       const tech = parseStringList(student.technicalExpertise).join('; ');
       const internships = parseInternshipsList(student.internships)
-        .map((i: any) => `${i.company || ''} - ${i.role || ''} (${i.duration || ''})`)
+        .map((i: any) => `${i.company || ''}${i.role ? ` - ${i.role}` : ''}${i.duration ? ` (${i.duration})` : ''}`)
+        .filter(Boolean)
         .join('; ');
       const projs = parseProjectsList(student.projects)
         .map((p: any) => `${p.title || ''}${p.toolsUsed ? ` [Tools: ${p.toolsUsed}]` : ''}`)
+        .filter(Boolean)
         .join('; ');
       const strengths = parseStringList(student.strengths).join('; ');
-      const customFieldsText = student.customFieldsData && typeof student.customFieldsData === 'object'
-        ? Object.entries(student.customFieldsData)
-            .map(([k, v]) => {
-              const label = formConfig.customFields?.find(f => f.id === k)?.label || k.replace(/^field_/, 'Field ');
-              return `${label}: ${typeof v === 'object' ? JSON.stringify(v) : String(v)}`;
-            })
-            .join('; ')
-        : '';
+
+      const customValList = allCustomFieldCols.map(cf => {
+        const val = student.customFieldsData?.[cf.id];
+        if (val === undefined || val === null) return '';
+        return typeof val === 'object' ? JSON.stringify(val) : String(val);
+      });
 
       return [
         escapeCsv(student.registerNumber || 'N/A'),
@@ -734,13 +773,25 @@ function AdminDashboardContent() {
         escapeCsv(student.contactPhone || ''),
         escapeCsv(student.contactEmail || ''),
         escapeCsv(student.tagline || ''),
-        escapeCsv(edu),
+        escapeCsv(student.objective || ''),
+        escapeCsv(student.linkedIn || ''),
+        escapeCsv(student.github || ''),
+        escapeCsv(student.portfolio || ''),
+        escapeCsv(ugEdu?.qualification || ''),
+        escapeCsv(ugEdu?.institution || ''),
+        escapeCsv(ugEdu?.year || ''),
+        escapeCsv(ugEdu?.cgpa || ''),
+        escapeCsv(pgEdu?.qualification || ''),
+        escapeCsv(pgEdu?.institution || ''),
+        escapeCsv(pgEdu?.year || ''),
+        escapeCsv(pgEdu?.cgpa || ''),
+        escapeCsv(allEduStr),
         escapeCsv(certs),
         escapeCsv(tech),
         escapeCsv(internships),
         escapeCsv(projs),
         escapeCsv(strengths),
-        escapeCsv(customFieldsText),
+        ...customValList.map(val => escapeCsv(val)),
         escapeCsv(student.createdAt ? new Date(student.createdAt).toLocaleString() : '')
       ].join(',');
     });
