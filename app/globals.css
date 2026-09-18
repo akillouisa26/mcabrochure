@@ -207,10 +207,98 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   column-gap: 1.5rem;
   column-fill: auto;
   display: block;
-  height: 866px;
-  padding: 1.25rem 2.5rem 0;
+  height: 855px;
+  padding: 1rem 2.25rem 0.6rem;
   box-sizing: border-box;
   overflow: hidden;
+}
+
+.item-title {
+  font-size: 0.9rem;
+}
+.item-sub {
+  font-size: 0.85rem;
+}
+
+/* Dense & Ultra-Dense Content Dynamic Scaling */
+.brochure-body.dense-content {
+  padding: 0.75rem 2rem 0.5rem;
+}
+.brochure-body.dense-content .section {
+  margin-bottom: 0.5rem;
+}
+.brochure-body.dense-content .section h3 {
+  font-size: 0.95rem;
+  padding-bottom: 0.15rem;
+  margin-bottom: 0.35rem;
+}
+.brochure-body.dense-content .contact-section {
+  padding: 0.6rem 0.85rem;
+}
+.brochure-body.dense-content .contact-item {
+  font-size: 0.8rem;
+  margin-bottom: 0.2rem;
+}
+.brochure-body.dense-content .edu-table {
+  font-size: 0.775rem;
+}
+.brochure-body.dense-content .edu-table th, 
+.brochure-body.dense-content .edu-table td {
+  padding: 0.2rem 0.35rem;
+}
+.brochure-body.dense-content .bullet-list {
+  padding-left: 1.1rem;
+}
+.brochure-body.dense-content .bullet-list li {
+  margin-bottom: 0.2rem;
+  font-size: 0.8rem;
+  line-height: 1.25;
+}
+.brochure-body.dense-content .item-title {
+  font-size: 0.825rem !important;
+}
+.brochure-body.dense-content .item-sub {
+  font-size: 0.775rem !important;
+}
+
+.brochure-body.ultra-dense-content {
+  padding: 0.5rem 1.75rem 0.5rem;
+}
+.brochure-body.ultra-dense-content .section {
+  margin-bottom: 0.35rem;
+}
+.brochure-body.ultra-dense-content .section h3 {
+  font-size: 0.875rem;
+  padding-bottom: 0.1rem;
+  margin-bottom: 0.25rem;
+}
+.brochure-body.ultra-dense-content .contact-section {
+  padding: 0.45rem 0.75rem;
+}
+.brochure-body.ultra-dense-content .contact-item {
+  font-size: 0.75rem;
+  margin-bottom: 0.15rem;
+}
+.brochure-body.ultra-dense-content .edu-table {
+  font-size: 0.725rem;
+}
+.brochure-body.ultra-dense-content .edu-table th, 
+.brochure-body.ultra-dense-content .edu-table td {
+  padding: 0.15rem 0.25rem;
+}
+.brochure-body.ultra-dense-content .bullet-list {
+  padding-left: 1rem;
+}
+.brochure-body.ultra-dense-content .bullet-list li {
+  margin-bottom: 0.15rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+.brochure-body.ultra-dense-content .item-title {
+  font-size: 0.775rem !important;
+}
+.brochure-body.ultra-dense-content .item-sub {
+  font-size: 0.725rem !important;
 }
 
 /* Column general styles */
@@ -401,10 +489,18 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
     column-gap: 1.5rem !important;
     column-fill: auto !important;
     display: block !important;
-    height: 225mm !important;
-    padding: 1.25rem 2.5rem 0 !important;
+    height: 220mm !important;
+    padding: 8mm 20mm 5mm !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
+  }
+
+  .brochure-body.dense-content {
+    padding: 6mm 16mm 4mm !important;
+  }
+
+  .brochure-body.ultra-dense-content {
+    padding: 4mm 14mm 4mm !important;
   }
 
   .brochure-card a {

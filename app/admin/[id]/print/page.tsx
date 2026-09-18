@@ -84,6 +84,26 @@ export default function SingleBrochurePrintPage() {
   const portfolioVal = student.portfolio || student.customFieldsData?.portfolio || student.customFieldsData?.Portfolio || student.customFieldsData?.['portfolio'];
   const visionObj = student.objective || student.visionStatement || student.customFieldsData?.objective || student.customFieldsData?.visionStatement || student.customFieldsData?.['Vision Statement (2 Lines)'] || student.customFieldsData?.['Vision Statement (2 lines)'] || student.customFieldsData?.['Vision Statement'];
 
+  const getDensityClass = (studentObj: any) => {
+    if (!studentObj) return 'brochure-body';
+    const eduCount = parseEducationList(studentObj.educationalQualifications).length;
+    const certsCount = parseStringList(studentObj.certifications).length;
+    const techCount = parseStringList(studentObj.technicalExpertise).length;
+    const internshipsCount = parseInternshipsList(studentObj.internships).length;
+    const projsCount = parseProjectsList(studentObj.projects).length;
+    const strengthsCount = parseStringList(studentObj.strengths).length;
+    const customCount = studentObj.customFieldsData ? Object.keys(studentObj.customFieldsData).length : 0;
+    
+    const visionLen = (studentObj.objective || studentObj.visionStatement || '').length;
+    const visionWeight = visionLen > 120 ? 2 : (visionLen > 60 ? 1 : 0);
+
+    const totalPoints = eduCount + certsCount + techCount + (internshipsCount * 1.5) + (projsCount * 1.5) + strengthsCount + customCount + visionWeight;
+
+    if (totalPoints > 16) return 'brochure-body ultra-dense-content';
+    if (totalPoints > 10) return 'brochure-body dense-content';
+    return 'brochure-body';
+  };
+
   return (
     <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#e5e7eb', minHeight: '100vh' }} className="print-container">
       
@@ -118,7 +138,7 @@ export default function SingleBrochurePrintPage() {
         </div>
 
         {/* Main Content Sections */}
-        <div className="brochure-body">
+        <div className={getDensityClass(student)}>
           <div className="section contact-section">
             <h3>{formConfig.sectionTitles?.contact || 'Contact'}</h3>
             {student.contactPhone && <div className="contact-item"><span>{formConfig.fieldLabels?.phone || 'Phone'}</span>: {renderWithLinks(student.contactPhone)}</div>}
@@ -191,24 +211,24 @@ export default function SingleBrochurePrintPage() {
                   const duration = i.duration || '';
 
                   return (
-                    <li key={idx} style={{ marginBottom: '0.4rem' }}>
+                    <li key={idx} style={{ marginBottom: '0.35rem' }}>
                       {role ? (
                         <>
-                          <div style={{ fontWeight: 700, color: '#113666', fontSize: '0.9rem', lineHeight: '1.3' }}>
+                          <div className="item-title" style={{ fontWeight: 700, color: '#113666', lineHeight: '1.3' }}>
                             {renderWithLinks(role)}
                           </div>
-                          <div style={{ color: '#113666', fontSize: '0.85rem', lineHeight: '1.3' }}>
+                          <div className="item-sub" style={{ color: '#113666', lineHeight: '1.3' }}>
                             {renderWithLinks(company)}
                             {duration && <> | {renderWithLinks(duration)}</>}
                           </div>
                         </>
                       ) : (
                         <>
-                          <div style={{ fontWeight: 700, color: '#113666', fontSize: '0.9rem', lineHeight: '1.3' }}>
+                          <div className="item-title" style={{ fontWeight: 700, color: '#113666', lineHeight: '1.3' }}>
                             {renderWithLinks(company)}
                           </div>
                           {duration && (
-                            <div style={{ color: '#113666', fontSize: '0.85rem', lineHeight: '1.3' }}>
+                            <div className="item-sub" style={{ color: '#113666', lineHeight: '1.3' }}>
                               Duration: {renderWithLinks(duration)}
                             </div>
                           )}
@@ -218,7 +238,7 @@ export default function SingleBrochurePrintPage() {
                   );
                 })}
                 {getCustomFieldsForSection('internships', student).map((cf, idx) => (
-                  <li key={'cf_' + idx} style={{ color: '#113666', fontSize: '0.85rem' }}>
+                  <li key={'cf_' + idx} className="item-sub" style={{ color: '#113666' }}>
                     <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
                   </li>
                 ))}
@@ -235,12 +255,12 @@ export default function SingleBrochurePrintPage() {
                   const tools = typeof p === 'object' && p.toolsUsed ? p.toolsUsed : '';
 
                   return (
-                    <li key={idx} style={{ marginBottom: '0.4rem' }}>
-                      <div style={{ fontWeight: 700, color: '#113666', fontSize: '0.9rem', lineHeight: '1.3' }}>
+                    <li key={idx} style={{ marginBottom: '0.35rem' }}>
+                      <div className="item-title" style={{ fontWeight: 700, color: '#113666', lineHeight: '1.3' }}>
                         {renderWithLinks(title)}
                       </div>
                       {tools && (
-                        <div style={{ color: '#113666', fontSize: '0.85rem', lineHeight: '1.3' }}>
+                        <div className="item-sub" style={{ color: '#113666', lineHeight: '1.3' }}>
                           Tools Used: {renderWithLinks(tools)}
                         </div>
                       )}
@@ -248,7 +268,7 @@ export default function SingleBrochurePrintPage() {
                   );
                 })}
                 {getCustomFieldsForSection('projects', student).map((cf, idx) => (
-                  <li key={'cf_' + idx} style={{ color: '#113666', fontSize: '0.85rem' }}>
+                  <li key={'cf_' + idx} className="item-sub" style={{ color: '#113666' }}>
                     <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
                   </li>
                 ))}

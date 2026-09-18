@@ -1006,6 +1006,12 @@ function AdminDashboardContent() {
               const projs = parseProjectsList(student.projects);
               const strengths = parseStringList(student.strengths);
 
+              const customCount = student.customFieldsData ? Object.keys(student.customFieldsData).length : 0;
+              const visionLen = (student.objective || student.visionStatement || '').length;
+              const visionWeight = visionLen > 120 ? 2 : (visionLen > 60 ? 1 : 0);
+              const totalPoints = edu.length + certs.length + tech.length + (internships.length * 1.5) + (projs.length * 1.5) + strengths.length + customCount + visionWeight;
+              const densityClass = totalPoints > 16 ? 'brochure-body ultra-dense-content' : (totalPoints > 10 ? 'brochure-body dense-content' : 'brochure-body');
+
               return (
                 <div key={student.id} style={{ width: '100%', position: 'relative' }}>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.5rem', gap: '0.5rem' }}>
@@ -1036,7 +1042,7 @@ function AdminDashboardContent() {
                       </div>
 
                       {/* Main Content Sections */}
-                      <div className="brochure-body">
+                      <div className={densityClass}>
                         <div className="section contact-section">
                           <h3>{formConfig.sectionTitles?.contact || 'Contact'}</h3>
                           {student.contactPhone && <div className="contact-item"><span>{formConfig.fieldLabels?.phone || 'Phone'}</span>: {renderWithLinks(student.contactPhone)}</div>}
@@ -1109,24 +1115,24 @@ function AdminDashboardContent() {
                                 const duration = i.duration || '';
 
                                 return (
-                                  <li key={idx} style={{ marginBottom: '0.4rem' }}>
+                                  <li key={idx} style={{ marginBottom: '0.35rem' }}>
                                     {role ? (
                                       <>
-                                        <div style={{ fontWeight: 700, color: '#113666', fontSize: '0.9rem', lineHeight: '1.3' }}>
+                                        <div className="item-title" style={{ fontWeight: 700, color: '#113666', lineHeight: '1.3' }}>
                                           {renderWithLinks(role)}
                                         </div>
-                                        <div style={{ color: '#113666', fontSize: '0.85rem', lineHeight: '1.3' }}>
+                                        <div className="item-sub" style={{ color: '#113666', lineHeight: '1.3' }}>
                                           {renderWithLinks(company)}
                                           {duration && <> | {renderWithLinks(duration)}</>}
                                         </div>
                                       </>
                                     ) : (
                                       <>
-                                        <div style={{ fontWeight: 700, color: '#113666', fontSize: '0.9rem', lineHeight: '1.3' }}>
+                                        <div className="item-title" style={{ fontWeight: 700, color: '#113666', lineHeight: '1.3' }}>
                                           {renderWithLinks(company)}
                                         </div>
                                         {duration && (
-                                          <div style={{ color: '#113666', fontSize: '0.85rem', lineHeight: '1.3' }}>
+                                          <div className="item-sub" style={{ color: '#113666', lineHeight: '1.3' }}>
                                             Duration: {renderWithLinks(duration)}
                                           </div>
                                         )}
@@ -1136,7 +1142,7 @@ function AdminDashboardContent() {
                                 );
                               })}
                               {getCustomFieldsForSection('internships', student).map((cf, idx) => (
-                                <li key={'cf_' + idx} style={{ color: '#113666', fontSize: '0.85rem' }}>
+                                <li key={'cf_' + idx} className="item-sub" style={{ color: '#113666' }}>
                                   <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
                                 </li>
                               ))}
@@ -1153,12 +1159,12 @@ function AdminDashboardContent() {
                                 const tools = typeof p === 'object' && p.toolsUsed ? p.toolsUsed : '';
 
                                 return (
-                                  <li key={idx} style={{ marginBottom: '0.4rem' }}>
-                                    <div style={{ fontWeight: 700, color: '#113666', fontSize: '0.9rem', lineHeight: '1.3' }}>
+                                  <li key={idx} style={{ marginBottom: '0.35rem' }}>
+                                    <div className="item-title" style={{ fontWeight: 700, color: '#113666', lineHeight: '1.3' }}>
                                       {renderWithLinks(title)}
                                     </div>
                                     {tools && (
-                                      <div style={{ color: '#113666', fontSize: '0.85rem', lineHeight: '1.3' }}>
+                                      <div className="item-sub" style={{ color: '#113666', lineHeight: '1.3' }}>
                                         Tools Used: {renderWithLinks(tools)}
                                       </div>
                                     )}
@@ -1166,7 +1172,7 @@ function AdminDashboardContent() {
                                 );
                               })}
                               {getCustomFieldsForSection('projects', student).map((cf, idx) => (
-                                <li key={'cf_' + idx} style={{ color: '#113666', fontSize: '0.85rem' }}>
+                                <li key={'cf_' + idx} className="item-sub" style={{ color: '#113666' }}>
                                   <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
                                 </li>
                               ))}
