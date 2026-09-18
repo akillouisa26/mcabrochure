@@ -16,7 +16,8 @@ export async function POST(req: Request) {
     // Only accept authenticated Firebase Auth tokens
     if (idToken) {
       const res = NextResponse.json({ success: true });
-      res.cookies.set('admin_session', idToken, {
+      const sessionPayload = JSON.stringify({ idToken, loginTime: Date.now() });
+      res.cookies.set('admin_session', sessionPayload, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         maxAge: 60 * 60 * 24 * 7, // 1 week

@@ -12,12 +12,13 @@ import {
 } from 'firebase/firestore';
 import { safeParseArray } from '@/lib/parsers';
 
+import { checkIsAdminValid } from '@/lib/auth-check';
+
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const isAdmin = Boolean(cookieStore.get('admin_session')?.value);
+    const isAdmin = await checkIsAdminValid();
 
     const collectionRef = collection(db, 'studentProfiles');
     let q;
