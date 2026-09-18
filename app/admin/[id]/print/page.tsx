@@ -16,7 +16,6 @@ export default function SingleBrochurePrintPage() {
 
   const bodyRef = useRef<HTMLDivElement>(null);
   const [densityClass, setDensityClass] = useState<string>('brochure-body');
-  const [dynamicHeight, setDynamicHeight] = useState<number | null>(null);
 
   useEffect(() => {
     fetch(`/api/students/${params.id}`)
@@ -40,47 +39,82 @@ export default function SingleBrochurePrintPage() {
       'brochure-body micro-content'
     ];
 
+    const edu = parseEducationList(student.educationalQualifications);
+    const certs = parseStringList(student.certifications);
+    const tech = parseStringList(student.technicalExpertise);
+    const internships = parseInternshipsList(student.internships);
+    const projs = parseProjectsList(student.projects);
+    const strengths = parseStringList(student.strengths);
+
+    const linkedInVal = student.linkedIn || student.customFieldsData?.linkedIn || student.customFieldsData?.LinkedIn || student.customFieldsData?.['linkedin'];
+    const githubVal = student.github || student.customFieldsData?.github || student.customFieldsData?.GitHub || student.customFieldsData?.['github'];
+    const portfolioVal = student.portfolio || student.customFieldsData?.portfolio || student.customFieldsData?.Portfolio || student.customFieldsData?.['portfolio'];
+
+    const visionText = student.objective || student.visionStatement || student.customFieldsData?.objective || student.customFieldsData?.visionStatement || student.customFieldsData?.['Vision Statement (2 Lines)'] || student.customFieldsData?.['Vision Statement (2 lines)'] || student.customFieldsData?.['Vision Statement'] || '';
+    const visionLines = visionText ? Math.ceil(String(visionText).length / 65) : 0;
+
+    let contactCount = 0;
+    if (student.contactPhone) contactCount++;
+    if (student.contactEmail) contactCount++;
+    if (linkedInVal) contactCount++;
+    if (githubVal) contactCount++;
+    if (portfolioVal) contactCount++;
+
+    const customContactCount = getCustomFieldsForSection('contact', student).length + getCustomFieldsForSection('personal', student).length;
+
+    const contactLines = 2 + contactCount + customContactCount;
+    const eduLines = 2.5 + (edu.length * 1.5) + (getCustomFieldsForSection('education', student).length * 1.2);
+    const certLines = (certs.length > 0 || getCustomFieldsForSection('certifications', student).length > 0) ? (2 + certs.length + getCustomFieldsForSection('certifications', student).length) : 0;
+    const internshipLines = (internships.length > 0 || getCustomFieldsForSection('internships', student).length > 0) ? (2 + (internships.length * 2.2) + getCustomFieldsForSection('internships', student).length) : 0;
+    const projectLines = (projs.length > 0 || getCustomFieldsForSection('projects', student).length > 0) ? (2 + (projs.length * 2.2) + getCustomFieldsForSection('projects', student).length) : 0;
+    const techLines = (tech.length > 0 || getCustomFieldsForSection('technical', student).length > 0) ? (2 + tech.length + getCustomFieldsForSection('technical', student).length) : 0;
+    const strengthLines = (strengths.length > 0 || getCustomFieldsForSection('strengths', student).length > 0) ? (2 + strengths.length + getCustomFieldsForSection('strengths', student).length) : 0;
+
+    let customSectionLines = 0;
+    (formConfig.sectionOrder || ['additional'])
+      .filter((secId: string) => !['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths'].includes(secId))
+      .forEach((secId: string) => {
+        const count = getCustomFieldsForSection(secId, student).length;
+        if (count > 0) {
+          customSectionLines += (2 + count);
+        }
+      });
+
+    const totalContentLines = contactLines + eduLines + certLines + internshipLines + projectLines + techLines + strengthLines + customSectionLines + visionLines;
+
+    const initDensity = totalContentLines > 75 
+      ? 'brochure-body micro-content' 
+      : (totalContentLines > 58 
+        ? 'brochure-body ultra-dense-content' 
+        : (totalContentLines > 42 
+          ? 'brochure-body dense-content' 
+          : (totalContentLines <= 26 
+            ? 'brochure-body sparse-content' 
+            : 'brochure-body')));
+
+    let currentIdx = modes.indexOf(initDensity);
+    if (currentIdx === -1) currentIdx = 1;
+
+    setDensityClass(modes[currentIdx]);
+
     const autoFit = () => {
       if (!bodyRef.current) return;
-      const STANDARD_BODY_H = 835;
+      const MAX_H = 835;
 
-      let currentIdx = 1;
-      setDensityClass(modes[currentIdx]);
-      setDynamicHeight(null);
-
-      const checkStep = () => {
+      setTimeout(() => {
         if (!bodyRef.current) return;
-
-        const sections = Array.from(bodyRef.current.querySelectorAll('.section'));
-        let totalSecH = 0;
-        sections.forEach((sec) => {
-          const rect = sec.getBoundingClientRect();
-          const style = window.getComputedStyle(sec);
-          totalSecH += rect.height + (parseFloat(style.marginBottom) || 0);
-        });
-
-        const halfColH = Math.ceil(totalSecH / 2) + 25;
         let hasColumn3 = bodyRef.current.scrollWidth > bodyRef.current.clientWidth + 5;
+        let bodyH = bodyRef.current.scrollHeight;
 
-        if ((hasColumn3 || halfColH > STANDARD_BODY_H) && currentIdx < modes.length - 1) {
-          currentIdx++;
-          setDensityClass(modes[currentIdx]);
-          setTimeout(checkStep, 35);
-        } else if (currentIdx === modes.length - 1 && halfColH > STANDARD_BODY_H) {
-          // Content is massive even at micro font size: dynamically expand height!
-          setDynamicHeight(halfColH);
-        } else if (halfColH < 720) {
-          // Content is sparse: contract height dynamically so layout is visually balanced without empty void
-          if (currentIdx === 1) {
-            setDensityClass(modes[0]);
+        if (hasColumn3 || bodyH > MAX_H) {
+          while ((hasColumn3 || bodyH > MAX_H) && currentIdx < modes.length - 1) {
+            currentIdx++;
+            setDensityClass(modes[currentIdx]);
+            hasColumn3 = bodyRef.current.scrollWidth > bodyRef.current.clientWidth + 5;
+            bodyH = bodyRef.current.scrollHeight;
           }
-          setDynamicHeight(Math.max(420, halfColH));
-        } else {
-          setDynamicHeight(null);
         }
-      };
-
-      setTimeout(checkStep, 35);
+      }, 50);
     };
 
     autoFit();
@@ -179,7 +213,7 @@ export default function SingleBrochurePrintPage() {
         </div>
 
         {/* Main Content Sections - Continuous Left-to-Right Multi-column Flow */}
-        <div className={densityClass} ref={bodyRef} style={dynamicHeight ? { height: `${dynamicHeight}px`, minHeight: 'auto' } : undefined}>
+        <div className={densityClass} ref={bodyRef}>
           <div className="section contact-section">
             <h3>{formConfig.sectionTitles?.contact || 'Contact'}</h3>
             {student.contactPhone && <div className="contact-item"><span>{formConfig.fieldLabels?.phone || 'Phone'}</span>: {renderWithLinks(student.contactPhone)}</div>}

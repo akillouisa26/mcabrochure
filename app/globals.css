@@ -101,8 +101,7 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 /* BROCHURE CARD STYLES */
 .brochure-card {
   width: 800px;
-  min-height: 1131px;
-  height: auto;
+  height: 1131px;
   max-width: 100%;
   background: #fff;
   border-radius: 6px;
@@ -111,7 +110,7 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   font-family: 'Inter', sans-serif;
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow: hidden;
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -208,11 +207,10 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   column-gap: 1.5rem;
   column-fill: auto;
   display: block;
-  min-height: 855px;
-  height: auto;
+  height: 855px;
   padding: 1.25rem 2.25rem 0.6rem;
   box-sizing: border-box;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .item-title {
@@ -609,13 +607,12 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 
   .brochure-card {
     width: 210mm !important;
-    min-height: 297mm !important;
-    height: auto !important;
+    height: 297mm !important;
     max-width: none !important;
     box-shadow: none !important;
     border-radius: 0 !important;
     margin: 0 !important;
-    overflow: visible !important;
+    overflow: hidden !important;
     page-break-after: avoid !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
@@ -627,11 +624,10 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
     column-gap: 1.5rem !important;
     column-fill: auto !important;
     display: block !important;
-    min-height: 220mm !important;
-    height: auto !important;
+    height: 220mm !important;
     padding: 10mm 20mm 5mm !important;
     box-sizing: border-box !important;
-    overflow: visible !important;
+    overflow: hidden !important;
   }
 
   .brochure-body.sparse-content {
