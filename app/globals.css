@@ -230,7 +230,7 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 .section {
   break-inside: avoid;
   page-break-inside: avoid;
-  margin-bottom: 1.15rem;
+  margin-bottom: 1.35rem;
   display: inline-block;
   width: 100%;
 }
@@ -239,17 +239,17 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   font-size: 1.1rem;
   border-bottom: 2px solid #b3cdef;
   padding-bottom: 0.3rem;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.65rem;
 }
 .contact-section {
   background: #f0f7ff;
-  padding: 1rem 1.25rem;
+  padding: 1.15rem 1.35rem;
   border-radius: 6px;
-  margin-bottom: 1.15rem;
+  margin-bottom: 1.35rem;
 }
 .contact-item {
   display: flex;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.4rem;
   font-size: 0.9rem;
   word-break: break-all;
   color: #113666;
@@ -263,12 +263,12 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 .edu-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   color: #113666;
 }
 .edu-table th, .edu-table td {
   border: 1px solid #b3cdef;
-  padding: 0.4rem 0.5rem;
+  padding: 0.45rem 0.6rem;
   text-align: center;
   color: #113666;
 }
@@ -277,9 +277,9 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   color: #113666;
 }
 .bullet-list li {
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.4rem;
   font-size: 0.9rem;
-  line-height: 1.35;
+  line-height: 1.38;
   color: #113666;
 }
 
@@ -288,38 +288,38 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   padding: 1.4rem 2.5rem 0.6rem;
 }
 .brochure-body.sparse-content .section {
-  margin-bottom: 1.45rem;
+  margin-bottom: 1.7rem;
 }
 .brochure-body.sparse-content .section h3 {
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   padding-bottom: 0.35rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.85rem;
 }
 .brochure-body.sparse-content .contact-section {
-  padding: 1.15rem 1.4rem;
-  margin-bottom: 1.45rem;
+  padding: 1.3rem 1.5rem;
+  margin-bottom: 1.7rem;
 }
 .brochure-body.sparse-content .contact-item {
-  font-size: 0.925rem;
-  margin-bottom: 0.45rem;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
 }
 .brochure-body.sparse-content .edu-table {
   font-size: 0.9rem;
 }
 .brochure-body.sparse-content .edu-table th, 
 .brochure-body.sparse-content .edu-table td {
-  padding: 0.5rem 0.65rem;
+  padding: 0.55rem 0.75rem;
 }
 .brochure-body.sparse-content .bullet-list {
   padding-left: 1.35rem;
 }
 .brochure-body.sparse-content .bullet-list li {
-  margin-bottom: 0.45rem;
-  font-size: 0.925rem;
-  line-height: 1.42;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  line-height: 1.48;
 }
 .brochure-body.sparse-content .item-title {
-  font-size: 0.975rem !important;
+  font-size: 1rem !important;
 }
 .brochure-body.sparse-content .item-sub {
   font-size: 0.9rem !important;
@@ -327,44 +327,44 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 
 /* Dense & Ultra-Dense Content Dynamic Scaling */
 .brochure-body.dense-content {
-  padding: 0.85rem 2rem 0.5rem;
+  padding: 0.95rem 2rem 0.5rem;
 }
 .brochure-body.dense-content .section {
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.85rem;
 }
 .brochure-body.dense-content .section h3 {
-  font-size: 0.975rem;
-  padding-bottom: 0.18rem;
-  margin-bottom: 0.4rem;
+  font-size: 1rem;
+  padding-bottom: 0.2rem;
+  margin-bottom: 0.45rem;
 }
 .brochure-body.dense-content .contact-section {
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.65rem;
+  padding: 0.85rem 1.1rem;
+  margin-bottom: 0.85rem;
 }
 .brochure-body.dense-content .contact-item {
-  font-size: 0.825rem;
-  margin-bottom: 0.22rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
 }
 .brochure-body.dense-content .edu-table {
   font-size: 0.8rem;
 }
 .brochure-body.dense-content .edu-table th, 
 .brochure-body.dense-content .edu-table td {
-  padding: 0.25rem 0.4rem;
+  padding: 0.3rem 0.45rem;
 }
 .brochure-body.dense-content .bullet-list {
   padding-left: 1.15rem;
 }
 .brochure-body.dense-content .bullet-list li {
-  margin-bottom: 0.22rem;
-  font-size: 0.825rem;
-  line-height: 1.28;
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+  line-height: 1.3;
 }
 .brochure-body.dense-content .item-title {
-  font-size: 0.85rem !important;
+  font-size: 0.875rem !important;
 }
 .brochure-body.dense-content .item-sub {
-  font-size: 0.8rem !important;
+  font-size: 0.825rem !important;
 }
 
 .brochure-body.ultra-dense-content {
