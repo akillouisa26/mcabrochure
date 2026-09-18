@@ -131,6 +131,7 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   display: flex;
   position: relative;
   min-height: 210px;
+  flex-shrink: 0;
   background: #113666;
   color: white;
   overflow: hidden;
@@ -207,7 +208,8 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   column-gap: 1.5rem;
   column-fill: auto;
   display: block;
-  height: 855px;
+  flex: 1;
+  min-height: 0;
   padding: 1.25rem 2.25rem 0.6rem;
   box-sizing: border-box;
   overflow: hidden;
@@ -680,10 +682,8 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 
 /* Footer banner effect - cleanly anchored at bottom of A4 card */
 .brochure-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  position: relative;
+  flex-shrink: 0;
   width: 100%;
   height: 55px;
   background-color: #113666;
@@ -749,15 +749,26 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
     break-after: avoid !important;
   }
 
+  .brochure-header {
+    flex-shrink: 0 !important;
+  }
+
   .brochure-body {
     columns: 2 !important;
     column-gap: 1.5rem !important;
     column-fill: auto !important;
     display: block !important;
-    height: 220mm !important;
+    flex: 1 !important;
+    min-height: 0 !important;
     padding: 10mm 20mm 5mm !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
+  }
+
+  .brochure-footer {
+    position: relative !important;
+    flex-shrink: 0 !important;
+    height: 15mm !important;
   }
 
   .brochure-body.sparse-content {

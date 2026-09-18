@@ -38,8 +38,8 @@ export default function StudentBrochureCard({ student, formConfig, showPrintButt
     const checkOverflow = () => {
       if (!el) return false;
       return (
-        el.scrollWidth > el.clientWidth + 5 ||
-        el.scrollHeight > el.clientHeight + 5
+        el.scrollWidth > el.clientWidth + 2 ||
+        el.scrollHeight > el.clientHeight + 2
       );
     };
 
@@ -58,11 +58,13 @@ export default function StudentBrochureCard({ student, formConfig, showPrintButt
     autoFit();
 
     window.addEventListener('resize', autoFit);
-    const timeoutId = setTimeout(autoFit, 150);
+    const t1 = setTimeout(autoFit, 100);
+    const t2 = setTimeout(autoFit, 350);
 
     return () => {
       window.removeEventListener('resize', autoFit);
-      clearTimeout(timeoutId);
+      clearTimeout(t1);
+      clearTimeout(t2);
     };
   }, [student, formConfig]);
 
