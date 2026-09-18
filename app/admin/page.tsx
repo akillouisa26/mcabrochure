@@ -235,14 +235,16 @@ function AdminDashboardContent() {
       return;
     }
     const newSecId = 'sec_' + Date.now();
-    setFormConfig(prev => ({
-      ...prev,
-      sectionOrder: [...(prev.sectionOrder || DEFAULT_SECTIONS), newSecId],
+    const updated = {
+      ...formConfig,
+      sectionOrder: [...(formConfig.sectionOrder || DEFAULT_SECTIONS), newSecId],
       sectionTitles: {
-        ...(prev.sectionTitles || DEFAULT_SECTION_TITLES),
+        ...(formConfig.sectionTitles || DEFAULT_SECTION_TITLES),
         [newSecId]: newSectionTitle.trim(),
       },
-    }));
+    };
+    setFormConfig(updated);
+    autoSaveConfig(updated);
     setNewSectionTitle('');
   };
 
@@ -252,23 +254,23 @@ function AdminDashboardContent() {
       return;
     }
     if (!confirm('Are you sure you want to remove this section? Any fields inside will be moved to Personal Details.')) return;
-    setFormConfig(prev => {
-      const newOrder = (prev.sectionOrder || []).filter(s => s !== sectionId);
-      const fallbackSec = newOrder[0] || 'personal';
-      const updatedSections = { ...(prev.fieldSections || {}) };
-      Object.keys(updatedSections).forEach(k => {
-        if (updatedSections[k] === sectionId) updatedSections[k] = fallbackSec;
-      });
-      const updatedCustoms = (prev.customFields || []).map(f => 
-        f.section === sectionId ? { ...f, section: fallbackSec } : f
-      );
-      return {
-        ...prev,
-        sectionOrder: newOrder,
-        fieldSections: updatedSections,
-        customFields: updatedCustoms,
-      };
+    const newOrder = (formConfig.sectionOrder || []).filter(s => s !== sectionId);
+    const fallbackSec = newOrder[0] || 'personal';
+    const updatedSections = { ...(formConfig.fieldSections || {}) };
+    Object.keys(updatedSections).forEach(k => {
+      if (updatedSections[k] === sectionId) updatedSections[k] = fallbackSec;
     });
+    const updatedCustoms = (formConfig.customFields || []).map(f => 
+      f.section === sectionId ? { ...f, section: fallbackSec } : f
+    );
+    const updated = {
+      ...formConfig,
+      sectionOrder: newOrder,
+      fieldSections: updatedSections,
+      customFields: updatedCustoms,
+    };
+    setFormConfig(updated);
+    autoSaveConfig(updated);
   };
 
   const getFieldsForSection = (sectionId: string) => {
@@ -535,17 +537,17 @@ function AdminDashboardContent() {
     };
   }, []);
 
-  const saveFormConfig = async () => {
+  const saveFormConfig = async (configToSave = formConfig) => {
     setConfigSaving(true);
     setConfigSuccess('');
     try {
       const res = await fetch('/api/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formConfig),
+        body: JSON.stringify(configToSave),
       });
       if (res.ok) {
-        setConfigSuccess('Form configuration saved! Changes are live on the student submission form.');
+        setConfigSuccess('Form configuration saved! Changes are live across all forms and brochures.');
         setTimeout(() => setConfigSuccess(''), 5000);
       }
     } catch (e) {
@@ -553,6 +555,14 @@ function AdminDashboardContent() {
     } finally {
       setConfigSaving(false);
     }
+  };
+
+  const autoSaveConfig = (updated: any) => {
+    fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated),
+    }).catch(err => console.error('Auto-save config failed:', err));
   };
 
   const updateSectionTitle = (sectionId: string, newTitle: string) => {
@@ -597,20 +607,24 @@ function AdminDashboardContent() {
       required: newFieldRequired,
       order: Date.now(),
     };
-    setFormConfig(prev => ({
-      ...prev,
-      customFields: [...(prev.customFields || []), newField],
-    }));
+    const updated = {
+      ...formConfig,
+      customFields: [...(formConfig.customFields || []), newField],
+    };
+    setFormConfig(updated);
+    autoSaveConfig(updated);
     setNewFieldLabel('');
     setNewFieldType('text');
     setNewFieldRequired(false);
   };
 
   const removeCustomField = (id: string) => {
-    setFormConfig(prev => ({
-      ...prev,
-      customFields: (prev.customFields || []).filter(f => f.id !== id),
-    }));
+    const updated = {
+      ...formConfig,
+      customFields: (formConfig.customFields || []).filter(f => f.id !== id),
+    };
+    setFormConfig(updated);
+    autoSaveConfig(updated);
   };
 
   const moveFieldToSection = (fieldId: string, targetSection: string) => {
@@ -1519,7 +1533,7 @@ function AdminDashboardContent() {
           {/* Single Save Button at Bottom */}
           <div style={{ marginTop: '2rem' }}>
             <button 
-              onClick={saveFormConfig} 
+              onClick={() => saveFormConfig()} 
               className="btn btn-primary" 
               style={{ padding: '0.85rem 1.5rem', fontSize: '1.05rem', width: '100%', background: '#113666', fontWeight: 600 }}
               disabled={configSaving}
@@ -2155,75 +2169,125 @@ function AdminDashboardContent() {
               </div>
 
               {/* Custom & Additional Fields Edit Block */}
-              {formConfig.customFields && formConfig.customFields.length > 0 && (
-                <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                  <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#1e293b' }}>Custom Fields & Additional Details</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem' }}>
-                    {formConfig.customFields.map((field: any) => {
-                      if (field.enabled === false) return null;
+              {(() => {
+                if (!editStudentModal) return null;
+                const fieldsMap = new Map<string, { id: string; label: string; section: string; type: string }>();
 
-                      const currentValObj = editStudentModal.customFieldsData?.[field.id] !== undefined
-                        ? editStudentModal.customFieldsData[field.id]
-                        : editStudentModal.customFieldsData?.[field.label];
-                      
-                      const currentVal = typeof currentValObj === 'object' && currentValObj !== null && 'value' in currentValObj
-                        ? currentValObj.value
-                        : (currentValObj || '');
+                (formConfig.customFields || []).forEach((cf: any) => {
+                  if (cf.enabled !== false) {
+                    fieldsMap.set(cf.id, {
+                      id: cf.id,
+                      label: cf.label || cf.id,
+                      section: cf.section || 'personal',
+                      type: cf.type || 'text'
+                    });
+                  }
+                });
 
-                      const sectionName = formConfig.sectionTitles?.[field.section] || field.section || 'Personal';
+                if (editStudentModal.customFieldsData && typeof editStudentModal.customFieldsData === 'object') {
+                  const standardHandled = ['linkedin', 'github', 'portfolio', 'objective', 'vision statement', 'vision statement (2 lines)'];
+                  Object.entries(editStudentModal.customFieldsData).forEach(([key, val]) => {
+                    if (val === undefined || val === null || val === '') return;
+                    if (standardHandled.includes(key.toLowerCase())) return;
 
-                      return (
-                        <div key={field.id} style={{ gridColumn: field.type === 'textarea' ? '1 / -1' : 'auto' }}>
-                          <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem', color: '#334155' }}>
-                            {field.label} <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 400 }}>({sectionName})</span>
-                          </label>
-                          {field.type === 'textarea' ? (
-                            <textarea
-                              rows={2}
-                              value={typeof currentVal === 'object' ? JSON.stringify(currentVal) : String(currentVal)}
-                              onChange={e => {
-                                setEditStudentModal({
-                                  ...editStudentModal,
-                                  customFieldsData: {
-                                    ...(editStudentModal.customFieldsData || {}),
-                                    [field.id]: {
-                                      label: field.label,
-                                      value: e.target.value,
-                                      section: field.section || 'personal'
-                                    },
-                                    [field.label]: e.target.value
-                                  }
-                                });
-                              }}
-                              className="form-control"
-                            />
-                          ) : (
-                            <input
-                              type="text"
-                              value={typeof currentVal === 'object' ? JSON.stringify(currentVal) : String(currentVal)}
-                              onChange={e => {
-                                setEditStudentModal({
-                                  ...editStudentModal,
-                                  customFieldsData: {
-                                    ...(editStudentModal.customFieldsData || {}),
-                                    [field.id]: {
-                                      label: field.label,
-                                      value: e.target.value,
-                                      section: field.section || 'personal'
-                                    },
-                                    [field.label]: e.target.value
-                                  }
-                                });
-                              }}
-                              className="form-control"
-                            />
-                          )}
-                        </div>
-                      );
-                    })}
+                    let fieldId = key;
+                    let fieldLabel = key.replace(/^field_/, '');
+                    let fieldSection = 'personal';
+
+                    if (typeof val === 'object' && val !== null && 'value' in val) {
+                      fieldLabel = (val as any).label || fieldLabel;
+                      fieldSection = (val as any).section || fieldSection;
+                    } else {
+                      const matchingCfg = (formConfig.customFields || []).find((f: any) => f.id === key || f.label === key || (f.label && f.label.toLowerCase() === key.toLowerCase()));
+                      if (matchingCfg) {
+                        fieldId = matchingCfg.id;
+                        fieldLabel = matchingCfg.label;
+                        fieldSection = matchingCfg.section || fieldSection;
+                      }
+                    }
+
+                    if (!fieldsMap.has(fieldId) && !Array.from(fieldsMap.values()).some(f => f.label.toLowerCase() === fieldLabel.toLowerCase())) {
+                      fieldsMap.set(fieldId, {
+                        id: fieldId,
+                        label: fieldLabel,
+                        section: fieldSection,
+                        type: 'text'
+                      });
+                    }
+                  });
+                }
+
+                const customFieldsToEdit = Array.from(fieldsMap.values());
+                if (customFieldsToEdit.length === 0) return null;
+
+                return (
+                  <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                    <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#1e293b' }}>Custom Fields & Additional Details</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem' }}>
+                      {customFieldsToEdit.map((field: any) => {
+                        const currentValObj = editStudentModal.customFieldsData?.[field.id] !== undefined
+                          ? editStudentModal.customFieldsData[field.id]
+                          : editStudentModal.customFieldsData?.[field.label];
+                        
+                        const currentVal = typeof currentValObj === 'object' && currentValObj !== null && 'value' in currentValObj
+                          ? currentValObj.value
+                          : (currentValObj || '');
+
+                        const sectionName = formConfig.sectionTitles?.[field.section] || field.section || 'Personal Details';
+
+                        return (
+                          <div key={field.id} style={{ gridColumn: field.type === 'textarea' ? '1 / -1' : 'auto' }}>
+                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem', color: '#334155' }}>
+                              {field.label} <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 400 }}>({sectionName})</span>
+                            </label>
+                            {field.type === 'textarea' ? (
+                              <textarea
+                                rows={2}
+                                value={typeof currentVal === 'object' ? JSON.stringify(currentVal) : String(currentVal)}
+                                onChange={e => {
+                                  setEditStudentModal({
+                                    ...editStudentModal,
+                                    customFieldsData: {
+                                      ...(editStudentModal.customFieldsData || {}),
+                                      [field.id]: {
+                                        label: field.label,
+                                        value: e.target.value,
+                                        section: field.section || 'personal'
+                                      },
+                                      [field.label]: e.target.value
+                                    }
+                                  });
+                                }}
+                                className="form-control"
+                              />
+                            ) : (
+                              <input
+                                type="text"
+                                value={typeof currentVal === 'object' ? JSON.stringify(currentVal) : String(currentVal)}
+                                onChange={e => {
+                                  setEditStudentModal({
+                                    ...editStudentModal,
+                                    customFieldsData: {
+                                      ...(editStudentModal.customFieldsData || {}),
+                                      [field.id]: {
+                                        label: field.label,
+                                        value: e.target.value,
+                                        section: field.section || 'personal'
+                                      },
+                                      [field.label]: e.target.value
+                                    }
+                                  });
+                                }}
+                                className="form-control"
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Action buttons */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
