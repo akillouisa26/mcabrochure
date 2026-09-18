@@ -203,22 +203,14 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 
 /* Body */
 .brochure-body {
-  display: flex;
-  gap: 1.5rem;
+  columns: 2;
+  column-gap: 1.5rem;
+  column-fill: auto;
+  display: block;
   height: 855px;
   padding: 1.25rem 2.25rem 0.6rem;
   box-sizing: border-box;
   overflow: hidden;
-}
-
-.brochure-column {
-  flex: 1;
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  box-sizing: border-box;
 }
 
 .item-title {
@@ -230,18 +222,27 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 
 /* Default / Normal Content (Spacious & Well-Filled Page) */
 .section {
-  break-inside: avoid;
-  page-break-inside: avoid;
-  margin-bottom: 1.15rem;
-  display: inline-block;
+  display: block;
   width: 100%;
+  margin-bottom: 1.15rem;
 }
+
 .section h3 {
   color: #113666;
   font-size: 1.1rem;
   border-bottom: 2px solid #b3cdef;
   padding-bottom: 0.3rem;
   margin-bottom: 0.6rem;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.contact-item,
+.bullet-list li,
+.edu-table tr,
+.project-item {
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 .contact-section {
   background: #f0f7ff;
@@ -283,90 +284,6 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   font-size: 0.9rem;
   line-height: 1.35;
   color: #113666;
-}
-
-/* Spacious XL Content (For light/short profiles to stretch & fill brochure fully) */
-.brochure-body.spacious-xl {
-  padding: 1.5rem 2.5rem 0.6rem;
-}
-.brochure-body.spacious-xl .section {
-  margin-bottom: 1.6rem;
-}
-.brochure-body.spacious-xl .section h3 {
-  font-size: 1.25rem;
-  padding-bottom: 0.4rem;
-  margin-bottom: 0.85rem;
-}
-.brochure-body.spacious-xl .contact-section {
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 1.6rem;
-}
-.brochure-body.spacious-xl .contact-item {
-  font-size: 1.025rem;
-  margin-bottom: 0.55rem;
-}
-.brochure-body.spacious-xl .edu-table {
-  font-size: 0.95rem;
-}
-.brochure-body.spacious-xl .edu-table th, 
-.brochure-body.spacious-xl .edu-table td {
-  padding: 0.6rem 0.75rem;
-}
-.brochure-body.spacious-xl .bullet-list {
-  padding-left: 1.4rem;
-}
-.brochure-body.spacious-xl .bullet-list li {
-  margin-bottom: 0.55rem;
-  font-size: 1.025rem;
-  line-height: 1.5;
-}
-.brochure-body.spacious-xl .item-title {
-  font-size: 1.075rem !important;
-}
-.brochure-body.spacious-xl .item-sub {
-  font-size: 0.975rem !important;
-}
-
-/* Spacious LG Content (For medium-light profiles) */
-.brochure-body.spacious-lg {
-  padding: 1.35rem 2.4rem 0.6rem;
-}
-.brochure-body.spacious-lg .section {
-  margin-bottom: 1.35rem;
-}
-.brochure-body.spacious-lg .section h3 {
-  font-size: 1.175rem;
-  padding-bottom: 0.35rem;
-  margin-bottom: 0.7rem;
-}
-.brochure-body.spacious-lg .contact-section {
-  padding: 1.15rem 1.35rem;
-  margin-bottom: 1.35rem;
-}
-.brochure-body.spacious-lg .contact-item {
-  font-size: 0.965rem;
-  margin-bottom: 0.45rem;
-}
-.brochure-body.spacious-lg .edu-table {
-  font-size: 0.9rem;
-}
-.brochure-body.spacious-lg .edu-table th, 
-.brochure-body.spacious-lg .edu-table td {
-  padding: 0.5rem 0.65rem;
-}
-.brochure-body.spacious-lg .bullet-list {
-  padding-left: 1.3rem;
-}
-.brochure-body.spacious-lg .bullet-list li {
-  margin-bottom: 0.45rem;
-  font-size: 0.965rem;
-  line-height: 1.42;
-}
-.brochure-body.spacious-lg .item-title {
-  font-size: 1.025rem !important;
-}
-.brochure-body.spacious-lg .item-sub {
-  font-size: 0.925rem !important;
 }
 
 /* Sparse Content Dynamic Scaling (For light/short profiles to fill page fully) */
@@ -704,30 +621,14 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   }
 
   .brochure-body {
-    display: flex !important;
-    gap: 1.5rem !important;
+    columns: 2 !important;
+    column-gap: 1.5rem !important;
+    column-fill: auto !important;
+    display: block !important;
     height: 220mm !important;
     padding: 10mm 20mm 5mm !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
-  }
-
-  .brochure-column {
-    flex: 1 !important;
-    width: 50% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-    height: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .brochure-body.spacious-xl {
-    padding: 14mm 22mm 6mm !important;
-  }
-
-  .brochure-body.spacious-lg {
-    padding: 12mm 21mm 6mm !important;
   }
 
   .brochure-body.sparse-content {

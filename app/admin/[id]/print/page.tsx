@@ -14,8 +14,7 @@ export default function SingleBrochurePrintPage() {
   const [student, setStudent] = useState<any>(null);
   const [formConfig, setFormConfig] = useState<any>({});
 
-  const leftColRef = useRef<HTMLDivElement>(null);
-  const rightColRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
   const [densityClass, setDensityClass] = useState<string>('brochure-body');
 
   useEffect(() => {
@@ -33,38 +32,47 @@ export default function SingleBrochurePrintPage() {
     if (!student) return;
 
     const modes = [
-      'brochure-body spacious-xl',
-      'brochure-body spacious-lg',
+      'brochure-body sparse-content',
       'brochure-body',
       'brochure-body dense-content',
       'brochure-body ultra-dense-content',
       'brochure-body micro-content'
     ];
 
-    const TARGET_MAX_H = 835;
+    const autoFit = () => {
+      if (!bodyRef.current) return;
+      
+      const isOverflowing = () => {
+        if (!bodyRef.current) return false;
+        return bodyRef.current.scrollWidth > bodyRef.current.clientWidth + 10;
+      };
 
-    const getMaxH = () => {
-      const lH = leftColRef.current?.scrollHeight || 0;
-      const rH = rightColRef.current?.scrollHeight || 0;
-      return Math.max(lH, rH);
-    };
+      let currentIdx = 1;
+      setDensityClass(modes[currentIdx]);
 
-    let currentIdx = 0;
-    setDensityClass(modes[currentIdx]);
-
-    const stepCheck = () => {
       setTimeout(() => {
-        if (!leftColRef.current || !rightColRef.current) return;
-        const maxH = getMaxH();
-        if (maxH > TARGET_MAX_H && currentIdx < modes.length - 1) {
-          currentIdx++;
-          setDensityClass(modes[currentIdx]);
-          stepCheck();
+        if (isOverflowing()) {
+          while (isOverflowing() && currentIdx < modes.length - 1) {
+            currentIdx++;
+            setDensityClass(modes[currentIdx]);
+          }
+        } else {
+          const eduCount = parseEducationList(student.educationalQualifications).length;
+          const certsCount = parseStringList(student.certifications).length;
+          const techCount = parseStringList(student.technicalExpertise).length;
+          const internshipsCount = parseInternshipsList(student.internships).length;
+          const projsCount = parseProjectsList(student.projects).length;
+          const strengthsCount = parseStringList(student.strengths).length;
+
+          const totalItems = eduCount + certsCount + techCount + internshipsCount + projsCount + strengthsCount;
+          if (totalItems <= 8) {
+            setDensityClass(modes[0]);
+          }
         }
-      }, 40);
+      }, 50);
     };
 
-    stepCheck();
+    autoFit();
   }, [student, formConfig]);
 
   if (!student) return <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>Loading Brochure...</div>;
@@ -159,195 +167,189 @@ export default function SingleBrochurePrintPage() {
           </div>
         </div>
 
-        {/* Main Content Sections - 2 Explicit Flex Columns */}
-        <div className={densityClass}>
-          {/* Left Column */}
-          <div className="brochure-column left-column" ref={leftColRef}>
-            <div className="section contact-section">
-              <h3>{formConfig.sectionTitles?.contact || 'Contact'}</h3>
-              {student.contactPhone && <div className="contact-item"><span>{formConfig.fieldLabels?.phone || 'Phone'}</span>: {renderWithLinks(student.contactPhone)}</div>}
-              {student.contactEmail && <div className="contact-item"><span>{formConfig.fieldLabels?.email || 'Email'}</span>: {renderWithLinks(student.contactEmail)}</div>}
-              {linkedInVal && <div className="contact-item"><span>{formConfig.fieldLabels?.linkedIn || 'LinkedIn'}</span>: {renderWithLinks(linkedInVal)}</div>}
-              {githubVal && <div className="contact-item"><span>{formConfig.fieldLabels?.github || 'GitHub'}</span>: {renderWithLinks(githubVal)}</div>}
-              {portfolioVal && <div className="contact-item"><span>{formConfig.fieldLabels?.portfolio || 'Portfolio'}</span>: {renderWithLinks(portfolioVal)}</div>}
-              {getCustomFieldsForSection('contact', student).map((cf, idx) => (
-                <div key={'cf_cnt_' + idx} className="contact-item">
-                  <span>{cf.label}</span>: {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
-                </div>
-              ))}
-              {getCustomFieldsForSection('personal', student).map((cf, idx) => (
-                <div key={'cf_pers_' + idx} className="contact-item">
-                  <span>{cf.label}</span>: {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
-                </div>
-              ))}
-            </div>
+        {/* Main Content Sections - Continuous Left-to-Right Multi-Column Flow */}
+        <div className={densityClass} ref={bodyRef}>
+          <div className="section contact-section">
+            <h3>{formConfig.sectionTitles?.contact || 'Contact'}</h3>
+            {student.contactPhone && <div className="contact-item"><span>{formConfig.fieldLabels?.phone || 'Phone'}</span>: {renderWithLinks(student.contactPhone)}</div>}
+            {student.contactEmail && <div className="contact-item"><span>{formConfig.fieldLabels?.email || 'Email'}</span>: {renderWithLinks(student.contactEmail)}</div>}
+            {linkedInVal && <div className="contact-item"><span>{formConfig.fieldLabels?.linkedIn || 'LinkedIn'}</span>: {renderWithLinks(linkedInVal)}</div>}
+            {githubVal && <div className="contact-item"><span>{formConfig.fieldLabels?.github || 'GitHub'}</span>: {renderWithLinks(githubVal)}</div>}
+            {portfolioVal && <div className="contact-item"><span>{formConfig.fieldLabels?.portfolio || 'Portfolio'}</span>: {renderWithLinks(portfolioVal)}</div>}
+            {getCustomFieldsForSection('contact', student).map((cf, idx) => (
+              <div key={'cf_cnt_' + idx} className="contact-item">
+                <span>{cf.label}</span>: {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
+              </div>
+            ))}
+            {getCustomFieldsForSection('personal', student).map((cf, idx) => (
+              <div key={'cf_pers_' + idx} className="contact-item">
+                <span>{cf.label}</span>: {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
+              </div>
+            ))}
+          </div>
 
-            <div className="section">
-              <h3>{formConfig.sectionTitles?.education || 'Educational Qualification'}</h3>
-              <table className="edu-table">
-                <thead>
-                  <tr>
-                    <th>Qualification</th>
-                    <th>Institution</th>
-                    <th>Year</th>
-                    <th>CGPA</th>
+          <div className="section">
+            <h3>{formConfig.sectionTitles?.education || 'Educational Qualification'}</h3>
+            <table className="edu-table">
+              <thead>
+                <tr>
+                  <th>Qualification</th>
+                  <th>Institution</th>
+                  <th>Year</th>
+                  <th>CGPA</th>
+                </tr>
+              </thead>
+              <tbody>
+                {edu.map((e: any, idx: number) => (
+                  <tr key={idx}>
+                    <td>{renderWithLinks(e.qualification)}</td>
+                    <td>{renderWithLinks(e.institution)}</td>
+                    <td>{renderWithLinks(e.year)}</td>
+                    <td>{renderWithLinks(e.cgpa)}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {edu.map((e: any, idx: number) => (
-                    <tr key={idx}>
-                      <td>{renderWithLinks(e.qualification)}</td>
-                      <td>{renderWithLinks(e.institution)}</td>
-                      <td>{renderWithLinks(e.year)}</td>
-                      <td>{renderWithLinks(e.cgpa)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {getCustomFieldsForSection('education', student).length > 0 && (
-                <ul className="bullet-list" style={{ marginTop: '0.5rem' }}>
-                  {getCustomFieldsForSection('education', student).map((cf, idx) => (
-                    <li key={idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
-                  ))}
-                </ul>
-              )}
+                ))}
+              </tbody>
+            </table>
+            {getCustomFieldsForSection('education', student).length > 0 && (
+              <ul className="bullet-list" style={{ marginTop: '0.5rem' }}>
+                {getCustomFieldsForSection('education', student).map((cf, idx) => (
+                  <li key={idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {(certs.length > 0 || getCustomFieldsForSection('certifications', student).length > 0) && (
+            <div className="section">
+              <h3>{formConfig.sectionTitles?.certifications || 'Certifications'}</h3>
+              <ul className="bullet-list">
+                {certs.map((c: string, idx: number) => <li key={idx}>{renderWithLinks(c)}</li>)}
+                {getCustomFieldsForSection('certifications', student).map((cf, idx) => (
+                  <li key={'cf_' + idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
+                ))}
+              </ul>
             </div>
+          )}
 
-            {(certs.length > 0 || getCustomFieldsForSection('certifications', student).length > 0) && (
-              <div className="section">
-                <h3>{formConfig.sectionTitles?.certifications || 'Certifications'}</h3>
-                <ul className="bullet-list">
-                  {certs.map((c: string, idx: number) => <li key={idx}>{renderWithLinks(c)}</li>)}
-                  {getCustomFieldsForSection('certifications', student).map((cf, idx) => (
-                    <li key={'cf_' + idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+          {(internships.length > 0 || getCustomFieldsForSection('internships', student).length > 0) && (
+            <div className="section">
+              <h3>{formConfig.sectionTitles?.internships || 'Internships'}</h3>
+              <ul className="bullet-list">
+                {internships.map((i: any, idx: number) => {
+                  const role = i.role || '';
+                  const company = i.company || '';
+                  const duration = i.duration || '';
 
-          {/* Right Column */}
-          <div className="brochure-column right-column" ref={rightColRef}>
-            {(internships.length > 0 || getCustomFieldsForSection('internships', student).length > 0) && (
-              <div className="section">
-                <h3>{formConfig.sectionTitles?.internships || 'Internships'}</h3>
-                <ul className="bullet-list">
-                  {internships.map((i: any, idx: number) => {
-                    const role = i.role || '';
-                    const company = i.company || '';
-                    const duration = i.duration || '';
-
-                    return (
-                      <li key={idx} style={{ marginBottom: '0.35rem' }}>
-                        {role ? (
-                          <>
-                            <div className="item-title" style={{ fontWeight: 700, color: '#113666', lineHeight: '1.3' }}>
-                              {renderWithLinks(role)}
-                            </div>
-                            <div className="item-sub" style={{ color: '#113666', lineHeight: '1.3' }}>
-                              {renderWithLinks(company)}
-                              {duration && <> | {renderWithLinks(duration)}</>}
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="item-title" style={{ fontWeight: 700, color: '#113666', lineHeight: '1.3' }}>
-                              {renderWithLinks(company)}
-                            </div>
-                            {duration && (
-                              <div className="item-sub" style={{ color: '#113666', lineHeight: '1.3' }}>
-                                Duration: {renderWithLinks(duration)}
-                              </div>
-                            )}
-                          </>
-                        )}
-                      </li>
-                    );
-                  })}
-                  {getCustomFieldsForSection('internships', student).map((cf, idx) => (
-                    <li key={'cf_' + idx} className="item-sub" style={{ color: '#113666' }}>
-                      <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {(projs.length > 0 || getCustomFieldsForSection('projects', student).length > 0) && (
-              <div className="section">
-                <h3>{formConfig.sectionTitles?.projects || 'Projects'}</h3>
-                <ul className="bullet-list">
-                  {projs.map((p: any, idx: number) => {
-                    const title = typeof p === 'string' ? p : (p.title || p.name || '');
-                    const tools = typeof p === 'object' && p.toolsUsed ? p.toolsUsed : '';
-
-                    return (
-                      <li key={idx} style={{ marginBottom: '0.35rem' }}>
-                        <div className="item-title" style={{ fontWeight: 700, color: '#113666', lineHeight: '1.3' }}>
-                          {renderWithLinks(title)}
-                        </div>
-                        {tools && (
-                          <div className="item-sub" style={{ color: '#113666', lineHeight: '1.3' }}>
-                            Tools Used: {renderWithLinks(tools)}
+                  return (
+                    <li key={idx} style={{ marginBottom: '0.35rem' }}>
+                      {role ? (
+                        <>
+                          <div className="item-title" style={{ fontWeight: 700, color: '#113666', lineHeight: '1.3' }}>
+                            {renderWithLinks(role)}
                           </div>
-                        )}
-                      </li>
-                    );
-                  })}
-                  {getCustomFieldsForSection('projects', student).map((cf, idx) => (
-                    <li key={'cf_' + idx} className="item-sub" style={{ color: '#113666' }}>
-                      <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
+                          <div className="item-sub" style={{ color: '#113666', lineHeight: '1.3' }}>
+                            {renderWithLinks(company)}
+                            {duration && <> | {renderWithLinks(duration)}</>}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="item-title" style={{ fontWeight: 700, color: '#113666', lineHeight: '1.3' }}>
+                            {renderWithLinks(company)}
+                          </div>
+                          {duration && (
+                            <div className="item-sub" style={{ color: '#113666', lineHeight: '1.3' }}>
+                              Duration: {renderWithLinks(duration)}
+                            </div>
+                          )}
+                        </>
+                      )}
                     </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+                  );
+                })}
+                {getCustomFieldsForSection('internships', student).map((cf, idx) => (
+                  <li key={'cf_' + idx} className="item-sub" style={{ color: '#113666' }}>
+                    <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-            {(tech.length > 0 || getCustomFieldsForSection('technical', student).length > 0) && (
-              <div className="section">
-                <h3>{formConfig.sectionTitles?.technical || 'Technical Expertise'}</h3>
-                <ul className="bullet-list">
-                  {tech.map((t: string, idx: number) => <li key={idx}>{renderWithLinks(t)}</li>)}
-                  {getCustomFieldsForSection('technical', student).map((cf, idx) => (
-                    <li key={'cf_' + idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          {(projs.length > 0 || getCustomFieldsForSection('projects', student).length > 0) && (
+            <div className="section">
+              <h3>{formConfig.sectionTitles?.projects || 'Projects'}</h3>
+              <ul className="bullet-list">
+                {projs.map((p: any, idx: number) => {
+                  const title = typeof p === 'string' ? p : (p.title || p.name || '');
+                  const tools = typeof p === 'object' && p.toolsUsed ? p.toolsUsed : '';
 
-            {(strengths.length > 0 || getCustomFieldsForSection('strengths', student).length > 0) && (
-              <div className="section">
-                <h3>{formConfig.sectionTitles?.strengths || 'Strengths'}</h3>
-                <ul className="bullet-list strengths-list">
-                  {strengths.map((s: string, idx: number) => <li key={idx}>{renderWithLinks(s)}</li>)}
-                  {getCustomFieldsForSection('strengths', student).map((cf, idx) => (
-                    <li key={'cf_' + idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+                  return (
+                    <li key={idx} style={{ marginBottom: '0.35rem' }}>
+                      <div className="item-title" style={{ fontWeight: 700, color: '#113666', lineHeight: '1.3' }}>
+                        {renderWithLinks(title)}
+                      </div>
+                      {tools && (
+                        <div className="item-sub" style={{ color: '#113666', lineHeight: '1.3' }}>
+                          Tools Used: {renderWithLinks(tools)}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+                {getCustomFieldsForSection('projects', student).map((cf, idx) => (
+                  <li key={'cf_' + idx} className="item-sub" style={{ color: '#113666' }}>
+                    <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-            {/* Additional / Custom Section rendering */}
-            {(formConfig.sectionOrder || ['additional'])
-              .filter((secId: string) => !['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths'].includes(secId))
-              .map((secId: string) => {
-                const secFields = getCustomFieldsForSection(secId, student);
-                if (secFields.length === 0) return null;
-                const secTitle = formConfig.sectionTitles?.[secId] || secId;
-                return (
-                  <div key={secId} className="section">
-                    <h3>{secTitle}</h3>
-                    <ul className="bullet-list">
-                      {secFields.map((cf, idx) => (
-                        <li key={idx}>
-                          <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
-          </div>
+          {(tech.length > 0 || getCustomFieldsForSection('technical', student).length > 0) && (
+            <div className="section">
+              <h3>{formConfig.sectionTitles?.technical || 'Technical Expertise'}</h3>
+              <ul className="bullet-list">
+                {tech.map((t: string, idx: number) => <li key={idx}>{renderWithLinks(t)}</li>)}
+                {getCustomFieldsForSection('technical', student).map((cf, idx) => (
+                  <li key={'cf_' + idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {(strengths.length > 0 || getCustomFieldsForSection('strengths', student).length > 0) && (
+            <div className="section">
+              <h3>{formConfig.sectionTitles?.strengths || 'Strengths'}</h3>
+              <ul className="bullet-list strengths-list">
+                {strengths.map((s: string, idx: number) => <li key={idx}>{renderWithLinks(s)}</li>)}
+                {getCustomFieldsForSection('strengths', student).map((cf, idx) => (
+                  <li key={'cf_' + idx}><strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Additional / Custom Section rendering */}
+          {(formConfig.sectionOrder || ['additional'])
+            .filter((secId: string) => !['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths'].includes(secId))
+            .map((secId: string) => {
+              const secFields = getCustomFieldsForSection(secId, student);
+              if (secFields.length === 0) return null;
+              const secTitle = formConfig.sectionTitles?.[secId] || secId;
+              return (
+                <div key={secId} className="section">
+                  <h3>{secTitle}</h3>
+                  <ul className="bullet-list">
+                    {secFields.map((cf, idx) => (
+                      <li key={idx}>
+                        <strong>{cf.label}:</strong> {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
         </div>
 
         {/* Footer text */}
