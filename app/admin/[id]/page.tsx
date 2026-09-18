@@ -8,9 +8,28 @@ export default function AdminEditPage() {
   const [formData, setFormData] = useState<any>(null);
 
   useEffect(() => {
+    const checkSessionRealtime = async () => {
+      try {
+        const res = await fetch('/api/auth');
+        if (!res.ok) {
+          window.location.href = '/admin/login';
+        }
+      } catch {}
+    };
+
+    const interval = setInterval(checkSessionRealtime, 4000);
+    window.addEventListener('focus', checkSessionRealtime);
+
     fetch(`/api/students/${params.id}`)
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) {
+          window.location.href = '/admin/login';
+          return null;
+        }
+        return r.json();
+      })
       .then(data => {
+        if (!data) return;
         const safeParse = (val: any) => {
           if (Array.isArray(val)) return val;
           if (typeof val === 'string') {
@@ -28,6 +47,11 @@ export default function AdminEditPage() {
           strengths: safeParse(data.strengths),
         });
       });
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', checkSessionRealtime);
+    };
   }, [params.id]);
 
   if (!formData) return <div>Loading...</div>;

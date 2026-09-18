@@ -497,6 +497,24 @@ function AdminDashboardContent() {
   useEffect(() => {
     fetchStudents();
     fetchConfig();
+
+    const checkSessionRealtime = async () => {
+      try {
+        const res = await fetch('/api/auth');
+        if (!res.ok) {
+          window.location.href = '/admin/login';
+        }
+      } catch {
+        // ignore intermittent network errors
+      }
+    };
+
+    const interval = setInterval(checkSessionRealtime, 4000);
+    window.addEventListener('focus', checkSessionRealtime);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', checkSessionRealtime);
+    };
   }, []);
 
   const saveFormConfig = async () => {

@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
+import { checkIsAdminValid } from '@/lib/auth-check';
 
 export const dynamic = 'force-dynamic';
+
+export async function GET() {
+  const isValid = await checkIsAdminValid();
+  if (!isValid) {
+    return NextResponse.json({ authenticated: false }, { status: 401 });
+  }
+  return NextResponse.json({ authenticated: true });
+}
 
 export async function POST(req: Request) {
   try {
