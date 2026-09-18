@@ -49,23 +49,34 @@ export default function SingleBrochurePrintPage() {
       if (handledKeys.includes(lowerKey)) return;
 
       if (typeof val === 'object' && val !== null && 'value' in val) {
-        const sec = (val as any).section || 'additional';
-        if (sec === sectionId || (sectionId === 'additional' && (!sec || sec === 'additional'))) {
+        const sec = (val as any).section || 'personal';
+        if (sec === sectionId || (sectionId === 'personal' && (!sec || sec === 'additional'))) {
           results.push({ label: (val as any).label || key, value: (val as any).value });
         }
         return;
       }
 
-      const cfgField = (formConfig.customFields || []).find((f: any) => f.id === key || (f.label && f.label.toLowerCase() === lowerKey));
-      const assignedSec = cfgField ? (cfgField.section || 'additional') : 'additional';
+      const cfgField = (formConfig.customFields || []).find((f: any) => 
+        f.id === key || 
+        (f.label && f.label.toLowerCase() === lowerKey) ||
+        key.toLowerCase().includes(f.id.toLowerCase())
+      );
+      const assignedSec = cfgField ? (cfgField.section || 'personal') : 'personal';
 
-      if (assignedSec === sectionId) {
-        const label = cfgField ? cfgField.label : key.replace(/^field_/, '');
+      if (assignedSec === sectionId || (sectionId === 'personal' && (assignedSec === 'additional' || !assignedSec))) {
+        const label = cfgField ? cfgField.label : key.replace(/^field_/, 'Field ');
         results.push({ label, value: val });
       }
     });
 
-    return results;
+    const uniqueMap = new Map<string, any>();
+    results.forEach(item => {
+      if (!uniqueMap.has(item.label.toLowerCase())) {
+        uniqueMap.set(item.label.toLowerCase(), item);
+      }
+    });
+
+    return Array.from(uniqueMap.values());
   };
 
   const linkedInVal = student.linkedIn || student.customFieldsData?.linkedIn || student.customFieldsData?.LinkedIn || student.customFieldsData?.['linkedin'];

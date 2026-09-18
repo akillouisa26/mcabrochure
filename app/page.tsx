@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
-const initialFormState = {
+const getInitialFormState = () => ({
   name: '',
   registerNumber: '',
   tagline: '',
@@ -23,10 +23,11 @@ const initialFormState = {
   strengths: [''],
   profileImageBase64: '',
   customFieldsData: {} as Record<string, any>,
-};
+});
 
 export default function Home() {
-  const [formData, setFormData] = useState(initialFormState);
+  const [formData, setFormData] = useState(getInitialFormState());
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formConfig, setFormConfig] = useState<any>({
     showTagline: true,
     showObjective: true,
@@ -313,12 +314,20 @@ export default function Home() {
     if (formConfig.customFields && formConfig.customFields.length > 0) {
       for (const field of formConfig.customFields) {
         if (field.enabled === false) continue;
-        const val = formData.customFieldsData?.[field.id];
+        const val = formData.customFieldsData?.[field.id] !== undefined 
+          ? formData.customFieldsData[field.id] 
+          : formData.customFieldsData?.[field.label];
+
         if (field.required && (!val || (typeof val === 'string' && !val.trim()))) {
           setErrorMsg(`Please fill in the required field "${field.label}".`);
           return;
         }
         if (val !== undefined && val !== null && val !== '') {
+          customFieldsPayload[field.id] = {
+            label: field.label,
+            value: val,
+            section: field.section || 'personal'
+          };
           customFieldsPayload[field.label] = val;
         }
       }
@@ -342,9 +351,12 @@ export default function Home() {
 
       if (res.ok && resData.id) {
         setSuccess('Brochure details submitted successfully!');
-        setFormData(initialFormState);
-        window.scrollTo(0, 0);
-        setTimeout(() => setSuccess(''), 6000);
+        setFormData(getInitialFormState());
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => setSuccess(''), 7000);
       } else {
         setErrorMsg(resData.error || 'Failed to submit form details.');
       }
@@ -490,7 +502,7 @@ export default function Home() {
               {getSection('profilePicture', 'personal') === secId && formConfig.showProfilePicture !== false && (
                 <div className="form-group">
                   <label>{getLabel('profilePicture', 'Profile Picture')}</label>
-                  <input type="file" accept="image/*" required={isReq('profilePicture', true)} className="form-control" onChange={handleFileChange} />
+                  <input ref={fileInputRef} type="file" accept="image/*" required={isReq('profilePicture', true)} className="form-control" onChange={handleFileChange} />
                 </div>
               )}
 

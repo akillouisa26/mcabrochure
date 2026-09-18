@@ -320,27 +320,45 @@ function AdminDashboardContent() {
     if (!studentObj || !studentObj.customFieldsData) return [];
     const results: Array<{ label: string; value: any }> = [];
 
+    const handledKeys = [
+      'linkedin', 'github', 'portfolio', 'objective', 
+      'visionstatement', 'vision statement (2 lines)', 'vision statement (2lines)', 'vision statement'
+    ];
+
     Object.entries(studentObj.customFieldsData).forEach(([key, val]) => {
       if (val === undefined || val === null || val === '') return;
+      const lowerKey = key.toLowerCase();
+      if (handledKeys.includes(lowerKey)) return;
 
       if (typeof val === 'object' && val !== null && 'value' in val) {
-        const sec = (val as any).section || 'additional';
-        if (sec === sectionId || (sectionId === 'additional' && (!sec || sec === 'additional'))) {
+        const sec = (val as any).section || 'personal';
+        if (sec === sectionId || (sectionId === 'personal' && (!sec || sec === 'additional'))) {
           results.push({ label: (val as any).label || key, value: (val as any).value });
         }
         return;
       }
 
-      const cfgField = (formConfig.customFields || []).find((f: any) => f.id === key || f.label === key);
-      const assignedSec = cfgField ? (cfgField.section || 'additional') : 'additional';
+      const cfgField = (formConfig.customFields || []).find((f: any) => 
+        f.id === key || 
+        (f.label && f.label.toLowerCase() === lowerKey) ||
+        key.toLowerCase().includes(f.id.toLowerCase())
+      );
+      const assignedSec = cfgField ? (cfgField.section || 'personal') : 'personal';
 
-      if (assignedSec === sectionId) {
+      if (assignedSec === sectionId || (sectionId === 'personal' && (assignedSec === 'additional' || !assignedSec))) {
         const label = cfgField ? cfgField.label : key.replace(/^field_/, 'Field ');
         results.push({ label, value: val });
       }
     });
 
-    return results;
+    const uniqueMap = new Map<string, any>();
+    results.forEach(item => {
+      if (!uniqueMap.has(item.label.toLowerCase())) {
+        uniqueMap.set(item.label.toLowerCase(), item);
+      }
+    });
+
+    return Array.from(uniqueMap.values());
   };
 
   const updateAnyFieldLabel = (fieldId: string, isCustom: boolean, label: string) => {
@@ -1569,83 +1587,127 @@ function AdminDashboardContent() {
                 {(viewStudentModal.portfolio || viewStudentModal.customFieldsData?.portfolio || viewStudentModal.customFieldsData?.Portfolio) && (
                   <p style={{ margin: '0 0 0.25rem 0', color: '#4b5563' }}><strong>Portfolio:</strong> {viewStudentModal.portfolio || viewStudentModal.customFieldsData?.portfolio || viewStudentModal.customFieldsData?.Portfolio}</p>
                 )}
+                {getCustomFieldsForSection('personal', viewStudentModal).map((cf, idx) => (
+                  <p key={'cf_p_' + idx} style={{ margin: '0 0 0.25rem 0', color: '#4b5563' }}>
+                    <strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
+                  </p>
+                ))}
+                {getCustomFieldsForSection('contact', viewStudentModal).map((cf, idx) => (
+                  <p key={'cf_c_' + idx} style={{ margin: '0 0 0.25rem 0', color: '#4b5563' }}>
+                    <strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
+                  </p>
+                ))}
               </div>
             </div>
 
             <hr style={{ margin: '1rem 0' }}/>
-            <h4 style={{ margin: '0 0 0.5rem 0' }}>Educational Qualifications</h4>
+            <h4 style={{ margin: '0 0 0.5rem 0' }}>{formConfig.sectionTitles?.education || 'Educational Qualifications'}</h4>
             <ul>
               {parseEducationList(viewStudentModal.educationalQualifications).map((e: any, idx: number) => (
                 <li key={idx}><strong>{e.qualification}</strong> - {e.institution} ({e.year}) | CGPA: {e.cgpa}</li>
               ))}
+              {getCustomFieldsForSection('education', viewStudentModal).map((cf, idx) => (
+                <li key={'cf_e_' + idx}>
+                  <strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
+                </li>
+              ))}
             </ul>
 
             <hr style={{ margin: '1rem 0' }}/>
-            <h4 style={{ margin: '0 0 0.5rem 0' }}>Certifications</h4>
+            <h4 style={{ margin: '0 0 0.5rem 0' }}>{formConfig.sectionTitles?.certifications || 'Certifications'}</h4>
             <ul>
               {parseStringList(viewStudentModal.certifications).map((c: string, idx: number) => (
                 <li key={idx}>{c}</li>
               ))}
+              {getCustomFieldsForSection('certifications', viewStudentModal).map((cf, idx) => (
+                <li key={'cf_cert_' + idx}>
+                  <strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
+                </li>
+              ))}
             </ul>
 
             <hr style={{ margin: '1rem 0' }}/>
-            <h4 style={{ margin: '0 0 0.5rem 0' }}>Technical Expertise</h4>
+            <h4 style={{ margin: '0 0 0.5rem 0' }}>{formConfig.sectionTitles?.technical || 'Technical Expertise'}</h4>
             <ul>
               {parseStringList(viewStudentModal.technicalExpertise).map((t: string, idx: number) => (
                 <li key={idx}>{t}</li>
               ))}
+              {getCustomFieldsForSection('technical', viewStudentModal).map((cf, idx) => (
+                <li key={'cf_t_' + idx}>
+                  <strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
+                </li>
+              ))}
             </ul>
 
-            {parseInternshipsList(viewStudentModal.internships).length > 0 && (
+            {(parseInternshipsList(viewStudentModal.internships).length > 0 || getCustomFieldsForSection('internships', viewStudentModal).length > 0) && (
               <>
                 <hr style={{ margin: '1rem 0' }}/>
-                <h4 style={{ margin: '0 0 0.5rem 0' }}>Internships</h4>
+                <h4 style={{ margin: '0 0 0.5rem 0' }}>{formConfig.sectionTitles?.internships || 'Internships'}</h4>
                 {parseInternshipsList(viewStudentModal.internships).map((i: any, idx: number) => (
                   <div key={idx} style={{ marginBottom: '0.75rem', background: '#f9fafb', padding: '0.75rem', borderRadius: '4px' }}>
                     <strong>{i.company}</strong> {i.role && <span>({i.role})</span>}
                     {i.duration && <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: '#4b5563' }}>Duration: {i.duration}</p>}
                   </div>
                 ))}
+                {getCustomFieldsForSection('internships', viewStudentModal).map((cf, idx) => (
+                  <div key={'cf_i_' + idx} style={{ marginBottom: '0.75rem', background: '#f9fafb', padding: '0.75rem', borderRadius: '4px' }}>
+                    <strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
+                  </div>
+                ))}
               </>
             )}
 
-            {parseProjectsList(viewStudentModal.projects).length > 0 && (
+            {(parseProjectsList(viewStudentModal.projects).length > 0 || getCustomFieldsForSection('projects', viewStudentModal).length > 0) && (
               <>
                 <hr style={{ margin: '1rem 0' }}/>
-                <h4 style={{ margin: '0 0 0.5rem 0' }}>Projects</h4>
+                <h4 style={{ margin: '0 0 0.5rem 0' }}>{formConfig.sectionTitles?.projects || 'Projects'}</h4>
                 {parseProjectsList(viewStudentModal.projects).map((p: any, idx: number) => (
                   <div key={idx} style={{ marginBottom: '0.75rem', background: '#f9fafb', padding: '0.75rem', borderRadius: '4px' }}>
                     <strong>{p.title}</strong> {p.toolsUsed && <span>(Tools: {p.toolsUsed})</span>}
+                  </div>
+                ))}
+                {getCustomFieldsForSection('projects', viewStudentModal).map((cf, idx) => (
+                  <div key={'cf_proj_' + idx} style={{ marginBottom: '0.75rem', background: '#f9fafb', padding: '0.75rem', borderRadius: '4px' }}>
+                    <strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
                   </div>
                 ))}
               </>
             )}
 
             <hr style={{ margin: '1rem 0' }}/>
-            <h4 style={{ margin: '0 0 0.5rem 0' }}>Strengths</h4>
+            <h4 style={{ margin: '0 0 0.5rem 0' }}>{formConfig.sectionTitles?.strengths || 'Strengths'}</h4>
             <ul>
               {parseStringList(viewStudentModal.strengths).map((s: string, idx: number) => (
                 <li key={idx}>{s}</li>
               ))}
+              {getCustomFieldsForSection('strengths', viewStudentModal).map((cf, idx) => (
+                <li key={'cf_s_' + idx}>
+                  <strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
+                </li>
+              ))}
             </ul>
 
-            {viewStudentModal.customFieldsData && Object.keys(viewStudentModal.customFieldsData).length > 0 && (
-              <>
-                <hr style={{ margin: '1rem 0' }}/>
-                <h4 style={{ margin: '0 0 0.5rem 0' }}>Additional Custom Information</h4>
-                <ul>
-                  {Object.entries(viewStudentModal.customFieldsData).map(([key, val]: [string, any]) => {
-                    if (!val) return null;
-                    const label = formConfig.customFields?.find(f => f.id === key)?.label || key.replace(/^field_/, 'Field ');
-                    return (
-                      <li key={key}>
-                        <strong>{label}:</strong> {typeof val === 'object' ? JSON.stringify(val) : String(val)}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </>
-            )}
+            {/* Render any Custom Sections */}
+            {(formConfig.sectionOrder || [])
+              .filter(secId => !['personal', 'contact', 'education', 'certifications', 'technical', 'internships', 'projects', 'strengths'].includes(secId))
+              .map(secId => {
+                const secFields = getCustomFieldsForSection(secId, viewStudentModal);
+                if (secFields.length === 0) return null;
+                const secTitle = formConfig.sectionTitles?.[secId] || secId;
+                return (
+                  <div key={secId}>
+                    <hr style={{ margin: '1rem 0' }}/>
+                    <h4 style={{ margin: '0 0 0.5rem 0' }}>{secTitle}</h4>
+                    <ul>
+                      {secFields.map((cf, idx) => (
+                        <li key={idx}>
+                          <strong>{cf.label}:</strong> {typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
 
             <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
               <button onClick={() => setViewStudentModal(null)} className="btn btn-secondary">Close Details</button>
