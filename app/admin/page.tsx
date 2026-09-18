@@ -703,6 +703,7 @@ function AdminDashboardContent() {
       'Register Number',
       'Student Name',
       'Status',
+      'Profile Picture',
       'Phone',
       'Email',
       'Tagline',
@@ -766,10 +767,13 @@ function AdminDashboardContent() {
         return typeof val === 'object' ? JSON.stringify(val) : String(val);
       });
 
+      const profilePic = student.profileImageBase64 || student.profilePicture || student.photoUrl || '';
+
       return [
         escapeCsv(student.registerNumber || 'N/A'),
         escapeCsv(student.name || ''),
         escapeCsv(student.status || 'PENDING'),
+        escapeCsv(profilePic),
         escapeCsv(student.contactPhone || ''),
         escapeCsv(student.contactEmail || ''),
         escapeCsv(student.tagline || ''),
