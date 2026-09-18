@@ -127,7 +127,12 @@ export default function SingleBrochurePrintPage() {
             {githubVal && <div className="contact-item"><span>{formConfig.fieldLabels?.github || 'GitHub'}</span>: {renderWithLinks(githubVal)}</div>}
             {portfolioVal && <div className="contact-item"><span>{formConfig.fieldLabels?.portfolio || 'Portfolio'}</span>: {renderWithLinks(portfolioVal)}</div>}
             {getCustomFieldsForSection('contact', student).map((cf, idx) => (
-              <div key={idx} className="contact-item">
+              <div key={'cf_cnt_' + idx} className="contact-item">
+                <span>{cf.label}</span>: {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
+              </div>
+            ))}
+            {getCustomFieldsForSection('personal', student).map((cf, idx) => (
+              <div key={'cf_pers_' + idx} className="contact-item">
                 <span>{cf.label}</span>: {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
               </div>
             ))}

@@ -1031,7 +1031,12 @@ function AdminDashboardContent() {
                           {githubVal && <div className="contact-item"><span>{formConfig.fieldLabels?.github || 'GitHub'}</span>: {renderWithLinks(githubVal)}</div>}
                           {portfolioVal && <div className="contact-item"><span>{formConfig.fieldLabels?.portfolio || 'Portfolio'}</span>: {renderWithLinks(portfolioVal)}</div>}
                           {getCustomFieldsForSection('contact', student).map((cf, idx) => (
-                            <div key={idx} className="contact-item">
+                            <div key={'cf_cnt_' + idx} className="contact-item">
+                              <span>{cf.label}</span>: {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
+                            </div>
+                          ))}
+                          {getCustomFieldsForSection('personal', student).map((cf, idx) => (
+                            <div key={'cf_pers_' + idx} className="contact-item">
                               <span>{cf.label}</span>: {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
                             </div>
                           ))}
@@ -2148,6 +2153,77 @@ function AdminDashboardContent() {
                   </div>
                 ))}
               </div>
+
+              {/* Custom & Additional Fields Edit Block */}
+              {formConfig.customFields && formConfig.customFields.length > 0 && (
+                <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#1e293b' }}>Custom Fields & Additional Details</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem' }}>
+                    {formConfig.customFields.map((field: any) => {
+                      if (field.enabled === false) return null;
+
+                      const currentValObj = editStudentModal.customFieldsData?.[field.id] !== undefined
+                        ? editStudentModal.customFieldsData[field.id]
+                        : editStudentModal.customFieldsData?.[field.label];
+                      
+                      const currentVal = typeof currentValObj === 'object' && currentValObj !== null && 'value' in currentValObj
+                        ? currentValObj.value
+                        : (currentValObj || '');
+
+                      const sectionName = formConfig.sectionTitles?.[field.section] || field.section || 'Personal';
+
+                      return (
+                        <div key={field.id} style={{ gridColumn: field.type === 'textarea' ? '1 / -1' : 'auto' }}>
+                          <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem', color: '#334155' }}>
+                            {field.label} <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 400 }}>({sectionName})</span>
+                          </label>
+                          {field.type === 'textarea' ? (
+                            <textarea
+                              rows={2}
+                              value={typeof currentVal === 'object' ? JSON.stringify(currentVal) : String(currentVal)}
+                              onChange={e => {
+                                setEditStudentModal({
+                                  ...editStudentModal,
+                                  customFieldsData: {
+                                    ...(editStudentModal.customFieldsData || {}),
+                                    [field.id]: {
+                                      label: field.label,
+                                      value: e.target.value,
+                                      section: field.section || 'personal'
+                                    },
+                                    [field.label]: e.target.value
+                                  }
+                                });
+                              }}
+                              className="form-control"
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              value={typeof currentVal === 'object' ? JSON.stringify(currentVal) : String(currentVal)}
+                              onChange={e => {
+                                setEditStudentModal({
+                                  ...editStudentModal,
+                                  customFieldsData: {
+                                    ...(editStudentModal.customFieldsData || {}),
+                                    [field.id]: {
+                                      label: field.label,
+                                      value: e.target.value,
+                                      section: field.section || 'personal'
+                                    },
+                                    [field.label]: e.target.value
+                                  }
+                                });
+                              }}
+                              className="form-control"
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Action buttons */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
