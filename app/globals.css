@@ -286,7 +286,93 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   color: #113666;
 }
 
-/* Sparse Content Dynamic Scaling (For light/short profiles to fill page fully) */
+/* Dynamic Density Classes (Auto-scaling text size to fill page between header and footer) */
+
+/* 1. Ultra Sparse Content (For very short profiles to fill page fully) */
+.brochure-body.ultra-sparse-content {
+  padding: 1.8rem 2.8rem 0.8rem;
+}
+.brochure-body.ultra-sparse-content .section {
+  margin-bottom: 1.8rem;
+}
+.brochure-body.ultra-sparse-content .section h3 {
+  font-size: 1.25rem;
+  padding-bottom: 0.45rem;
+  margin-bottom: 0.95rem;
+}
+.brochure-body.ultra-sparse-content .contact-section {
+  padding: 1.35rem 1.6rem;
+  margin-bottom: 1.8rem;
+}
+.brochure-body.ultra-sparse-content .contact-item {
+  font-size: 1.0rem;
+  margin-bottom: 0.55rem;
+}
+.brochure-body.ultra-sparse-content .edu-table {
+  font-size: 0.95rem;
+}
+.brochure-body.ultra-sparse-content .edu-table th, 
+.brochure-body.ultra-sparse-content .edu-table td {
+  padding: 0.6rem 0.8rem;
+}
+.brochure-body.ultra-sparse-content .bullet-list {
+  padding-left: 1.45rem;
+}
+.brochure-body.ultra-sparse-content .bullet-list li {
+  margin-bottom: 0.55rem;
+  font-size: 0.975rem;
+  line-height: 1.5;
+}
+.brochure-body.ultra-sparse-content .item-title {
+  font-size: 1.05rem !important;
+}
+.brochure-body.ultra-sparse-content .item-sub {
+  font-size: 0.95rem !important;
+}
+
+/* 2. Very Sparse Content */
+.brochure-body.very-sparse-content {
+  padding: 1.6rem 2.6rem 0.7rem;
+}
+.brochure-body.very-sparse-content .section {
+  margin-bottom: 1.6rem;
+}
+.brochure-body.very-sparse-content .section h3 {
+  font-size: 1.2rem;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.85rem;
+}
+.brochure-body.very-sparse-content .contact-section {
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.6rem;
+}
+.brochure-body.very-sparse-content .contact-item {
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+.brochure-body.very-sparse-content .edu-table {
+  font-size: 0.925rem;
+}
+.brochure-body.very-sparse-content .edu-table th, 
+.brochure-body.very-sparse-content .edu-table td {
+  padding: 0.55rem 0.7rem;
+}
+.brochure-body.very-sparse-content .bullet-list {
+  padding-left: 1.4rem;
+}
+.brochure-body.very-sparse-content .bullet-list li {
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+.brochure-body.very-sparse-content .item-title {
+  font-size: 1.0rem !important;
+}
+.brochure-body.very-sparse-content .item-sub {
+  font-size: 0.925rem !important;
+}
+
+/* 3. Sparse Content */
 .brochure-body.sparse-content {
   padding: 1.4rem 2.5rem 0.6rem;
 }
@@ -328,7 +414,7 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   font-size: 0.9rem !important;
 }
 
-/* Dense & Ultra-Dense Content Dynamic Scaling */
+/* 4. Dense Content */
 .brochure-body.dense-content {
   padding: 0.85rem 2rem 0.5rem;
 }
@@ -370,6 +456,7 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   font-size: 0.8rem !important;
 }
 
+/* 5. Ultra Dense Content */
 .brochure-body.ultra-dense-content {
   padding: 0.55rem 1.75rem 0.5rem;
 }
@@ -411,7 +498,7 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   font-size: 0.725rem !important;
 }
 
-/* Micro Content Dynamic Scaling (For mega-heavy profiles) */
+/* 6. Micro Content */
 .brochure-body.micro-content {
   padding: 0.4rem 1.5rem 0.4rem;
 }
@@ -451,6 +538,48 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 }
 .brochure-body.micro-content .item-sub {
   font-size: 0.68rem !important;
+}
+
+/* 7. Nano Content (For extreme heavy data) */
+.brochure-body.nano-content {
+  padding: 0.25rem 1.25rem 0.25rem;
+}
+.brochure-body.nano-content .section {
+  margin-bottom: 0.2rem;
+}
+.brochure-body.nano-content .section h3 {
+  font-size: 0.75rem;
+  padding-bottom: 0.05rem;
+  margin-bottom: 0.15rem;
+}
+.brochure-body.nano-content .contact-section {
+  padding: 0.3rem 0.5rem;
+  margin-bottom: 0.2rem;
+}
+.brochure-body.nano-content .contact-item {
+  font-size: 0.65rem;
+  margin-bottom: 0.08rem;
+}
+.brochure-body.nano-content .edu-table {
+  font-size: 0.62rem;
+}
+.brochure-body.nano-content .edu-table th, 
+.brochure-body.nano-content .edu-table td {
+  padding: 0.08rem 0.15rem;
+}
+.brochure-body.nano-content .bullet-list {
+  padding-left: 0.75rem;
+}
+.brochure-body.nano-content .bullet-list li {
+  margin-bottom: 0.08rem;
+  font-size: 0.65rem;
+  line-height: 1.1;
+}
+.brochure-body.nano-content .item-title {
+  font-size: 0.68rem !important;
+}
+.brochure-body.nano-content .item-sub {
+  font-size: 0.62rem !important;
 }
 
 /* Left column specials */
