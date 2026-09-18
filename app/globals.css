@@ -203,14 +203,20 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 
 /* Body */
 .brochure-body {
-  columns: 2;
-  column-gap: 1.5rem;
-  column-fill: balance;
-  display: block;
+  display: flex;
+  gap: 1.5rem;
   height: 855px;
   padding: 1.25rem 2.25rem 0.6rem;
   box-sizing: border-box;
   overflow: hidden;
+}
+
+.brochure-column {
+  flex: 1;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 .item-title {
@@ -402,6 +408,48 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   font-size: 0.725rem !important;
 }
 
+/* Micro Content Dynamic Scaling (For mega-heavy profiles) */
+.brochure-body.micro-content {
+  padding: 0.4rem 1.5rem 0.4rem;
+}
+.brochure-body.micro-content .section {
+  margin-bottom: 0.3rem;
+}
+.brochure-body.micro-content .section h3 {
+  font-size: 0.8rem;
+  padding-bottom: 0.08rem;
+  margin-bottom: 0.2rem;
+}
+.brochure-body.micro-content .contact-section {
+  padding: 0.4rem 0.65rem;
+  margin-bottom: 0.3rem;
+}
+.brochure-body.micro-content .contact-item {
+  font-size: 0.7rem;
+  margin-bottom: 0.1rem;
+}
+.brochure-body.micro-content .edu-table {
+  font-size: 0.68rem;
+}
+.brochure-body.micro-content .edu-table th, 
+.brochure-body.micro-content .edu-table td {
+  padding: 0.1rem 0.2rem;
+}
+.brochure-body.micro-content .bullet-list {
+  padding-left: 0.85rem;
+}
+.brochure-body.micro-content .bullet-list li {
+  margin-bottom: 0.1rem;
+  font-size: 0.7rem;
+  line-height: 1.15;
+}
+.brochure-body.micro-content .item-title {
+  font-size: 0.725rem !important;
+}
+.brochure-body.micro-content .item-sub {
+  font-size: 0.68rem !important;
+}
+
 /* Left column specials */
 .contact-section {
   background: #f0f7ff;
@@ -570,14 +618,20 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   }
 
   .brochure-body {
-    columns: 2 !important;
-    column-gap: 1.5rem !important;
-    column-fill: balance !important;
-    display: block !important;
+    display: flex !important;
+    gap: 1.5rem !important;
     height: 220mm !important;
     padding: 10mm 20mm 5mm !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
+  }
+
+  .brochure-column {
+    flex: 1 !important;
+    width: 50% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
   }
 
   .brochure-body.sparse-content {
@@ -590,6 +644,10 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 
   .brochure-body.ultra-dense-content {
     padding: 4mm 14mm 4mm !important;
+  }
+
+  .brochure-body.micro-content {
+    padding: 3mm 12mm 3mm !important;
   }
 
   .brochure-card a {
