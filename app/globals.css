@@ -604,7 +604,7 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   flex-shrink: 0;
 }
 
-/* Education Table - Fixed Layout to Prevent Column Overflow / Text Overlapping */
+/* Education Table - Clean Box Design matching Reference Layout */
 .edu-table {
   width: 100%;
   max-width: 100%;
@@ -613,11 +613,14 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   font-size: 0.825rem;
   color: #113666;
   box-sizing: border-box;
+  margin-top: 0.35rem;
+  margin-bottom: 0.35rem;
 }
 .edu-table th, .edu-table td {
   border: 1px solid #b3cdef;
-  padding: 0.3rem 0.2rem;
+  padding: 0.45rem 0.35rem;
   text-align: center;
+  vertical-align: middle;
   color: #113666;
   word-break: break-word;
   overflow-wrap: break-word;
@@ -627,24 +630,29 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
 .edu-table th {
   background: #f0f7ff;
   color: #113666;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 0.85rem;
   word-break: normal;
   overflow-wrap: normal;
 }
+.edu-table td {
+  line-height: 1.35;
+}
 .edu-table th:nth-child(1), .edu-table td:nth-child(1) {
-  width: 28%;
+  width: 25%;
+  text-align: center;
 }
 .edu-table th:nth-child(2), .edu-table td:nth-child(2) {
-  width: 38%;
+  width: 45%;
   text-align: left;
 }
 .edu-table th:nth-child(3), .edu-table td:nth-child(3) {
-  width: 20%;
-  word-break: break-word;
+  width: 18%;
+  text-align: center;
 }
 .edu-table th:nth-child(4), .edu-table td:nth-child(4) {
-  width: 14%;
-  word-break: break-word;
+  width: 12%;
+  text-align: center;
 }
 
 .bullet-list {
