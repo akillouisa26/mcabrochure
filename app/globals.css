@@ -604,17 +604,15 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   flex-shrink: 0;
 }
 
-/* Education Table - Clean Box Design matching Reference Layout */
+/* Education Table - Fixed Layout & Letter Sizing (Exactly matching reference design across ALL brochures) */
 .edu-table {
   width: 100%;
   max-width: 100%;
   table-layout: fixed;
   border-collapse: collapse;
-  font-size: 0.825rem;
+  font-size: 0.85rem;
   color: #113666;
   box-sizing: border-box;
-  margin-top: 0.35rem;
-  margin-bottom: 0.35rem;
 }
 .edu-table th, .edu-table td {
   border: 1px solid #b3cdef;
@@ -631,15 +629,12 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   background: #f0f7ff;
   color: #113666;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   word-break: normal;
   overflow-wrap: normal;
 }
-.edu-table td {
-  line-height: 1.35;
-}
 .edu-table th:nth-child(1), .edu-table td:nth-child(1) {
-  width: 25%;
+  width: 27%;
   text-align: center;
 }
 .edu-table th:nth-child(2), .edu-table td:nth-child(2) {
@@ -647,12 +642,14 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   text-align: left;
 }
 .edu-table th:nth-child(3), .edu-table td:nth-child(3) {
-  width: 18%;
+  width: 15%;
   text-align: center;
+  word-break: break-word;
 }
 .edu-table th:nth-child(4), .edu-table td:nth-child(4) {
-  width: 12%;
+  width: 13%;
   text-align: center;
+  word-break: break-word;
 }
 
 .bullet-list {
