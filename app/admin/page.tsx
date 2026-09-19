@@ -121,11 +121,15 @@ function AdminDashboardContent() {
     showGithub: boolean;
     showPortfolio: boolean;
     showEducation: boolean;
+    showUG?: boolean;
+    showPG?: boolean;
+    allowMultiplePG?: boolean;
     showCertifications: boolean;
     showTechnicalExpertise: boolean;
     showInternships: boolean;
     showProjects: boolean;
     showStrengths: boolean;
+    allowMultiple?: Record<string, boolean>;
     fieldLabels: Record<string, string>;
     fieldSections?: Record<string, string>;
     fieldRequired?: Record<string, boolean>;
@@ -133,7 +137,7 @@ function AdminDashboardContent() {
     fieldOrder?: Record<string, string[]>;
     sectionOrder: string[];
     sectionTitles: Record<string, string>;
-    customFields: Array<{ id: string; label: string; type: string; section: string; required?: boolean; enabled?: boolean; order?: number }>;
+    customFields: Array<{ id: string; label: string; type: string; section: string; required?: boolean; enabled?: boolean; allowMultiple?: boolean; order?: number }>;
   }>({
     showName: true,
     showRegisterNumber: true,
@@ -146,11 +150,23 @@ function AdminDashboardContent() {
     showGithub: true,
     showPortfolio: true,
     showEducation: true,
+    showUG: true,
+    showPG: true,
+    allowMultiplePG: true,
     showCertifications: true,
     showTechnicalExpertise: true,
     showInternships: true,
     showProjects: true,
     showStrengths: true,
+    allowMultiple: {
+      education: true,
+      pg: true,
+      certifications: true,
+      technical: true,
+      internships: true,
+      projects: true,
+      strengths: true,
+    },
     fieldLabels: DEFAULT_FIELD_LABELS,
     fieldSections: {
       name: 'personal',
@@ -206,6 +222,7 @@ function AdminDashboardContent() {
   const [newFieldType, setNewFieldType] = useState<'text' | 'textarea' | 'list'>('text');
   const [newFieldSection, setNewFieldSection] = useState<string>('personal');
   const [newFieldRequired, setNewFieldRequired] = useState<boolean>(false);
+  const [newFieldAllowMultiple, setNewFieldAllowMultiple] = useState<boolean>(true);
 
   // Drag & Drop State
   const [draggedFieldId, setDraggedFieldId] = useState<string | null>(null);
@@ -285,6 +302,7 @@ function AdminDashboardContent() {
       section: sectionId,
       enabled: (formConfig as any)[std.stateKey] !== false,
       required: formConfig.fieldRequired?.[std.id] ?? (std.id === 'name' || std.id === 'registerNumber' || std.id === 'phone' || std.id === 'email' || std.id === 'education'),
+      allowMultiple: formConfig.allowMultiple?.[std.id] !== false,
       isCustom: false,
       stateKey: std.stateKey,
     }));
@@ -298,6 +316,7 @@ function AdminDashboardContent() {
         section: sectionId,
         enabled: c.enabled !== false,
         required: c.required || false,
+        allowMultiple: c.allowMultiple !== false,
         isCustom: true,
         stateKey: undefined,
       }));
@@ -389,6 +408,20 @@ function AdminDashboardContent() {
         fieldRequired: {
           ...(prev.fieldRequired || {}),
           [fieldId]: !!required,
+        }
+      }));
+    }
+  };
+
+  const toggleAnyFieldAllowMultiple = (fieldId: string, isCustom: boolean, allowMultiple?: boolean) => {
+    if (isCustom) {
+      updateCustomField(fieldId, { allowMultiple: !!allowMultiple });
+    } else {
+      setFormConfig(prev => ({
+        ...prev,
+        allowMultiple: {
+          ...(prev.allowMultiple || {}),
+          [fieldId]: !!allowMultiple,
         }
       }));
     }
@@ -586,7 +619,7 @@ function AdminDashboardContent() {
     }));
   };
 
-  const updateCustomField = (fieldId: string, updates: Partial<{ label: string; type: string; section: string; required: boolean; enabled: boolean }>) => {
+  const updateCustomField = (fieldId: string, updates: Partial<{ label: string; type: string; section: string; required: boolean; enabled: boolean; allowMultiple: boolean }>) => {
     setFormConfig(prev => ({
       ...prev,
       customFields: (prev.customFields || []).map(f => 
@@ -606,6 +639,7 @@ function AdminDashboardContent() {
       type: newFieldType,
       section: newFieldSection,
       required: newFieldRequired,
+      allowMultiple: newFieldAllowMultiple,
       order: Date.now(),
     };
     const updated = {
@@ -616,6 +650,8 @@ function AdminDashboardContent() {
     autoSaveConfig(updated);
     setNewFieldLabel('');
     setNewFieldType('text');
+    setNewFieldRequired(false);
+    setNewFieldAllowMultiple(true);
     setNewFieldRequired(false);
   };
 
@@ -881,6 +917,22 @@ function AdminDashboardContent() {
         </div>
       </div>
 
+      {/* Stat Cards Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.1rem 1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+          <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Submissions</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', marginTop: '0.2rem' }}>{students.length}</div>
+        </div>
+        <div style={{ background: '#ffffff', border: '1px solid #fde68a', borderRadius: '8px', padding: '1.1rem 1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+          <div style={{ fontSize: '0.85rem', color: '#b45309', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pending Approvals</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#d97706', marginTop: '0.2rem' }}>{pendingStudents.length}</div>
+        </div>
+        <div style={{ background: '#ffffff', border: '1px solid #a7f3d0', borderRadius: '8px', padding: '1.1rem 1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+          <div style={{ fontSize: '0.85rem', color: '#047857', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Generated Brochures</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#059669', marginTop: '0.2rem' }}>{approvedStudents.length}</div>
+        </div>
+      </div>
+
       {/* Admin Tabs */}
       <div style={{ display: 'flex', gap: '1rem', borderBottom: '2px solid #e5e7eb', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         <button
@@ -896,7 +948,7 @@ function AdminDashboardContent() {
             color: activeTab === 'submissions' ? '#2563eb' : '#6b7280',
           }}
         >
-          Student Submissions
+          Student Submissions ({students.length})
         </button>
 
         <button
@@ -912,7 +964,7 @@ function AdminDashboardContent() {
             color: activeTab === 'brochures' ? '#2563eb' : '#6b7280',
           }}
         >
-          Generated Brochure
+          Generated Brochure ({approvedStudents.length} Generated)
         </button>
 
         <button
@@ -1072,6 +1124,16 @@ function AdminDashboardContent() {
                     </option>
                   ))}
                 </select>
+
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, fontSize: '0.85rem', color: '#1e293b', cursor: 'pointer', background: '#eff6ff', padding: '0.4rem 0.6rem', borderRadius: '5px', border: '1px solid #bfdbfe' }}>
+                  <input 
+                    type="checkbox"
+                    checked={newFieldAllowMultiple}
+                    onChange={e => setNewFieldAllowMultiple(e.target.checked)}
+                    style={{ width: '15px', height: '15px' }}
+                  />
+                  Allow Multiple (+ Button)
+                </label>
 
                 <button 
                   type="button" 
@@ -1244,6 +1306,19 @@ function AdminDashboardContent() {
                             Required
                           </label>
 
+                          {/* Allow Multiple (+ Button) Checkbox */}
+                          {(field.type === 'array' || field.type === 'list' || field.isCustom || ['education', 'certifications', 'technical', 'internships', 'projects', 'strengths'].includes(field.id)) && (
+                            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer', userSelect: 'none', background: '#eff6ff', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
+                              <input 
+                                type="checkbox"
+                                checked={field.allowMultiple !== false}
+                                onChange={e => toggleAnyFieldAllowMultiple(field.id, field.isCustom, e.target.checked)}
+                                style={{ width: '16px', height: '16px' }}
+                              />
+                              Allow Multiple (+ Button)
+                            </label>
+                          )}
+
                           {/* Type selector */}
                           <select
                             value={field.type}
@@ -1278,6 +1353,40 @@ function AdminDashboardContent() {
                           >
                             Remove
                           </button>
+
+                          {/* Special Education Sub-Controls */}
+                          {field.id === 'education' && (
+                            <div style={{ marginTop: '0.6rem', paddingTop: '0.6rem', borderTop: '1px dashed #cbd5e1', width: '100%', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', fontSize: '0.825rem' }}>
+                              <span style={{ fontWeight: 700, color: '#113666' }}>Education Sub-Controls:</span>
+                              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600, color: '#334155', cursor: 'pointer' }}>
+                                <input 
+                                  type="checkbox"
+                                  checked={formConfig.showUG !== false}
+                                  onChange={e => setFormConfig(prev => ({ ...prev, showUG: e.target.checked }))}
+                                  style={{ width: '15px', height: '15px' }}
+                                />
+                                Enable Under Graduate (UG)
+                              </label>
+                              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600, color: '#334155', cursor: 'pointer' }}>
+                                <input 
+                                  type="checkbox"
+                                  checked={formConfig.showPG !== false}
+                                  onChange={e => setFormConfig(prev => ({ ...prev, showPG: e.target.checked }))}
+                                  style={{ width: '15px', height: '15px' }}
+                                />
+                                Enable Post Graduate (PG)
+                              </label>
+                              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600, color: '#1d4ed8', cursor: 'pointer' }}>
+                                <input 
+                                  type="checkbox"
+                                  checked={formConfig.allowMultiplePG !== false}
+                                  onChange={e => setFormConfig(prev => ({ ...prev, allowMultiplePG: e.target.checked }))}
+                                  style={{ width: '15px', height: '15px' }}
+                                />
+                                Allow Multiple PG (+ Button)
+                              </label>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}

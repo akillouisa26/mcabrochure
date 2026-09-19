@@ -610,16 +610,18 @@ export default function Home() {
                   })}
 
                   {/* Add Post Graduate Button */}
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => addArrayItem('educationalQualifications', { qualification: '', institution: '', year: '', cgpa: '' })}
-                      className="btn btn-secondary"
-                      style={{ background: '#3b82f6', color: '#ffffff', fontWeight: 600, fontSize: '0.875rem', padding: '0.45rem 0.9rem', borderRadius: '5px' }}
-                    >
-                      + Add Post Graduate
-                    </button>
-                  </div>
+                  {formConfig.allowMultiplePG !== false && (formConfig.allowMultiple?.education !== false) && (
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => addArrayItem('educationalQualifications', { qualification: '', institution: '', year: '', cgpa: '' })}
+                        className="btn btn-secondary"
+                        style={{ background: '#3b82f6', color: '#ffffff', fontWeight: 600, fontSize: '0.875rem', padding: '0.45rem 0.9rem', borderRadius: '5px' }}
+                      >
+                        + Add Post Graduate
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -636,7 +638,9 @@ export default function Home() {
                       </div>
                     </div>
                   ))}
-                  <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('certifications', '')}>+ Add Certification</button>
+                  {formConfig.allowMultiple?.certifications !== false && (
+                    <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('certifications', '')}>+ Add Certification</button>
+                  )}
                 </div>
               )}
 
@@ -653,7 +657,9 @@ export default function Home() {
                       </div>
                     </div>
                   ))}
-                  <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('technicalExpertise', '')}>+ Add Expertise</button>
+                  {formConfig.allowMultiple?.technical !== false && (
+                    <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('technicalExpertise', '')}>+ Add Expertise</button>
+                  )}
                 </div>
               )}
 
@@ -678,7 +684,9 @@ export default function Home() {
                       )}
                     </div>
                   ))}
-                  <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('internships', { company: '', role: '', duration: ''})}>+ Add Internship</button>
+                  {formConfig.allowMultiple?.internships !== false && (
+                    <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('internships', { company: '', role: '', duration: ''})}>+ Add Internship</button>
+                  )}
                 </div>
               )}
 
@@ -699,7 +707,9 @@ export default function Home() {
                       )}
                     </div>
                   ))}
-                  <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('projects', { title: '', toolsUsed: ''})}>+ Add Project</button>
+                  {formConfig.allowMultiple?.projects !== false && (
+                    <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('projects', { title: '', toolsUsed: ''})}>+ Add Project</button>
+                  )}
                 </div>
               )}
 
@@ -716,7 +726,9 @@ export default function Home() {
                       </div>
                     </div>
                   ))}
-                  <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('strengths', '')}>+ Add Strength</button>
+                  {formConfig.allowMultiple?.strengths !== false && (
+                    <button type="button" className="btn btn-secondary" onClick={() => addArrayItem('strengths', '')}>+ Add Strength</button>
+                  )}
                 </div>
               )}
 
