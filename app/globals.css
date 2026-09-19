@@ -311,11 +311,11 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   margin-bottom: 0.55rem;
 }
 .brochure-body.ultra-sparse-content .edu-table {
-  font-size: 0.95rem;
+  font-size: 0.825rem;
 }
 .brochure-body.ultra-sparse-content .edu-table th, 
 .brochure-body.ultra-sparse-content .edu-table td {
-  padding: 0.6rem 0.8rem;
+  padding: 0.5rem 0.4rem;
 }
 .brochure-body.ultra-sparse-content .bullet-list {
   padding-left: 1.45rem;
@@ -353,11 +353,11 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   margin-bottom: 0.5rem;
 }
 .brochure-body.very-sparse-content .edu-table {
-  font-size: 0.925rem;
+  font-size: 0.825rem;
 }
 .brochure-body.very-sparse-content .edu-table th, 
 .brochure-body.very-sparse-content .edu-table td {
-  padding: 0.55rem 0.7rem;
+  padding: 0.45rem 0.35rem;
 }
 .brochure-body.very-sparse-content .bullet-list {
   padding-left: 1.4rem;
@@ -395,11 +395,11 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   margin-bottom: 0.45rem;
 }
 .brochure-body.sparse-content .edu-table {
-  font-size: 0.9rem;
+  font-size: 0.825rem;
 }
 .brochure-body.sparse-content .edu-table th, 
 .brochure-body.sparse-content .edu-table td {
-  padding: 0.5rem 0.65rem;
+  padding: 0.4rem 0.3rem;
 }
 .brochure-body.sparse-content .bullet-list {
   padding-left: 1.35rem;
@@ -633,7 +633,7 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   white-space: nowrap;
 }
 .edu-table th:nth-child(1), .edu-table td:nth-child(1) {
-  width: 30%;
+  width: 28%;
   text-align: center;
 }
 .edu-table th:nth-child(2), .edu-table td:nth-child(2) {
@@ -641,12 +641,14 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   text-align: left;
 }
 .edu-table th:nth-child(3), .edu-table td:nth-child(3) {
-  width: 19%;
+  width: 21%;
   text-align: center;
+  white-space: nowrap;
 }
 .edu-table th:nth-child(4), .edu-table td:nth-child(4) {
   width: 15%;
   text-align: center;
+  white-space: nowrap;
 }
 
 .bullet-list {
