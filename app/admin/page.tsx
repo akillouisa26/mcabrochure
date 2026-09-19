@@ -138,6 +138,7 @@ function AdminDashboardContent() {
     sectionOrder: string[];
     sectionTitles: Record<string, string>;
     customFields: Array<{ id: string; label: string; type: string; section: string; required?: boolean; enabled?: boolean; allowMultiple?: boolean; order?: number }>;
+    educationSubCategories?: Array<{ id: string; label: string; enabled: boolean; allowMultiple?: boolean }>;
   }>({
     showName: true,
     showRegisterNumber: true,
@@ -153,6 +154,10 @@ function AdminDashboardContent() {
     showUG: true,
     showPG: true,
     allowMultiplePG: true,
+    educationSubCategories: [
+      { id: 'ug', label: 'Under Graduate', enabled: true, allowMultiple: false },
+      { id: 'pg', label: 'Post Graduate', enabled: true, allowMultiple: true },
+    ],
     showCertifications: true,
     showTechnicalExpertise: true,
     showInternships: true,
@@ -223,6 +228,66 @@ function AdminDashboardContent() {
   const [newFieldSection, setNewFieldSection] = useState<string>('personal');
   const [newFieldRequired, setNewFieldRequired] = useState<boolean>(false);
   const [newFieldAllowMultiple, setNewFieldAllowMultiple] = useState<boolean>(true);
+  // Education Sub-Category Management state
+  const [newEduSubCatLabel, setNewEduSubCatLabel] = useState('');
+
+  const addEducationSubCategory = () => {
+    if (!newEduSubCatLabel.trim()) {
+      alert('Please enter an education sub-category title (e.g. HSC, Diploma, Doctorate).');
+      return;
+    }
+    const newSubCat = {
+      id: 'subcat_' + Date.now(),
+      label: newEduSubCatLabel.trim(),
+      enabled: true,
+      allowMultiple: false,
+    };
+    const currentList = formConfig.educationSubCategories && formConfig.educationSubCategories.length > 0
+      ? formConfig.educationSubCategories
+      : [
+          { id: 'ug', label: 'Under Graduate', enabled: formConfig.showUG !== false, allowMultiple: false },
+          { id: 'pg', label: 'Post Graduate', enabled: formConfig.showPG !== false, allowMultiple: formConfig.allowMultiplePG !== false },
+        ];
+    const updated = {
+      ...formConfig,
+      educationSubCategories: [...currentList, newSubCat],
+    };
+    setFormConfig(updated);
+    autoSaveConfig(updated);
+    setNewEduSubCatLabel('');
+  };
+
+  const updateEducationSubCategory = (id: string, updates: Partial<{ label: string; enabled: boolean; allowMultiple: boolean }>) => {
+    const currentList = formConfig.educationSubCategories && formConfig.educationSubCategories.length > 0
+      ? formConfig.educationSubCategories
+      : [
+          { id: 'ug', label: 'Under Graduate', enabled: formConfig.showUG !== false, allowMultiple: false },
+          { id: 'pg', label: 'Post Graduate', enabled: formConfig.showPG !== false, allowMultiple: formConfig.allowMultiplePG !== false },
+        ];
+    const updatedList = currentList.map(item => item.id === id ? { ...item, ...updates } : item);
+    const updatedConfig: any = {
+      ...formConfig,
+      educationSubCategories: updatedList,
+    };
+    if (id === 'ug') {
+      if ('enabled' in updates) updatedConfig.showUG = updates.enabled;
+    } else if (id === 'pg') {
+      if ('enabled' in updates) updatedConfig.showPG = updates.enabled;
+      if ('allowMultiple' in updates) updatedConfig.allowMultiplePG = updates.allowMultiple;
+    }
+    setFormConfig(updatedConfig);
+  };
+
+  const removeEducationSubCategory = (id: string) => {
+    const currentList = formConfig.educationSubCategories || [];
+    const updatedList = currentList.filter(item => item.id !== id);
+    const updated = {
+      ...formConfig,
+      educationSubCategories: updatedList,
+    };
+    setFormConfig(updated);
+    autoSaveConfig(updated);
+  };
 
   // Drag & Drop State
   const [draggedFieldId, setDraggedFieldId] = useState<string | null>(null);
@@ -1308,7 +1373,7 @@ function AdminDashboardContent() {
 
                           {/* Allow Multiple (+ Button) Checkbox */}
                           {(field.type === 'array' || field.type === 'list' || field.isCustom || ['education', 'certifications', 'technical', 'internships', 'projects', 'strengths'].includes(field.id)) && (
-                            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer', userSelect: 'none', background: '#eff6ff', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
+                            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer', userSelect: 'none', background: '#f8fafc', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
                               <input 
                                 type="checkbox"
                                 checked={field.allowMultiple !== false}
@@ -1354,37 +1419,78 @@ function AdminDashboardContent() {
                             Remove
                           </button>
 
-                          {/* Special Education Sub-Controls */}
+                          {/* Special Education Sub-Category Manager */}
                           {field.id === 'education' && (
-                            <div style={{ marginTop: '0.6rem', paddingTop: '0.6rem', borderTop: '1px dashed #cbd5e1', width: '100%', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', fontSize: '0.825rem' }}>
-                              <span style={{ fontWeight: 700, color: '#113666' }}>Education Sub-Controls:</span>
-                              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600, color: '#334155', cursor: 'pointer' }}>
+                            <div style={{ marginTop: '0.85rem', paddingTop: '0.85rem', borderTop: '1px dashed #cbd5e1', width: '100%', display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.825rem' }}>
+                              <div style={{ fontWeight: 700, color: '#113666', fontSize: '0.9rem' }}>
+                                Education Sub-Categories Manager:
+                              </div>
+                              
+                              {/* Sub-Categories List */}
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                {(formConfig.educationSubCategories || [
+                                  { id: 'ug', label: 'Under Graduate', enabled: formConfig.showUG !== false, allowMultiple: false },
+                                  { id: 'pg', label: 'Post Graduate', enabled: formConfig.showPG !== false, allowMultiple: formConfig.allowMultiplePG !== false },
+                                ]).map((subCat) => (
+                                  <div key={subCat.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#f8fafc', padding: '0.5rem 0.75rem', borderRadius: '5px', border: '1px solid #cbd5e1', flexWrap: 'wrap' }}>
+                                    <input 
+                                      type="text" 
+                                      value={subCat.label} 
+                                      onChange={e => updateEducationSubCategory(subCat.id, { label: e.target.value })}
+                                      className="form-control"
+                                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.85rem', fontWeight: 600, flex: '1 1 140px' }}
+                                      placeholder="Sub-Category Title"
+                                    />
+                                    <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600, color: '#334155', cursor: 'pointer' }}>
+                                      <input 
+                                        type="checkbox"
+                                        checked={subCat.enabled !== false}
+                                        onChange={e => updateEducationSubCategory(subCat.id, { enabled: e.target.checked })}
+                                        style={{ width: '15px', height: '15px' }}
+                                      />
+                                      Enabled
+                                    </label>
+                                    <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600, color: '#1e293b', cursor: 'pointer', background: '#ffffff', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
+                                      <input 
+                                        type="checkbox"
+                                        checked={subCat.allowMultiple !== false}
+                                        onChange={e => updateEducationSubCategory(subCat.id, { allowMultiple: e.target.checked })}
+                                        style={{ width: '15px', height: '15px' }}
+                                      />
+                                      Allow Multiple (+ Button)
+                                    </label>
+                                    {subCat.id !== 'ug' && subCat.id !== 'pg' && (
+                                      <button 
+                                        type="button" 
+                                        onClick={() => removeEducationSubCategory(subCat.id)}
+                                        style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.25rem 0.5rem', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
+                                      >
+                                        ✕ Remove
+                                      </button>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+
+                              {/* Add New Education Sub-Category Row */}
+                              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.25rem' }}>
                                 <input 
-                                  type="checkbox"
-                                  checked={formConfig.showUG !== false}
-                                  onChange={e => setFormConfig(prev => ({ ...prev, showUG: e.target.checked }))}
-                                  style={{ width: '15px', height: '15px' }}
+                                  type="text" 
+                                  placeholder="New Sub-Category Title (e.g. HSC, Diploma, Doctorate)" 
+                                  value={newEduSubCatLabel} 
+                                  onChange={e => setNewEduSubCatLabel(e.target.value)}
+                                  className="form-control"
+                                  style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem', flex: 1 }}
                                 />
-                                Enable Under Graduate (UG)
-                              </label>
-                              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600, color: '#334155', cursor: 'pointer' }}>
-                                <input 
-                                  type="checkbox"
-                                  checked={formConfig.showPG !== false}
-                                  onChange={e => setFormConfig(prev => ({ ...prev, showPG: e.target.checked }))}
-                                  style={{ width: '15px', height: '15px' }}
-                                />
-                                Enable Post Graduate (PG)
-                              </label>
-                              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600, color: '#1d4ed8', cursor: 'pointer' }}>
-                                <input 
-                                  type="checkbox"
-                                  checked={formConfig.allowMultiplePG !== false}
-                                  onChange={e => setFormConfig(prev => ({ ...prev, allowMultiplePG: e.target.checked }))}
-                                  style={{ width: '15px', height: '15px' }}
-                                />
-                                Allow Multiple PG (+ Button)
-                              </label>
+                                <button 
+                                  type="button" 
+                                  onClick={addEducationSubCategory}
+                                  className="btn btn-secondary"
+                                  style={{ background: '#3b82f6', color: '#fff', fontSize: '0.8rem', fontWeight: 600, padding: '0.35rem 0.75rem', whiteSpace: 'nowrap' }}
+                                >
+                                  + Add Education Sub-Category
+                                </button>
+                              </div>
                             </div>
                           )}
                         </div>

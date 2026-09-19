@@ -19,6 +19,10 @@ const defaultConfig = {
   showUG: true,
   showPG: true,
   allowMultiplePG: true,
+  educationSubCategories: [
+    { id: 'ug', label: 'Under Graduate', enabled: true, allowMultiple: false },
+    { id: 'pg', label: 'Post Graduate', enabled: true, allowMultiple: true },
+  ],
   showCertifications: true,
   showTechnicalExpertise: true,
   showInternships: true,
