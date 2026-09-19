@@ -41,6 +41,15 @@ export async function GET() {
       };
     });
 
+    students.sort((a: any, b: any) => {
+      const regA = String(a.registerNumber || '').trim().toUpperCase();
+      const regB = String(b.registerNumber || '').trim().toUpperCase();
+      if (!regA && !regB) return 0;
+      if (!regA) return 1;
+      if (!regB) return -1;
+      return regA.localeCompare(regB, undefined, { numeric: true, sensitivity: 'base' });
+    });
+
     return NextResponse.json(students);
   } catch (error: any) {
     console.error('Firestore GET error:', error?.message || error);

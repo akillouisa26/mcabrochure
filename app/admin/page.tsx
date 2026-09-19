@@ -825,8 +825,18 @@ function AdminDashboardContent() {
     return [];
   };
 
-  const approvedStudents = students.filter(s => s.status === 'APPROVED');
-  const pendingStudents = students.filter(s => s.status === 'PENDING');
+  const sortByRegisterNumber = (a: any, b: any) => {
+    const regA = String(a.registerNumber || '').trim().toUpperCase();
+    const regB = String(b.registerNumber || '').trim().toUpperCase();
+    if (!regA && !regB) return 0;
+    if (!regA) return 1;
+    if (!regB) return -1;
+    return regA.localeCompare(regB, undefined, { numeric: true, sensitivity: 'base' });
+  };
+
+  const sortedStudents = [...students].sort(sortByRegisterNumber);
+  const approvedStudents = sortedStudents.filter(s => s.status === 'APPROVED');
+  const pendingStudents = sortedStudents.filter(s => s.status === 'PENDING');
 
   const downloadExcel = () => {
     if (!students || students.length === 0) {
@@ -1065,7 +1075,7 @@ function AdminDashboardContent() {
               </tr>
             </thead>
             <tbody>
-              {students.map(student => (
+              {sortedStudents.map(student => (
                 <tr key={student.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
                   <td style={{ padding: '0.75rem', fontWeight: 600, color: '#374151' }}>{student.registerNumber || '-'}</td>
                   <td style={{ padding: '0.75rem', fontWeight: 600 }}>{student.name}</td>
