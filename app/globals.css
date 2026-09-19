@@ -479,11 +479,11 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   margin-bottom: 0.15rem;
 }
 .brochure-body.ultra-dense-content .edu-table {
-  font-size: 0.725rem;
+  font-size: 0.78rem;
 }
 .brochure-body.ultra-dense-content .edu-table th, 
 .brochure-body.ultra-dense-content .edu-table td {
-  padding: 0.15rem 0.25rem;
+  padding: 0.22rem 0.2rem;
 }
 .brochure-body.ultra-dense-content .bullet-list {
   padding-left: 1rem;
@@ -521,11 +521,11 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   margin-bottom: 0.1rem;
 }
 .brochure-body.micro-content .edu-table {
-  font-size: 0.68rem;
+  font-size: 0.78rem;
 }
 .brochure-body.micro-content .edu-table th, 
 .brochure-body.micro-content .edu-table td {
-  padding: 0.1rem 0.2rem;
+  padding: 0.2rem 0.18rem;
 }
 .brochure-body.micro-content .bullet-list {
   padding-left: 0.85rem;
@@ -563,11 +563,11 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   margin-bottom: 0.08rem;
 }
 .brochure-body.nano-content .edu-table {
-  font-size: 0.62rem;
+  font-size: 0.78rem;
 }
 .brochure-body.nano-content .edu-table th, 
 .brochure-body.nano-content .edu-table td {
-  padding: 0.08rem 0.15rem;
+  padding: 0.18rem 0.15rem;
 }
 .brochure-body.nano-content .bullet-list {
   padding-left: 0.75rem;
@@ -610,13 +610,13 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   max-width: 100%;
   table-layout: fixed;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 0.825rem;
   color: #113666;
   box-sizing: border-box;
 }
 .edu-table th, .edu-table td {
   border: 1px solid #b3cdef;
-  padding: 0.45rem 0.35rem;
+  padding: 0.35rem 0.25rem;
   text-align: center;
   vertical-align: middle;
   color: #113666;
@@ -629,27 +629,24 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   background: #f0f7ff;
   color: #113666;
   font-weight: 700;
-  font-size: 0.875rem;
-  word-break: normal;
-  overflow-wrap: normal;
+  font-size: 0.825rem;
+  white-space: nowrap;
 }
 .edu-table th:nth-child(1), .edu-table td:nth-child(1) {
-  width: 27%;
+  width: 30%;
   text-align: center;
 }
 .edu-table th:nth-child(2), .edu-table td:nth-child(2) {
-  width: 45%;
+  width: 36%;
   text-align: left;
 }
 .edu-table th:nth-child(3), .edu-table td:nth-child(3) {
-  width: 15%;
+  width: 19%;
   text-align: center;
-  word-break: break-word;
 }
 .edu-table th:nth-child(4), .edu-table td:nth-child(4) {
-  width: 13%;
+  width: 15%;
   text-align: center;
-  word-break: break-word;
 }
 
 .bullet-list {
