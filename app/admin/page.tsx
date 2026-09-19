@@ -1673,47 +1673,83 @@ function AdminDashboardContent() {
                   </div>
                 </div>
 
-                {/* Post Graduate */}
-                <div style={{ padding: '0.75rem', background: '#ffffff', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
-                  <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#113666', fontWeight: 700 }}>Post Graduate</h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.5fr 1fr 0.8fr', gap: '0.5rem' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Qualification</label>
-                      <input type="text" placeholder="e.g. MCA" value={editStudentModal.educationalQualifications?.[1]?.qualification || ''} onChange={e => {
-                        const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
-                        if (!updated[1]) updated[1] = { qualification: '', institution: '', year: '', cgpa: '' };
-                        updated[1].qualification = e.target.value;
-                        setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
-                      }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                {/* Post Graduate Entries */}
+                {(editStudentModal.educationalQualifications || []).slice(1).map((pg: any, pgIdx: number) => {
+                  const realIndex = pgIdx + 1;
+                  return (
+                    <div key={'edit_pg_' + realIndex} style={{ marginBottom: '0.85rem', padding: '0.75rem', background: '#ffffff', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <h4 style={{ margin: 0, fontSize: '0.9rem', color: '#113666', fontWeight: 700 }}>
+                          Post Graduate {(editStudentModal.educationalQualifications || []).length > 2 ? `#${realIndex}` : ''}
+                        </h4>
+                        {realIndex > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = [...(editStudentModal.educationalQualifications || [])];
+                              updated.splice(realIndex, 1);
+                              setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                            }}
+                            style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.2rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
+                          >
+                            ✕ Remove
+                          </button>
+                        )}
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.5fr 1fr 0.8fr', gap: '0.5rem' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Qualification</label>
+                          <input type="text" placeholder="e.g. MCA" value={pg?.qualification || ''} onChange={e => {
+                            const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
+                            if (!updated[realIndex]) updated[realIndex] = { qualification: '', institution: '', year: '', cgpa: '' };
+                            updated[realIndex].qualification = e.target.value;
+                            setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                          }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Institution</label>
+                          <input type="text" placeholder="Institution" value={pg?.institution || ''} onChange={e => {
+                            const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
+                            if (!updated[realIndex]) updated[realIndex] = { qualification: '', institution: '', year: '', cgpa: '' };
+                            updated[realIndex].institution = e.target.value;
+                            setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                          }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Year</label>
+                          <input type="text" placeholder="2025-2027" value={pg?.year || ''} onChange={e => {
+                            const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
+                            if (!updated[realIndex]) updated[realIndex] = { qualification: '', institution: '', year: '', cgpa: '' };
+                            updated[realIndex].year = e.target.value;
+                            setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                          }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>CGPA</label>
+                          <input type="text" placeholder="CGPA" value={pg?.cgpa || ''} onChange={e => {
+                            const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
+                            if (!updated[realIndex]) updated[realIndex] = { qualification: '', institution: '', year: '', cgpa: '' };
+                            updated[realIndex].cgpa = e.target.value;
+                            setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                          }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Institution</label>
-                      <input type="text" placeholder="Institution" value={editStudentModal.educationalQualifications?.[1]?.institution || ''} onChange={e => {
-                        const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
-                        if (!updated[1]) updated[1] = { qualification: '', institution: '', year: '', cgpa: '' };
-                        updated[1].institution = e.target.value;
-                        setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
-                      }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>Year</label>
-                      <input type="text" placeholder="2025-2027" value={editStudentModal.educationalQualifications?.[1]?.year || ''} onChange={e => {
-                        const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
-                        if (!updated[1]) updated[1] = { qualification: '', institution: '', year: '', cgpa: '' };
-                        updated[1].year = e.target.value;
-                        setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
-                      }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.2rem' }}>CGPA</label>
-                      <input type="text" placeholder="CGPA" value={editStudentModal.educationalQualifications?.[1]?.cgpa || ''} onChange={e => {
-                        const updated = [...(editStudentModal.educationalQualifications || [{}, {}])];
-                        if (!updated[1]) updated[1] = { qualification: '', institution: '', year: '', cgpa: '' };
-                        updated[1].cgpa = e.target.value;
-                        setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
-                      }} className="form-control" style={{ padding: '0.4rem', fontSize: '0.85rem' }} />
-                    </div>
-                  </div>
+                  );
+                })}
+
+                <div style={{ marginTop: '0.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = [...(editStudentModal.educationalQualifications || [{}, {}]), { qualification: '', institution: '', year: '', cgpa: '' }];
+                      setEditStudentModal({ ...editStudentModal, educationalQualifications: updated });
+                    }}
+                    className="btn btn-secondary"
+                    style={{ background: '#3b82f6', color: '#fff', fontSize: '0.8rem', padding: '0.35rem 0.75rem', fontWeight: 600 }}
+                  >
+                    + Add Post Graduate
+                  </button>
                 </div>
               </div>
 

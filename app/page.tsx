@@ -224,11 +224,13 @@ export default function Home() {
         setErrorMsg('Please complete all Under Graduate details (Qualification, Institution, Year, CGPA).');
         return;
       }
-      const pg = formData.educationalQualifications[1];
-      if (pg && (pg.qualification.trim() || pg.institution.trim() || pg.year.trim() || pg.cgpa.trim())) {
-        if (!pg.qualification.trim() || !pg.institution.trim() || !pg.year.trim() || !pg.cgpa.trim()) {
-          setErrorMsg('Please complete all Post Graduate details (Qualification, Institution, Year, CGPA).');
-          return;
+      for (let i = 1; i < formData.educationalQualifications.length; i++) {
+        const pg = formData.educationalQualifications[i];
+        if (pg && (pg.qualification.trim() || pg.institution.trim() || pg.year.trim() || pg.cgpa.trim())) {
+          if (!pg.qualification.trim() || !pg.institution.trim() || !pg.year.trim() || !pg.cgpa.trim()) {
+            setErrorMsg(`Please complete all details for Post Graduate #${i} (Qualification, Institution, Year, CGPA).`);
+            return;
+          }
         }
       }
     }
@@ -566,27 +568,57 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Post Graduate Set */}
-                  <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
-                    <h4 style={{ margin: '0 0 0.85rem 0', fontSize: '1rem', color: '#113666', fontWeight: 700 }}>Post Graduate</h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.85rem' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Qualification</label>
-                        <input className="form-control" placeholder="Qualification (e.g. MCA)" value={formData.educationalQualifications[1]?.qualification || ''} onChange={e => handleArrayChange('educationalQualifications', 1, e.target.value, 'qualification')} />
+                  {/* Post Graduate Set(s) */}
+                  {formData.educationalQualifications.slice(1).map((pg, pgIdx) => {
+                    const realIndex = pgIdx + 1;
+                    return (
+                      <div key={'pg_' + realIndex} style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+                          <h4 style={{ margin: 0, fontSize: '1rem', color: '#113666', fontWeight: 700 }}>
+                            Post Graduate {formData.educationalQualifications.length > 2 ? `#${realIndex}` : ''}
+                          </h4>
+                          {realIndex > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeArrayItem('educationalQualifications', realIndex)}
+                              style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.25rem 0.6rem', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+                            >
+                              ✕ Remove
+                            </button>
+                          )}
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.85rem' }}>
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Qualification</label>
+                            <input className="form-control" placeholder="Qualification (e.g. MCA)" value={pg?.qualification || ''} onChange={e => handleArrayChange('educationalQualifications', realIndex, e.target.value, 'qualification')} />
+                          </div>
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Institution</label>
+                            <input className="form-control" placeholder="Institution" value={pg?.institution || ''} onChange={e => handleArrayChange('educationalQualifications', realIndex, e.target.value, 'institution')} />
+                          </div>
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Year</label>
+                            <input className="form-control" placeholder="Year (e.g. 2025-2027)" value={pg?.year || ''} onChange={e => handleArrayChange('educationalQualifications', realIndex, e.target.value, 'year')} />
+                          </div>
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>CGPA</label>
+                            <input className="form-control" placeholder="CGPA" value={pg?.cgpa || ''} onChange={e => handleArrayChange('educationalQualifications', realIndex, e.target.value, 'cgpa')} />
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Institution</label>
-                        <input className="form-control" placeholder="Institution" value={formData.educationalQualifications[1]?.institution || ''} onChange={e => handleArrayChange('educationalQualifications', 1, e.target.value, 'institution')} />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>Year</label>
-                        <input className="form-control" placeholder="Year (e.g. 2025-2027)" value={formData.educationalQualifications[1]?.year || ''} onChange={e => handleArrayChange('educationalQualifications', 1, e.target.value, 'year')} />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>CGPA</label>
-                        <input className="form-control" placeholder="CGPA" value={formData.educationalQualifications[1]?.cgpa || ''} onChange={e => handleArrayChange('educationalQualifications', 1, e.target.value, 'cgpa')} />
-                      </div>
-                    </div>
+                    );
+                  })}
+
+                  {/* Add Post Graduate Button */}
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => addArrayItem('educationalQualifications', { qualification: '', institution: '', year: '', cgpa: '' })}
+                      className="btn btn-secondary"
+                      style={{ background: '#3b82f6', color: '#ffffff', fontWeight: 600, fontSize: '0.875rem', padding: '0.45rem 0.9rem', borderRadius: '5px' }}
+                    >
+                      + Add Post Graduate
+                    </button>
                   </div>
                 </div>
               )}
