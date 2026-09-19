@@ -604,28 +604,44 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   flex-shrink: 0;
 }
 
-/* Education Table */
+/* Education Table - Strictly Constrained to Column Width */
 .edu-table {
-  width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
+  table-layout: fixed !important;
   border-collapse: collapse;
   font-size: 0.825rem;
   color: #113666;
+  box-sizing: border-box !important;
 }
 .edu-table th, .edu-table td {
   border: 1px solid #b3cdef;
-  padding: 0.3rem 0.45rem;
+  padding: 0.3rem 0.35rem;
   text-align: center;
   color: #113666;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+  box-sizing: border-box !important;
+}
+.edu-table th:nth-child(1), .edu-table td:nth-child(1) {
+  width: 28% !important;
+}
+.edu-table th:nth-child(2), .edu-table td:nth-child(2) {
+  width: 40% !important;
+  text-align: left;
+}
+.edu-table th:nth-child(3), .edu-table td:nth-child(3) {
+  width: 18% !important;
+  white-space: nowrap;
+}
+.edu-table th:nth-child(4), .edu-table td:nth-child(4) {
+  width: 14% !important;
+  white-space: nowrap;
 }
 .edu-table th {
   background: #f0f7ff;
   color: #113666;
-}
-.edu-table td:nth-child(2) {
-  text-align: left;
-}
-.edu-table th:nth-child(3), .edu-table td:nth-child(3) {
-  white-space: nowrap;
 }
 
 .bullet-list {
