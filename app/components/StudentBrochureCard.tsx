@@ -127,6 +127,35 @@ export default function StudentBrochureCard({ student, formConfig, showPrintButt
   const portfolioVal = student.portfolio || student.customFieldsData?.portfolio || student.customFieldsData?.Portfolio || student.customFieldsData?.['portfolio'];
   const visionObj = student.objective || student.visionStatement || student.customFieldsData?.objective || student.customFieldsData?.visionStatement || student.customFieldsData?.['Vision Statement (2 Lines)'] || student.customFieldsData?.['Vision Statement (2 lines)'] || student.customFieldsData?.['Vision Statement'];
 
+  const nameText = student.name || '';
+  const nameFontSize = nameText.length > 35 
+    ? '1.2rem' 
+    : nameText.length > 28 
+    ? '1.4rem' 
+    : nameText.length > 22 
+    ? '1.65rem' 
+    : nameText.length > 16 
+    ? '1.85rem' 
+    : '2.2rem';
+
+  const taglineText = student.tagline || '';
+  const taglineFontSize = taglineText.length > 50 
+    ? '0.85rem' 
+    : taglineText.length > 35 
+    ? '0.95rem' 
+    : taglineText.length > 22 
+    ? '1.05rem' 
+    : '1.2rem';
+
+  const visionText = typeof visionObj === 'string' ? visionObj : (visionObj ? String(visionObj) : '');
+  const visionFontSize = visionText.length > 180 
+    ? '0.72rem' 
+    : visionText.length > 130 
+    ? '0.78rem' 
+    : visionText.length > 80 
+    ? '0.85rem' 
+    : '0.92rem';
+
   return (
     <div style={{ width: '100%', position: 'relative' }}>
       {showPrintButton && (
@@ -141,13 +170,18 @@ export default function StudentBrochureCard({ student, formConfig, showPrintButt
           {/* Header Section */}
           <div className="brochure-header">
             <div className="header-content">
-              <h1>{student.name}</h1>
-              {student.tagline && <h2>{renderWithLinks(student.tagline)}</h2>}
+              <h1 style={{ fontSize: nameFontSize }}>{student.name}</h1>
+              {student.tagline && <h2 style={{ fontSize: taglineFontSize }}>{renderWithLinks(student.tagline)}</h2>}
               {visionObj && (
-                <div className="objective">
+                <div className="objective" style={{ fontSize: visionFontSize }}>
                   &ldquo;{renderWithLinks(visionObj)}&rdquo;
                 </div>
               )}
+              {getCustomFieldsForSection('header', student).map((cf, idx) => (
+                <div key={'cf_hdr_' + idx} className="header-custom-item" style={{ fontSize: '0.85rem', color: '#e0f0ff', marginTop: '0.25rem' }}>
+                  <span>{cf.label}</span>: {renderWithLinks(typeof cf.value === 'object' ? JSON.stringify(cf.value) : String(cf.value))}
+                </div>
+              ))}
             </div>
             <div className="header-image">
               {student.profileImageBase64 ? (
