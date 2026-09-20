@@ -159,12 +159,13 @@ th { background-color: var(--secondary-color); color: var(--primary-color); font
   justify-content: center;
 }
 .header-content h1 {
-  font-size: clamp(1.4rem, 4.5vw, 2.3rem);
+  font-size: 2.3rem;
   margin: 0 0 0.25rem 0;
   font-weight: 700;
   letter-spacing: -0.5px;
-  word-break: break-word;
-  overflow-wrap: break-word;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .header-content h2 {
   font-size: clamp(0.95rem, 2.5vw, 1.2rem);

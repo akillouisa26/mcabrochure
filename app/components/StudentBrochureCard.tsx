@@ -27,6 +27,18 @@ interface StudentBrochureCardProps {
   showPrintButton?: boolean;
 }
 
+const getStudentNameFontSize = (name: string = '') => {
+  const len = name.length;
+  if (len <= 14) return '2.3rem';
+  if (len <= 18) return '1.9rem';
+  if (len <= 22) return '1.65rem';
+  if (len <= 26) return '1.4rem';
+  if (len <= 31) return '1.2rem';
+  if (len <= 36) return '1.05rem';
+  if (len <= 42) return '0.9rem';
+  return '0.8rem';
+};
+
 export default function StudentBrochureCard({ student, formConfig, showPrintButton = false }: StudentBrochureCardProps) {
   const bodyRef = useRef<HTMLDivElement>(null);
   const [densityClass, setDensityClass] = useState<string>('brochure-body');
@@ -141,7 +153,7 @@ export default function StudentBrochureCard({ student, formConfig, showPrintButt
           {/* Header Section */}
           <div className="brochure-header">
             <div className="header-content">
-              <h1 style={student.name && student.name.length > 22 ? { fontSize: student.name.length > 32 ? '1.4rem' : '1.7rem' } : undefined}>
+              <h1 style={{ fontSize: getStudentNameFontSize(student.name), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {student.name}
               </h1>
               {student.tagline && <h2>{renderWithLinks(student.tagline)}</h2>}
