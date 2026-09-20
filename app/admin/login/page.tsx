@@ -62,8 +62,7 @@ export default function AdminLogin() {
       }
 
       if (res.ok && resData?.success !== false) {
-        router.push('/admin');
-        router.refresh();
+        window.location.href = '/admin';
       } else {
         setError(resData?.error || 'Authentication failed. Please check credentials.');
       }

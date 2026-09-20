@@ -87,11 +87,9 @@ export default function Navbar() {
               Admin Options
             </div>
             
-            <button
-              onClick={() => {
-                setMenuOpen(false);
-                router.push('/admin');
-              }}
+            <Link
+              href="/admin"
+              onClick={() => setMenuOpen(false)}
               style={{
                 width: '100%',
                 textAlign: 'left',
@@ -103,10 +101,12 @@ export default function Navbar() {
                 display: 'block',
                 color: '#111827',
                 fontWeight: 500,
+                textDecoration: 'none',
+                boxSizing: 'border-box',
               }}
             >
               Admin Panel
-            </button>
+            </Link>
           </div>
         )}
       </div>
