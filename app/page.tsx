@@ -48,6 +48,48 @@ export default function Home() {
   const [success, setSuccess] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Auto-fill form from draft stored in localStorage on initial page load
+  useEffect(() => {
+    try {
+      const savedDraft = localStorage.getItem('mca_brochure_form_draft');
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft);
+        if (parsed && typeof parsed === 'object') {
+          setFormData(prev => ({
+            ...prev,
+            ...parsed,
+          }));
+        }
+      }
+    } catch (e) {
+      console.error('Could not restore form draft from localStorage', e);
+    }
+  }, []);
+
+  // Auto-save form draft to localStorage whenever form data updates
+  useEffect(() => {
+    try {
+      const hasContent = Boolean(
+        formData.name ||
+        formData.registerNumber ||
+        formData.contactPhone ||
+        formData.contactEmail ||
+        formData.tagline ||
+        formData.objective ||
+        (formData.educationalQualifications && formData.educationalQualifications.some(q => q.qualification || q.institution)) ||
+        (formData.certifications && formData.certifications.some(c => c)) ||
+        (formData.technicalExpertise && formData.technicalExpertise.some(t => t)) ||
+        (formData.internships && formData.internships.some(i => i.company || i.role)) ||
+        (formData.projects && formData.projects.some(p => p.title))
+      );
+      if (hasContent) {
+        localStorage.setItem('mca_brochure_form_draft', JSON.stringify(formData));
+      }
+    } catch (e) {
+      console.error('Could not save form draft to localStorage', e);
+    }
+  }, [formData]);
+
   useEffect(() => {
     fetch('/api/config')
       .then(r => r.json())
@@ -354,6 +396,9 @@ export default function Home() {
       if (res.ok && resData.id) {
         setSuccess('Brochure details submitted successfully!');
         setFormData(getInitialFormState());
+        try {
+          localStorage.removeItem('mca_brochure_form_draft');
+        } catch (e) {}
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
